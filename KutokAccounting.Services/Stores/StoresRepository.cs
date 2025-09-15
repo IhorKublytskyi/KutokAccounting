@@ -9,24 +9,33 @@ public class StoresRepository : IStoresRepository
 {
 	private readonly KutokDbContext _dbContext;
 	private readonly DbSet<Store> _storesDbSet;
-	public StoresRepository(KutokDbContext dbContext)
+	private readonly SemaphoreSlim _semaphoreSlim;
+	public StoresRepository(KutokDbContext dbContext, SemaphoreSlim semaphoreSlim)
 	{
+		_semaphoreSlim = semaphoreSlim;
 		_dbContext = dbContext;
 		_storesDbSet = dbContext.Stores;
 	}
-	public async Task CreateStoreAsync(Store store)
+	public async Task CreateStoreAsync(Store store, CancellationToken ct)
 	{
-		if (StoreExists(store))
+		var storeExists = await StoreExists(store);
+		if (storeExists)
 		{
 			throw new ArgumentException($"Store {store.Name} already exists");
 		}
-		if (HasRequiredData(store) is false)
+		
+		await _semaphoreSlim.WaitAsync(ct);
+
+		try
 		{
-			throw new NullReferenceException("Missing some required data for creating store");
+			_storesDbSet.Add(store);
+			await _dbContext.SaveChangesAsync(ct);
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
 		}
 		
-		_storesDbSet.Add(store);
-		await _dbContext.SaveChangesAsync();
 	}
 	
 	public int GetStoresCount()
@@ -45,42 +54,65 @@ public class StoresRepository : IStoresRepository
 	/// </summary>
 	/// <param name="storeId">store id to update</param>
 	/// <param name="updatedStore">new characteristics of store</param>
-	public async Task UpdateStoreAsync(int storeId, Store updatedStore)
+	/// <param name="ct"></param>
+	public async ValueTask UpdateStoreAsync(int storeId, Store updatedStore, CancellationToken ct)
 	{
-		var store = await _storesDbSet.FindAsync(storeId);
-
-		ThrowIfStoreIsNull(store, storeId);
-
-		//tech fields like history remain the same
-		store.Name = updatedStore.Name;
-		store.IsOpened = updatedStore.IsOpened;
-		store.SetupDate = updatedStore.SetupDate;
-		store.Address = updatedStore.Address;
+		await _semaphoreSlim.WaitAsync(ct);
+		try
+		{
+			var store = await _storesDbSet.FindAsync(storeId);
 		
-		_storesDbSet.Update(store);
-		await _dbContext.SaveChangesAsync();
-	}
-
-	public async Task DeleteStoreAsync(int storeId)
-	{
-		var store = _storesDbSet.Find(storeId);
-		ThrowIfStoreIsNull(store, storeId);
+			ThrowIfStoreIsNull(store, storeId);
+			
+			//tech fields like history remain the same
+			store.Name = updatedStore.Name;
+			store.IsOpened = updatedStore.IsOpened;
+			store.SetupDate = updatedStore.SetupDate;
+			store.Address = updatedStore.Address;
 		
-		_storesDbSet.Remove(store);
-		await _dbContext.SaveChangesAsync();
-	}
-	private bool StoreExists(Store store)
-	{
-		return _storesDbSet.Any(s => s.Id == store.Id);
-	}
-	private bool HasRequiredData(Store store)
-	{
-		return store.IsOpened != null && store.SetupDate != null && store.Name != null;
+			_storesDbSet.Update(store);
+			await _dbContext.SaveChangesAsync(ct);
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
+		
 	}
 
-	private void ThrowIfStoreIsNull(Store? store, int storeId)
+	public async Task DeleteStoreAsync(int storeId, CancellationToken ct)
 	{
-		if (store is null)
+		await _semaphoreSlim.WaitAsync(ct);
+
+		try
+		{
+			var store = _storesDbSet.Find(storeId);
+			ThrowIfStoreIsNull(store, storeId);
+		
+			_storesDbSet.Remove(store);
+			await _dbContext.SaveChangesAsync(ct);
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
+		
+	}
+
+	public async Task<bool> StoreExists(Store store)
+	{
+		return await _storesDbSet.AnyAsync(s => s.Id == store.Id);
+	}
+
+	/// <summary>
+	/// 
+	/// </summary>
+	/// <param name="store"></param>
+	/// <param name="storeId"></param>
+	/// <exception cref="ArgumentException"></exception>
+	private void ThrowIfStoreIsNull(Store? foundStore, int storeId)
+	{
+		if (foundStore is null)
 		{
 			throw new ArgumentException($"Store with id {storeId} does not exist");
 		}

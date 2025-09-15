@@ -15,4 +15,15 @@ public static class StoreDtoExtensions
 			Address = dto.Address,
 		};
 	}
+
+	public static StoreDto ToDto(this Store store)
+	{
+		return new()
+		{
+			Name = store.Name,
+			IsOpened = store.IsOpened,
+			SetupDate = store.SetupDate,
+			Address = store.Address,
+		};
+	}
 }
