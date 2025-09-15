@@ -2,22 +2,34 @@ using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Vendors.DataTransferObjects;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace KutokAccounting.Services.Vendors;
 
 public sealed class VendorRepository : IVendorRepository
 {
     private readonly KutokDbContext _dbContext;
+    private readonly SemaphoreSlim _semaphoreSlim;
 
-    public VendorRepository(KutokDbContext dbContext)
+    public VendorRepository(KutokDbContext dbContext, [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim) 
     {
         _dbContext = dbContext;
+        _semaphoreSlim = semaphoreSlim;
     }
 
     public async ValueTask CreateAsync(Vendor vendor, CancellationToken cancellationToken)
     {
-        await _dbContext.Vendors.AddAsync(vendor, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _semaphoreSlim.WaitAsync(cancellationToken);
+
+        try
+        {
+            await _dbContext.Vendors.AddAsync(vendor, cancellationToken);
+            await _dbContext.SaveChangesAsync(cancellationToken);
+        }
+        finally 
+        {
+            _semaphoreSlim.Release();
+        }
     }
 
     public async ValueTask<VendorPagedResult> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken)
@@ -27,8 +39,6 @@ public sealed class VendorRepository : IVendorRepository
             Page = queryParameters.Page,
             PageSize = queryParameters.PageSize
         };
-        
-        var pagedResult = new VendorPagedResult();
 
         var query = _dbContext.Vendors.AsQueryable();
 
@@ -39,7 +49,7 @@ public sealed class VendorRepository : IVendorRepository
             query = query.Where(v =>
                 EF.Functions.Like(v.Name, $"%{queryParameters.SearchString}%") || EF.Functions.Like(v.Description, $"%{queryParameters.SearchString}%"));
 
-        pagedResult.Count = await query.CountAsync(cancellationToken);
+        Task<int> countTask = query.CountAsync(cancellationToken);
 
         var vendors = await query
             .AsNoTracking()
@@ -54,9 +64,11 @@ public sealed class VendorRepository : IVendorRepository
             .OrderBy(v => v.Name)
             .ToListAsync(cancellationToken);
 
-        pagedResult.Vendors = vendors;
-
-        return pagedResult;
+        return new VendorPagedResult() 
+        {
+            Vendors = vendors,
+            Count = await countTask,
+        };
     }
 
     public async ValueTask<Vendor?> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -68,17 +80,35 @@ public sealed class VendorRepository : IVendorRepository
 
     public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
     {
-        await _dbContext.Vendors
+        await _semaphoreSlim.WaitAsync(cancellationToken);
+
+        try
+        {
+            await _dbContext.Vendors
             .Where(v => v.Id == id)
             .ExecuteDeleteAsync(cancellationToken);
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 
     public async ValueTask UpdateAsync(Vendor vendor, CancellationToken cancellationToken)
     {
-        await _dbContext.Vendors
-            .Where(v => v.Id == vendor.Id)
-            .ExecuteUpdateAsync(v => v
-                .SetProperty(p => p.Name, vendor.Name)
-                .SetProperty(p => p.Description, vendor.Description), cancellationToken);
+        await _semaphoreSlim.WaitAsync(cancellationToken);
+
+        try
+        {
+            await _dbContext.Vendors
+             .Where(v => v.Id == vendor.Id)
+             .ExecuteUpdateAsync(v => v
+                 .SetProperty(p => p.Name, vendor.Name)
+                 .SetProperty(p => p.Description, vendor.Description), cancellationToken);
+        }
+        finally
+        {
+            _semaphoreSlim.Release();
+        }
     }
 }

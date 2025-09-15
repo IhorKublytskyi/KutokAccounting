@@ -39,8 +39,6 @@
 @code{
     [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
     
-    private CancellationTokenSource tokenSource = new CancellationTokenSource();
-    
     private string _name = null!;
     private string _description = null!;
 
@@ -48,6 +46,8 @@
 
     private async Task Add()
     {
+        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
         var vendor = new VendorDto
         {
             Name = _name,

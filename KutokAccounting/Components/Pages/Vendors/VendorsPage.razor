@@ -55,7 +55,6 @@
 
 @code
 {
-    private CancellationTokenSource tokenSource = new CancellationTokenSource();
     private MudDataGrid<Vendor> _dataGrid;
 
     private readonly HashSet<string> _filterOperators = new()
@@ -67,9 +66,11 @@
     private int _pageSize = 10;
 
     private string? _searchString;
-    
+
     private async Task<GridData<Vendor>> GetVendorsAsync(GridState<Vendor> state)
     {
+        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
         var filter = state.FilterDefinitions.FirstOrDefault()?.Value?.ToString();
 
         _page += state.Page;
@@ -103,6 +104,8 @@
 
     private async Task OnDeleteButtonClick(Vendor vendor)
     {
+        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
         await VendorService.DeleteAsync(vendor.Id, tokenSource.Token);
 
         if (_dataGrid != null)

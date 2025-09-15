@@ -41,13 +41,13 @@
     [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
     
     [Parameter] public Vendor Vendor { get; set; } = null!;
-
-    private CancellationTokenSource tokenSource = new CancellationTokenSource();
     
     private bool _isSuccess;
 
     private async Task Update()
     {
+        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
         var vendor = new VendorDto
         {
             Id = Vendor.Id,
