@@ -9,11 +9,11 @@ public sealed class QueryParametersValidator : AbstractValidator<QueryParameters
     {
         RuleFor(p => p.Name).Length(1, 100);
 
-        RuleFor(p => p.Page)
+        RuleFor(p => p.Pagination.Page)
             .GreaterThan(0)
             .LessThanOrEqualTo(100);
 
-        RuleFor(p => p.PageSize)
+        RuleFor(p => p.Pagination.PageSize)
             .GreaterThan(0)
             .LessThanOrEqualTo(10);
     }

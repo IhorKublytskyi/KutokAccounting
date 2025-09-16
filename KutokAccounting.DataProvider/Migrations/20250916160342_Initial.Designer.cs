@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KutokAccounting.DataProvider.Migrations
 {
     [DbContext(typeof(KutokDbContext))]
-    [Migration("20250912172753_Initial")]
+    [Migration("20250916160342_Initial")]
     partial class Initial
     {
         /// <inheritdoc />

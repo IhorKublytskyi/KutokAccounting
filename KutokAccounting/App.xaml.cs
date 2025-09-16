@@ -1,10 +1,14 @@
-﻿namespace KutokAccounting;
+﻿using Microsoft.Extensions.Logging;
+
+namespace KutokAccounting;
 
 public partial class App : Application
 {
-    public App()
+    public App(ILogger<App> logger)
     {
         InitializeComponent();
+
+        logger.LogInformation("Application starting");
     }
 
     protected override Window CreateWindow(IActivationState? activationState)

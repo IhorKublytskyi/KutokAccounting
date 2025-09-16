@@ -76,7 +76,7 @@
         _page += state.Page;
         _pageSize = state.PageSize;
 
-        var queryParameters = new QueryParameters(filter, _searchString, _page, _pageSize);
+        var queryParameters = new QueryParameters(filter, _searchString, new Pagination() { Page = _page, PageSize = _pageSize });
 
         try
         {

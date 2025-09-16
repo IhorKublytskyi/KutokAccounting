@@ -26,6 +26,10 @@ public sealed class VendorRepository : IVendorRepository
             await _dbContext.Vendors.AddAsync(vendor, cancellationToken);
             await _dbContext.SaveChangesAsync(cancellationToken);
         }
+        catch (Exception e)
+        {
+            Console.WriteLine(e.InnerException);
+        }
         finally 
         {
             _semaphoreSlim.Release();
@@ -34,13 +38,8 @@ public sealed class VendorRepository : IVendorRepository
 
     public async ValueTask<VendorPagedResult> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken)
     {
-        var pagination = new Pagination()
-        {
-            Page = queryParameters.Page,
-            PageSize = queryParameters.PageSize
-        };
 
-        var query = _dbContext.Vendors.AsQueryable();
+        var query = _dbContext.Vendors.AsNoTracking();
 
         if (string.IsNullOrWhiteSpace(queryParameters.Name) is false)
             query = query.Where(v => v.Name == queryParameters.Name);
@@ -53,8 +52,8 @@ public sealed class VendorRepository : IVendorRepository
 
         var vendors = await query
             .AsNoTracking()
-            .Skip(pagination.Skip)
-            .Take(pagination.PageSize)
+            .Skip(queryParameters.Pagination.Skip)
+            .Take(queryParameters.Pagination.PageSize)
             .Select(v => new Vendor
             {
                 Id = v.Id,

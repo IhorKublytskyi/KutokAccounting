@@ -1,6 +1,7 @@
 using KutokAccounting.DataProvider;
 using KutokAccounting.Services.Vendors;
 using KutokAccounting.Services.Vendors.Validators;
+using KutokAccounting.WinUI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
@@ -37,6 +38,17 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        return builder.Build();
+        var app = builder.Build();
+
+        var scope = app.Services.CreateAsyncScope();
+
+        var dbcontext = scope.ServiceProvider.GetService<KutokDbContext>();
+
+        dbcontext.Database.MigrateAsync().ContinueWith(_ => 
+        {
+            scope.Dispose();
+        });
+
+        return app;
     }
 }

@@ -8,7 +8,7 @@
     <DialogContent>
         <MudForm @bind-IsValid="_isSuccess">
             <MudTextField @bind-Value="_name"
-                          Placeholder="Введіть назву постачальника"
+                          Placeholder="Назва постачальника"
                           Label="Назва"
                           Variant="Variant.Outlined"
                           Counter="100"
@@ -19,8 +19,8 @@
                           RequiredError="Це поле обов'язкове"
                           Margin="Margin.Normal"/>
             <MudTextField @bind-Value="_description"
-                          Placeholder="Введіть опис постачальника"
-                          Label="Опис"
+                          Placeholder="Нотатки"
+                          Label="Нотатки"
                           Variant="Variant.Outlined"
                           Counter="1024"
                           MaxLength="1024"

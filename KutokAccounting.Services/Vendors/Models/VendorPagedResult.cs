@@ -4,6 +4,6 @@ namespace KutokAccounting.Services.Vendors.DataTransferObjects;
 
 public sealed record VendorPagedResult
 {
-    public IEnumerable<Vendor>? Vendors { get; set; }
-    public int Count { get; set; }
+    public required IEnumerable<Vendor>? Vendors { get; set; }
+    public required int Count { get; set; }
 }
