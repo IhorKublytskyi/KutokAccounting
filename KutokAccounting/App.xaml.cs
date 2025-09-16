@@ -1,20 +1,38 @@
-﻿using Microsoft.Maui;
-using Microsoft.Maui.Controls;
+﻿using KutokAccounting.DataProvider;
+using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 
 namespace KutokAccounting;
 
 public partial class App : Application
 {
-	public App()
-	{
-		InitializeComponent();
-	}
+    private readonly KutokDbContext _dbContext;
+    private readonly ILogger<App> _logger;
 
-	protected override Window CreateWindow(IActivationState? activationState)
-	{
-		return new Window(new MainPage())
-		{
-			Title = "Kutok"
-		};
-	}
+    public App(KutokDbContext dbContext, ILogger<App> logger)
+    {
+        _dbContext = dbContext;
+        _logger = logger;
+    }
+
+    protected override void OnStart()
+    {
+        InitializeComponent();
+        
+        _dbContext.Database.MigrateAsync().ContinueWith(t =>
+        {
+            if (t.IsCompletedSuccessfully)
+                _logger.LogInformation("Migration applied successfully");
+            else
+                _logger.LogInformation(t.Exception, "Migration failed");
+        });
+    }
+
+    protected override Window CreateWindow(IActivationState? activationState)
+    {
+        return new Window(new MainPage())
+        {
+            Title = "Kutok"
+        };
+    }
 }
