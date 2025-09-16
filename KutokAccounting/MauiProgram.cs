@@ -38,17 +38,6 @@ public static class MauiProgram
         builder.Logging.AddDebug();
 #endif
 
-        var app = builder.Build();
-
-        var scope = app.Services.CreateAsyncScope();
-
-        var dbcontext = scope.ServiceProvider.GetService<KutokDbContext>();
-
-        dbcontext.Database.MigrateAsync().ContinueWith(_ => 
-        {
-            scope.Dispose();
-        });
-
-        return app;
+        return builder.Build();
     }
 }
