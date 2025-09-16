@@ -59,7 +59,7 @@ public sealed class VendorService : IVendorService
 
         var vendor = await _repository.GetByIdAsync(id, cancellationToken);
 
-        if (vendor == null)
+        if (vendor is null)
         {
             _logger.LogWarning("Vendor with ID {VendorId} not found", id);
 
@@ -90,7 +90,7 @@ public sealed class VendorService : IVendorService
 
         var vendors = await _repository.GetAsync(queryParameters, cancellationToken);
 
-        if (vendors == null || vendors.Count == 0)
+        if (vendors is {Count: 0})
         {
             _logger.LogWarning("No vendors found for query parameters: {@QueryParameters}", queryParameters);
 
