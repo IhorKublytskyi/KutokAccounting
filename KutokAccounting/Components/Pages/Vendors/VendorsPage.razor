@@ -1,6 +1,6 @@
 @page "/vendors"
 @using KutokAccounting.DataProvider.Models
-@using KutokAccounting.Services.Vendors.DataTransferObjects
+@using KutokAccounting.Services.Vendors.Models
 @inject IVendorService VendorService
 @inject IDialogService DialogService
 
@@ -84,7 +84,7 @@
 
             return new GridData<Vendor>
             {
-                Items = pagedResult.Vendors ?? new List<Vendor>(),
+                Items = pagedResult.Items ?? new List<Vendor>(),
                 TotalItems = pagedResult.Count
             };
         }

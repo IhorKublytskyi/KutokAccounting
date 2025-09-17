@@ -1,6 +1,6 @@
 using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
-using KutokAccounting.Services.Vendors.DataTransferObjects;
+using KutokAccounting.Services.Vendors.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,7 +39,7 @@ public sealed class VendorRepository : IVendorRepository
         }
     }
 
-    public async ValueTask<VendorPagedResult> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<Vendor>> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken)
     {
         var query = _dbContext.Vendors.AsNoTracking();
  
@@ -65,9 +65,9 @@ public sealed class VendorRepository : IVendorRepository
                 .OrderBy(v => v.Name)
                 .ToListAsync(cancellationToken);
 
-            return new VendorPagedResult()
+            return new PagedResult<Vendor>()
             {
-                Vendors = vendors,
+                Items = vendors,
                 Count = await countTask,
             };
         }

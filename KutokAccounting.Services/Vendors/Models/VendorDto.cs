@@ -1,4 +1,4 @@
-﻿namespace KutokAccounting.Services.Vendors.DataTransferObjects;
+﻿namespace KutokAccounting.Services.Vendors.Models;
 
 public sealed record VendorDto
 {

@@ -1,5 +1,5 @@
 using KutokAccounting.DataProvider.Models;
-using KutokAccounting.Services.Vendors.DataTransferObjects;
+using KutokAccounting.Services.Vendors.Models;
 using KutokAccounting.Services.Vendors.Validators;
 using Microsoft.Extensions.Logging;
 
@@ -8,24 +8,24 @@ namespace KutokAccounting.Services.Vendors;
 public sealed class VendorService : IVendorService
 {
     private readonly ILogger<VendorService> _logger;
-    private readonly QueryParametersValidator _queryValidator;
+    private readonly VendorQueryParametersValidator _vendorQueryValidator;
     private readonly IVendorRepository _repository;
-    private readonly VendorDtoValidator _vendorModelValidator;
+    private readonly VendorDtoValidator _vendorDtoValidator;
 
-    public VendorService(IVendorRepository repository, VendorDtoValidator vendorModelValidator,
-        QueryParametersValidator queryValidator, ILogger<VendorService> logger) 
+    public VendorService(IVendorRepository repository, VendorDtoValidator vendorDtoValidator,
+        VendorQueryParametersValidator vendorQueryValidator, ILogger<VendorService> logger) 
     {
         _repository = repository;
-        _vendorModelValidator = vendorModelValidator;
+        _vendorDtoValidator = vendorDtoValidator;
         _logger = logger;
-        _queryValidator = queryValidator;
+        _vendorQueryValidator = vendorQueryValidator;
     }
 
     public async ValueTask<Vendor> CreateAsync(VendorDto request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var validationResult = await _vendorModelValidator.ValidateAsync(request, cancellationToken);
+        var validationResult = await _vendorDtoValidator.ValidateAsync(request, cancellationToken);
 
         if (validationResult.IsValid is false)
         {
@@ -72,20 +72,20 @@ public sealed class VendorService : IVendorService
         return vendor;
     }
 
-    public async ValueTask<VendorPagedResult> GetAsync(QueryParameters queryParameters,
+    public async ValueTask<PagedResult<Vendor>> GetAsync(QueryParameters queryParameters,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         _logger.LogInformation("Fetching vendors with query parameters: {QueryParameters}", queryParameters);
 
-        var validationResult = await _queryValidator.ValidateAsync(queryParameters, cancellationToken);
+        var validationResult = await _vendorQueryValidator.ValidateAsync(queryParameters, cancellationToken);
 
         if (validationResult.IsValid is false)
         {
             _logger.LogWarning("Query parameters validation failed. Errors: {Errors}", validationResult.Errors);
 
-            throw new Exception(validationResult.ToString());
+            throw new ArgumentException(validationResult.ToString());
         }
 
         var vendors = await _repository.GetAsync(queryParameters, cancellationToken);
@@ -108,7 +108,7 @@ public sealed class VendorService : IVendorService
 
         _logger.LogInformation("Updating vendor with data: {VendorRequest}", request);
 
-        var validationResult = await _vendorModelValidator.ValidateAsync(request, cancellationToken);
+        var validationResult = await _vendorDtoValidator.ValidateAsync(request, cancellationToken);
 
         if (validationResult.IsValid is false)
         {
