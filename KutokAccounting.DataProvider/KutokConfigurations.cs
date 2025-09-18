@@ -2,5 +2,7 @@ namespace KutokAccounting;
 
 public static class KutokConfigurations
 {
-    public const string ConnectionString = "KutokData.db";
+    public static readonly string ConnectionString =
+        $"Data Source={Path.Combine(AppContext.BaseDirectory, "KutokData.db")}";
+    public const string WriteOperationsSemaphore = "WriteOperationsSemaphore";
 }
