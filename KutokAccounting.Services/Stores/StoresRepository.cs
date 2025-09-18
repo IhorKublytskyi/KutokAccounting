@@ -1,7 +1,11 @@
 using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores.Abstractions;
+using KutokAccounting.Services.Stores.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NullReferenceException = System.NullReferenceException;
 
 namespace KutokAccounting.Services.Stores;
 
@@ -9,9 +13,15 @@ public class StoresRepository : IStoresRepository
 {
 	private readonly KutokDbContext _dbContext;
 	private readonly SemaphoreSlim _semaphoreSlim;
-	public StoresRepository(KutokDbContext dbContext, SemaphoreSlim semaphoreSlim)
+	private readonly IStoreFilter _storeFilter;
+	private readonly ILogger<StoresRepository> _logger;
+	public StoresRepository(KutokDbContext dbContext, [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim,
+		IStoreFilter storeFilter,
+		ILogger<StoresRepository> logger)
 	{
 		_semaphoreSlim = semaphoreSlim;
+		_storeFilter = storeFilter;
+		_logger = logger;
 		_dbContext = dbContext;
 	}
 	public async ValueTask CreateStoreAsync(Store store, CancellationToken ct)
@@ -33,20 +43,30 @@ public class StoresRepository : IStoresRepository
 		{
 			_semaphoreSlim.Release();
 		}
-		
 	}
-	
 	public async ValueTask<int> GetStoresCountAsync()
 	{
-		return await _dbContext.Stores.CountAsync();
-	}
-	public IQueryable<Store> GetStoresPage(int pageSize, int pageNumber)
-	{
-		_dbContext.Stores.AsNoTracking();
-		var startPosition = pageSize * (pageNumber - 1);
-		return _dbContext.Stores.Skip(startPosition).Take(pageSize);
+		return await _dbContext.Stores
+			.AsNoTracking()
+			.CountAsync();
 	}
 
+	private async ValueTask<List<Store>> GetStoresPageAsync(IQueryable<Store> stores, Page page, CancellationToken ct)
+	{
+		var startPosition = page.PageSize * (page.PageNumber - 1);
+		var query = stores
+			.Skip(startPosition)
+			.Take(page.PageSize);
+
+		return await query.ToListAsync(ct);
+	}
+	public async ValueTask<IEnumerable<Store>> GetFilteredPageOfStoresAsync(SearchParameters searchParameters, Page page, CancellationToken ct)
+	{
+		var query = _storeFilter.GetFilteredQuery(_dbContext.Stores.AsNoTracking(), searchParameters);
+		var stores = await GetStoresPageAsync(query, page, ct);
+		return stores;
+	}
+	
 	/// <summary>
 	/// updates store without the need to save changes manually
 	/// </summary>
@@ -58,19 +78,21 @@ public class StoresRepository : IStoresRepository
 		await _semaphoreSlim.WaitAsync(ct);
 		try
 		{
-			var store = await _dbContext.Stores.FindAsync(storeId);
-		
-			ThrowIfStoreIsNull(store, storeId);
+			var storeExists = await StoreExists(storeId);
+
+			if (storeExists is false)
+			{
+				throw new NullReferenceException($"Store {storeId} does not exist");
+			}
 			
 			//tech fields like history remain the same
-			store.Name = updatedStore.Name;
-			store.IsOpened = updatedStore.IsOpened;
-			store.SetupDate = updatedStore.SetupDate;
-			store.Address = updatedStore.Address;
-
 			await _dbContext.Stores
-				.Where(s => s.Id == store.Id)
-				.ExecuteUpdateAsync(s => s.SetProperty(sProp => sProp, storeValue => store), ct);
+				.Where(s => s.Id == storeId)
+				.ExecuteUpdateAsync(s => s
+					.SetProperty(st => st.SetupDate, updatedStore.SetupDate)
+					.SetProperty(st => st.Address, updatedStore.Address)
+					.SetProperty(st => st.Name, updatedStore.Name)
+					.SetProperty(st => st.IsOpened, updatedStore.IsOpened), ct);
 		}
 		finally
 		{
@@ -78,7 +100,7 @@ public class StoresRepository : IStoresRepository
 		}
 		
 	}
-
+	
 	public async ValueTask DeleteStoreAsync(int storeId, CancellationToken ct)
 	{
 		await _semaphoreSlim.WaitAsync(ct);
@@ -86,8 +108,11 @@ public class StoresRepository : IStoresRepository
 		try
 		{
 			var store = _dbContext.Stores.Find(storeId);
-			ThrowIfStoreIsNull(store, storeId);
-
+			
+			if (store is null)
+			{
+				throw new ArgumentException($"Store with id {storeId} does not exist");
+			}
 			await _dbContext.Stores.Where(s => s.Id == storeId).ExecuteDeleteAsync(ct);
 		}
 		finally
@@ -99,20 +124,11 @@ public class StoresRepository : IStoresRepository
 
 	private async ValueTask<bool> StoreExists(int storeId)
 	{
-		return await _dbContext.Stores.AnyAsync(s => s.Id == storeId);
+		
+		return await _dbContext.Stores
+			.AsNoTracking()
+			.AnyAsync(s => s.Id == storeId);
 	}
 
-	/// <summary>
-	/// 
-	/// </summary>
-	/// <param name="store"></param>
-	/// <param name="storeId"></param>
-	/// <exception cref="ArgumentException"></exception>
-	private void ThrowIfStoreIsNull(Store? foundStore, int storeId)
-	{
-		if (foundStore is null)
-		{
-			throw new ArgumentException($"Store with id {storeId} does not exist");
-		}
-	}
+	
 }

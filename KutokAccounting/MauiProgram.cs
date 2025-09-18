@@ -1,4 +1,7 @@
 using KutokAccounting.DataProvider;
+using KutokAccounting.Services.Stores;
+using KutokAccounting.Services.Stores.Abstractions;
+using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Services.Vendors;
 using KutokAccounting.Services.Vendors.Validators;
 using KutokAccounting.WinUI;
@@ -25,13 +28,19 @@ public static class MauiProgram
         {
             options.UseSqlite(KutokConfigurations.ConnectionString);
         });
-
+        
         builder.Services.AddScoped<IVendorService, VendorService>();
         builder.Services.AddScoped<IVendorRepository, VendorRepository>();
         builder.Services.AddScoped<VendorDtoValidator>();
         builder.Services.AddScoped<QueryParametersValidator>();
         builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore,  new SemaphoreSlim(1, 1));
 
+        builder.Services.AddScoped<IStoreFilter, StoreFilter>();
+        builder.Services.AddScoped<PageDtoValidator>();
+        builder.Services.AddScoped<StoreDtoValidator>();
+        builder.Services.AddScoped<IStoresRepository, StoresRepository>();
+        builder.Services.AddScoped<IStoresService, StoresService>();
+        
 
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
