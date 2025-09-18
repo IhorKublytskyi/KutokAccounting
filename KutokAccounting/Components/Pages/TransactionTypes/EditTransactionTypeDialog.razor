@@ -51,7 +51,7 @@
         {
             Id = TransactionTypeView.Id,
             Name = TransactionTypeView.Name,
-            IsPositiveValue = TransactionTypeView.IsPositiveValue
+            IsIncome = TransactionTypeView.IsPositiveValue
         };
 
         await TransactionTypeService.UpdateAsync(transactionType, tokenSource.Token);

@@ -14,12 +14,16 @@ public class TransactionTypeRepository : ITransactionTypeRepository
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly ILogger<TransactionTypeRepository> _logger;
     
-    public TransactionTypeRepository(KutokDbContext dbContext, [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim, ILogger<TransactionTypeRepository> logger)
+    public TransactionTypeRepository(
+        KutokDbContext dbContext, 
+        [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim, 
+        ILogger<TransactionTypeRepository> logger)
     {
         _dbContext = dbContext;
         _logger = logger;
         _semaphoreSlim = semaphoreSlim;
     }
+    
     public async ValueTask CreateAsync(TransactionType transactionType, CancellationToken cancellationToken)
     {
         await _semaphoreSlim.WaitAsync(cancellationToken);
@@ -39,29 +43,29 @@ public class TransactionTypeRepository : ITransactionTypeRepository
         }
     }
 
-    public async ValueTask<PagedResult<TransactionType>> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<TransactionType>> GetAsync(TransactionTypeQueryParameters transactionTypeQueryParameters, CancellationToken cancellationToken)
     {
         IQueryable<TransactionType> query = _dbContext.TransactionTypes.AsNoTracking();
 
-        if (string.IsNullOrWhiteSpace(queryParameters?.Filters?.Name) is false)
-            query = query.Where(tp => tp.Name == queryParameters.Filters.Name);
-        if(queryParameters?.Filters?.IsPositiveValue is not null)
-            query = query.Where(tp => tp.IsPositiveValue == queryParameters.Filters.IsPositiveValue);
-        if (string.IsNullOrWhiteSpace(queryParameters?.SearchString) is false)
-            query = query.Where(tp => EF.Functions.Like(tp.Name, $"%{queryParameters.SearchString}%"));
+        if (string.IsNullOrWhiteSpace(transactionTypeQueryParameters?.Filters?.Name) is false)
+            query = query.Where(tp => tp.Name == transactionTypeQueryParameters.Filters.Name);
+        if(transactionTypeQueryParameters?.Filters?.IsIncome is not null)
+            query = query.Where(tp => tp.IsIncome == transactionTypeQueryParameters.Filters.IsIncome);
+        if (string.IsNullOrWhiteSpace(transactionTypeQueryParameters?.SearchString) is false)
+            query = query.Where(tp => EF.Functions.Like(tp.Name, $"%{transactionTypeQueryParameters.SearchString}%"));
 
         try
         {
             Task<int> countTask = query.CountAsync(cancellationToken);
 
             List<TransactionType> transactionTypes = await query
-                .Skip(queryParameters.Pagination.Skip)
-                .Take(queryParameters.Pagination.PageSize)
+                .Skip(transactionTypeQueryParameters.Pagination.Skip)
+                .Take(transactionTypeQueryParameters.Pagination.PageSize)
                 .Select(tp => new TransactionType
                 {
                     Id = tp.Id,
                     Name = tp.Name,
-                    IsPositiveValue = tp.IsPositiveValue
+                    IsIncome = tp.IsIncome
 
                 })
                 .OrderBy(tp => tp.Name)
@@ -75,7 +79,7 @@ public class TransactionTypeRepository : ITransactionTypeRepository
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to retrieve transaction types with QueryParameters: {QueryParameters}", queryParameters);
+            _logger.LogError(e, "Failed to retrieve transaction types with QueryParameters: {QueryParameters}", transactionTypeQueryParameters);
 
             throw;
         }
@@ -129,7 +133,7 @@ public class TransactionTypeRepository : ITransactionTypeRepository
                 .Where(tp => tp.Id == transactionType.Id)
                 .ExecuteUpdateAsync(tp => tp
                     .SetProperty(p => p.Name, transactionType.Name)
-                    .SetProperty(p => p.IsPositiveValue, transactionType.IsPositiveValue), cancellationToken);
+                    .SetProperty(p => p.IsIncome, transactionType.IsIncome), cancellationToken);
         }
         catch (Exception e)
         {

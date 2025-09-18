@@ -20,7 +20,7 @@ public class TransactionTypeConfiguration : IEntityTypeConfiguration<Transaction
             .IsRequired();
 
         builder
-            .Property(tp => tp.IsPositiveValue)
+            .Property(tp => tp.IsIncome)
             .HasColumnName("is_positive_value")
             .HasColumnType("INTEGER")
             .HasConversion<BooleanConverter>()

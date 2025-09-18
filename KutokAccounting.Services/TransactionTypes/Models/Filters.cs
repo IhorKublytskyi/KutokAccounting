@@ -3,5 +3,5 @@
 public sealed record Filters
 {
     public string? Name { get; set; }
-    public bool? IsPositiveValue { get; set; }
+    public bool? IsIncome { get; set; }
 }

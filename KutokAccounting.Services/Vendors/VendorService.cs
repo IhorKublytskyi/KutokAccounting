@@ -1,6 +1,7 @@
+using FluentValidation;
+using FluentValidation.Results;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Vendors.Models;
-using KutokAccounting.Services.Vendors.Validators;
 using Microsoft.Extensions.Logging;
 
 namespace KutokAccounting.Services.Vendors;
@@ -8,12 +9,15 @@ namespace KutokAccounting.Services.Vendors;
 public sealed class VendorService : IVendorService
 {
     private readonly ILogger<VendorService> _logger;
-    private readonly VendorQueryParametersValidator _vendorQueryValidator;
+    private readonly IValidator<VendorQueryParameters> _vendorQueryValidator;
     private readonly IVendorRepository _repository;
-    private readonly VendorDtoValidator _vendorDtoValidator;
+    private readonly IValidator<VendorDto> _vendorDtoValidator;
 
-    public VendorService(IVendorRepository repository, VendorDtoValidator vendorDtoValidator,
-        VendorQueryParametersValidator vendorQueryValidator, ILogger<VendorService> logger) 
+    public VendorService(
+        IVendorRepository repository, 
+        IValidator<VendorDto> vendorDtoValidator,
+        IValidator<VendorQueryParameters> vendorQueryValidator, 
+        ILogger<VendorService> logger) 
     {
         _repository = repository;
         _vendorDtoValidator = vendorDtoValidator;
@@ -25,7 +29,7 @@ public sealed class VendorService : IVendorService
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        var validationResult = await _vendorDtoValidator.ValidateAsync(request, cancellationToken);
+        ValidationResult validationResult = await _vendorDtoValidator.ValidateAsync(request, cancellationToken);
 
         if (validationResult.IsValid is false)
         {
@@ -36,7 +40,7 @@ public sealed class VendorService : IVendorService
 
         _logger.LogInformation("Validation succeeded for vendor {VendorName}", request.Name);
 
-        var vendor = new Vendor
+        Vendor vendor = new Vendor
         {
             Name = request.Name,
             Description = request.Description
@@ -57,7 +61,7 @@ public sealed class VendorService : IVendorService
 
         _logger.LogInformation("Fetching vendor by ID: {VendorId}", id);
 
-        var vendor = await _repository.GetByIdAsync(id, cancellationToken);
+        Vendor vendor = await _repository.GetByIdAsync(id, cancellationToken);
 
         if (vendor is null)
         {
@@ -72,14 +76,14 @@ public sealed class VendorService : IVendorService
         return vendor;
     }
 
-    public async ValueTask<PagedResult<Vendor>> GetAsync(QueryParameters queryParameters,
+    public async ValueTask<PagedResult<Vendor>> GetAsync(VendorQueryParameters vendorQueryParameters,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        _logger.LogInformation("Fetching vendors with query parameters: {QueryParameters}", queryParameters);
+        _logger.LogInformation("Fetching vendors with query parameters: {QueryParameters}", vendorQueryParameters);
 
-        var validationResult = await _vendorQueryValidator.ValidateAsync(queryParameters, cancellationToken);
+        ValidationResult validationResult = await _vendorQueryValidator.ValidateAsync(vendorQueryParameters, cancellationToken);
 
         if (validationResult.IsValid is false)
         {
@@ -88,11 +92,11 @@ public sealed class VendorService : IVendorService
             throw new ArgumentException(validationResult.ToString());
         }
 
-        var vendors = await _repository.GetAsync(queryParameters, cancellationToken);
+        PagedResult<Vendor> vendors = await _repository.GetAsync(vendorQueryParameters, cancellationToken);
 
         if (vendors is {Count: 0})
         {
-            _logger.LogWarning("No vendors found for query parameters: {@QueryParameters}", queryParameters);
+            _logger.LogWarning("No vendors found for query parameters: {@QueryParameters}", vendorQueryParameters);
 
             throw new Exception("Vendors list is empty");
         }
@@ -108,7 +112,7 @@ public sealed class VendorService : IVendorService
 
         _logger.LogInformation("Updating vendor with data: {VendorRequest}", request);
 
-        var validationResult = await _vendorDtoValidator.ValidateAsync(request, cancellationToken);
+        ValidationResult validationResult = await _vendorDtoValidator.ValidateAsync(request, cancellationToken);
 
         if (validationResult.IsValid is false)
         {
@@ -119,7 +123,7 @@ public sealed class VendorService : IVendorService
 
         _logger.LogDebug("Validation succeeded for vendor update: {VendorName}", request.Name);
 
-        var vendor = new Vendor
+        Vendor vendor = new Vendor
         {
             Id = request.Id,
             Name = request.Name,

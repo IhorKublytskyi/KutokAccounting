@@ -7,7 +7,7 @@ public interface ITransactionTypeRepository
 {
     ValueTask CreateAsync(TransactionType transactionType, CancellationToken cancellationToken);
     ValueTask<TransactionType?> GetByIdAsync(int id, CancellationToken cancellationToken);
-    ValueTask<PagedResult<TransactionType>> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken);
+    ValueTask<PagedResult<TransactionType>> GetAsync(TransactionTypeQueryParameters transactionTypeQueryParameters, CancellationToken cancellationToken);
     ValueTask DeleteAsync(int id, CancellationToken cancellationToken);
     ValueTask UpdateAsync(TransactionType transactionType, CancellationToken cancellationToken);
 }

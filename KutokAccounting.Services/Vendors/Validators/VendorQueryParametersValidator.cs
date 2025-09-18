@@ -3,7 +3,7 @@ using KutokAccounting.Services.Vendors.Models;
 
 namespace KutokAccounting.Services.Vendors.Validators;
 
-public sealed class VendorQueryParametersValidator : AbstractValidator<QueryParameters>
+public sealed class VendorQueryParametersValidator : AbstractValidator<VendorQueryParameters>
 {
     public VendorQueryParametersValidator()
     {

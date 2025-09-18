@@ -1,5 +1,7 @@
+using FluentValidation;
 using FluentValidation.Results;
 using KutokAccounting.DataProvider.Models;
+using KutokAccounting.Services.TransactionTypes.Exceptions;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Models;
 using KutokAccounting.Services.TransactionTypes.Validators;
@@ -10,16 +12,16 @@ namespace KutokAccounting.Services.TransactionTypes;
 public sealed class TransactionTypeService : ITransactionTypeService
 {
     private readonly ILogger<TransactionTypeService> _logger;
-    private readonly TransactionTypeDtoValidator _transactionTypeDtoValidator;
-    private readonly TransactionTypeQueryParametersValidator _transactionTypeQueryValidator;
+    private readonly IValidator<TransactionTypeDto> _transactionTypeDtoValidator;
+    private readonly IValidator<TransactionTypeQueryParameters> _transactionTypeQueryValidator;
     private readonly ITransactionTypeRepository _repository;
     
 
     public TransactionTypeService(
         ITransactionTypeRepository repository, 
         ILogger<TransactionTypeService> logger, 
-        TransactionTypeDtoValidator transactionTypeDtoValidator, 
-        TransactionTypeQueryParametersValidator transactionTypeQueryValidator)
+        IValidator<TransactionTypeDto> transactionTypeDtoValidator, 
+        IValidator<TransactionTypeQueryParameters> transactionTypeQueryValidator)
     {
         _repository = repository;
         _logger = logger;
@@ -45,7 +47,7 @@ public sealed class TransactionTypeService : ITransactionTypeService
         TransactionType transactionType = new TransactionType()
         {
             Name = request.Name,
-            IsPositiveValue = request.IsPositiveValue
+            IsIncome = request.IsIncome
         };
         
         _logger.LogInformation("Saving transaction type to repository. Name: {TransactionTypeName}", transactionType.Name);
@@ -69,7 +71,7 @@ public sealed class TransactionTypeService : ITransactionTypeService
         {
             _logger.LogWarning("Transaction type with ID {TransactionTypeId} not found", id);
 
-            throw new Exception("Transaction type not found");
+            throw new NotFoundException("Transaction type not found");
         }
 
         _logger.LogInformation("Transaction type with ID {TransactionTypeId} retrieved successfully. Name: {TransactionTypeName}", transactionType.Id,
@@ -78,11 +80,11 @@ public sealed class TransactionTypeService : ITransactionTypeService
         return transactionType;
     }
 
-    public async ValueTask<PagedResult<TransactionType>> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<TransactionType>> GetAsync(TransactionTypeQueryParameters transactionTypeQueryParameters, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        ValidationResult validationResult = await _transactionTypeQueryValidator.ValidateAsync(queryParameters, cancellationToken);
+        ValidationResult validationResult = await _transactionTypeQueryValidator.ValidateAsync(transactionTypeQueryParameters, cancellationToken);
         
         if (validationResult.IsValid is false)
         {
@@ -91,11 +93,11 @@ public sealed class TransactionTypeService : ITransactionTypeService
             throw new ArgumentException(validationResult.ToString());
         }
 
-        PagedResult<TransactionType> transactionTypes = await _repository.GetAsync(queryParameters, cancellationToken);
+        PagedResult<TransactionType> transactionTypes = await _repository.GetAsync(transactionTypeQueryParameters, cancellationToken);
 
         if (transactionTypes is { Count: 0 })
         {
-            _logger.LogWarning("No transaction types found for query parameters: {@QueryParameters}", queryParameters);
+            _logger.LogWarning("No transaction types found for query parameters: {@QueryParameters}", transactionTypeQueryParameters);
 
             throw new Exception("Transaction types list is empty");
         }
@@ -126,7 +128,7 @@ public sealed class TransactionTypeService : ITransactionTypeService
         {
             Id = request.Id,
             Name = request.Name,
-            IsPositiveValue = request.IsPositiveValue
+            IsIncome = request.IsIncome
         };
 
         await _repository.UpdateAsync(transactionType, cancellationToken);

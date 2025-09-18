@@ -53,7 +53,7 @@
         TransactionTypeDto transactionType = new TransactionTypeDto
         {
             Name = _name,
-            IsPositiveValue = _isPositiveValue
+            IsIncome = _isPositiveValue
         };
 
         await TransactionTypeService.CreateAsync(transactionType, tokenSource.Token);

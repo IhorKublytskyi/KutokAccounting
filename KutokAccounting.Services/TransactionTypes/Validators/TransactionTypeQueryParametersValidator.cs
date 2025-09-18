@@ -3,7 +3,7 @@ using KutokAccounting.Services.TransactionTypes.Models;
 
 namespace KutokAccounting.Services.TransactionTypes.Validators;
 
-public sealed class TransactionTypeQueryParametersValidator : AbstractValidator<QueryParameters>
+public sealed class TransactionTypeQueryParametersValidator : AbstractValidator<TransactionTypeQueryParameters>
 {
     public TransactionTypeQueryParametersValidator()
     {

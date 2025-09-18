@@ -1,8 +1,11 @@
+using FluentValidation;
 using KutokAccounting.DataProvider;
 using KutokAccounting.Services.TransactionTypes;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
+using KutokAccounting.Services.TransactionTypes.Models;
 using KutokAccounting.Services.TransactionTypes.Validators;
 using KutokAccounting.Services.Vendors;
+using KutokAccounting.Services.Vendors.Models;
 using KutokAccounting.Services.Vendors.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -30,12 +33,12 @@ public static class MauiProgram
 
         builder.Services.AddScoped<IVendorService, VendorService>();
         builder.Services.AddScoped<IVendorRepository, VendorRepository>();
-        builder.Services.AddScoped<VendorDtoValidator>();
-        builder.Services.AddScoped<VendorQueryParametersValidator>();
+        builder.Services.AddScoped<IValidator<TransactionTypeDto>, TransactionTypeDtoValidator>();
+        builder.Services.AddScoped<IValidator<TransactionTypeQueryParameters>, TransactionTypeQueryParametersValidator>();
         builder.Services.AddScoped<ITransactionTypeService, TransactionTypeService>();
         builder.Services.AddScoped<ITransactionTypeRepository, TransactionTypeRepository>();
-        builder.Services.AddScoped<TransactionTypeDtoValidator>();
-        builder.Services.AddScoped<TransactionTypeQueryParametersValidator>();
+        builder.Services.AddScoped<IValidator<VendorDto>, VendorDtoValidator>();
+        builder.Services.AddScoped<IValidator<VendorQueryParameters>, VendorQueryParametersValidator>();
         builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore,  new SemaphoreSlim(1, 1));
         
 #if DEBUG
