@@ -4,7 +4,6 @@ using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Validators;
 using KutokAccounting.Services.Vendors;
 using KutokAccounting.Services.Vendors.Validators;
-using KutokAccounting.WinUI;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
