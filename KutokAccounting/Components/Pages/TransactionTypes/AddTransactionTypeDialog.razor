@@ -1,0 +1,68 @@
+@using KutokAccounting.Services.TransactionTypes.Interfaces
+@using KutokAccounting.Services.TransactionTypes.Models
+@inject ITransactionTypeService TransactionTypeService
+
+<MudDialog>
+    <TitleContent>
+        Додати нового постачальника
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isSuccess"
+                 @bind-Errors="_errors">
+            <MudTextField @bind-Value="_name"
+                          Placeholder="Назва типу транзакції"
+                          Label="Назва"
+                          Variant="Variant.Outlined"
+                          Counter="100"
+                          MaxLength="100"
+                          Lines="1"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"
+                          Margin="Margin.Normal"/>
+            <MudSelect T="bool"
+                       @bind-Value="_isPositiveValue"
+                       For="() => _isPositiveValue"
+                       Label="Тип"
+                       Variant="Variant.Outlined">
+                <MudSelectItem Value="false">Витрата</MudSelectItem>
+                <MudSelectItem Value="true">Прибуток</MudSelectItem>
+            </MudSelect>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton OnClick="Add" Disabled="!_isSuccess" Color="Color.Primary">Додати</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code{
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
+    
+    private string[] _errors;
+    
+    private string _name = null!;
+    private bool _isPositiveValue;
+
+    private bool _isSuccess;
+
+    private async Task Add()
+    {
+        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        TransactionTypeDto transactionType = new TransactionTypeDto
+        {
+            Name = _name,
+            IsPositiveValue = _isPositiveValue
+        };
+
+        await TransactionTypeService.CreateAsync(transactionType, tokenSource.Token);
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+}
