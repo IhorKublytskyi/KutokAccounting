@@ -8,17 +8,15 @@ namespace KutokAccounting.Services.Stores;
 public class StoresRepository : IStoresRepository
 {
 	private readonly KutokDbContext _dbContext;
-	private readonly DbSet<Store> _storesDbSet;
 	private readonly SemaphoreSlim _semaphoreSlim;
 	public StoresRepository(KutokDbContext dbContext, SemaphoreSlim semaphoreSlim)
 	{
 		_semaphoreSlim = semaphoreSlim;
 		_dbContext = dbContext;
-		_storesDbSet = dbContext.Stores;
 	}
-	public async Task CreateStoreAsync(Store store, CancellationToken ct)
+	public async ValueTask CreateStoreAsync(Store store, CancellationToken ct)
 	{
-		var storeExists = await StoreExists(store);
+		var storeExists = await StoreExists(store.Id);
 		if (storeExists)
 		{
 			throw new ArgumentException($"Store {store.Name} already exists");
@@ -28,7 +26,7 @@ public class StoresRepository : IStoresRepository
 
 		try
 		{
-			_storesDbSet.Add(store);
+			_dbContext.Stores.Add(store);
 			await _dbContext.SaveChangesAsync(ct);
 		}
 		finally
@@ -38,15 +36,15 @@ public class StoresRepository : IStoresRepository
 		
 	}
 	
-	public int GetStoresCount()
+	public async ValueTask<int> GetStoresCountAsync()
 	{
-		return _storesDbSet.Count();
+		return await _dbContext.Stores.CountAsync();
 	}
 	public IQueryable<Store> GetStoresPage(int pageSize, int pageNumber)
 	{
-		_storesDbSet.AsNoTracking();
+		_dbContext.Stores.AsNoTracking();
 		var startPosition = pageSize * (pageNumber - 1);
-		return _storesDbSet.Skip(startPosition).Take(pageSize);
+		return _dbContext.Stores.Skip(startPosition).Take(pageSize);
 	}
 
 	/// <summary>
@@ -60,7 +58,7 @@ public class StoresRepository : IStoresRepository
 		await _semaphoreSlim.WaitAsync(ct);
 		try
 		{
-			var store = await _storesDbSet.FindAsync(storeId);
+			var store = await _dbContext.Stores.FindAsync(storeId);
 		
 			ThrowIfStoreIsNull(store, storeId);
 			
@@ -69,9 +67,10 @@ public class StoresRepository : IStoresRepository
 			store.IsOpened = updatedStore.IsOpened;
 			store.SetupDate = updatedStore.SetupDate;
 			store.Address = updatedStore.Address;
-		
-			_storesDbSet.Update(store);
-			await _dbContext.SaveChangesAsync(ct);
+
+			await _dbContext.Stores
+				.Where(s => s.Id == store.Id)
+				.ExecuteUpdateAsync(s => s.SetProperty(sProp => sProp, storeValue => store), ct);
 		}
 		finally
 		{
@@ -80,17 +79,16 @@ public class StoresRepository : IStoresRepository
 		
 	}
 
-	public async Task DeleteStoreAsync(int storeId, CancellationToken ct)
+	public async ValueTask DeleteStoreAsync(int storeId, CancellationToken ct)
 	{
 		await _semaphoreSlim.WaitAsync(ct);
 
 		try
 		{
-			var store = _storesDbSet.Find(storeId);
+			var store = _dbContext.Stores.Find(storeId);
 			ThrowIfStoreIsNull(store, storeId);
-		
-			_storesDbSet.Remove(store);
-			await _dbContext.SaveChangesAsync(ct);
+
+			await _dbContext.Stores.Where(s => s.Id == storeId).ExecuteDeleteAsync(ct);
 		}
 		finally
 		{
@@ -99,9 +97,9 @@ public class StoresRepository : IStoresRepository
 		
 	}
 
-	public async Task<bool> StoreExists(Store store)
+	private async ValueTask<bool> StoreExists(int storeId)
 	{
-		return await _storesDbSet.AnyAsync(s => s.Id == store.Id);
+		return await _dbContext.Stores.AnyAsync(s => s.Id == storeId);
 	}
 
 	/// <summary>

@@ -12,7 +12,7 @@ public class StoresService : IStoresService
 		_repository = repository;
 	}
 
-	public async Task CreateStoreAsync(StoreDto storeDto, CancellationToken ct)
+	public async ValueTask CreateStoreAsync(StoreDto storeDto, CancellationToken ct)
 	{
 		var storeModel = storeDto.FromDto();
 		await _repository.CreateStoreAsync(storeModel, ct);
@@ -23,21 +23,21 @@ public class StoresService : IStoresService
 		return _repository.GetStoresPage(pageSize, pageNumber).Select(x => x.ToDto());
 	}
 
-	public int GetAllStoresCount()
+	public async ValueTask<int> GetAllStoresCountAsync()
 	{
-		return _repository.GetStoresCount();
+		return await _repository.GetStoresCountAsync();
 	}
 
-	public async Task UpdateStore(int storeId, StoreDto updatedStoreDto, CancellationToken ct)
+	public async ValueTask UpdateStoreAsync(int storeId, StoreDto updatedStoreDto, CancellationToken ct)
 	{
 		
 		var updatedStoreModel = updatedStoreDto.FromDto();
 		await _repository.UpdateStoreAsync(storeId, updatedStoreModel, ct);
 	}
 	
-	public async ValueTask DeleteStore(int storeId, CancellationToken ct)
+	public async ValueTask DeleteStoreAsync(int storeId, CancellationToken ct)
 	{
-		if (storeId >= 0 is false)
+		if (storeId < 0)
 		{
 			throw new ArgumentException("Invalid store id");
 		}

@@ -4,10 +4,9 @@ namespace KutokAccounting.Services.Stores.Abstractions;
 
 public interface IStoresRepository
 {
-	Task CreateStoreAsync(Store store, CancellationToken ct);
-	int GetStoresCount();
+	ValueTask CreateStoreAsync(Store store, CancellationToken ct);
+	ValueTask<int> GetStoresCountAsync();
 	IQueryable<Store> GetStoresPage(int pageSize, int pageNumber);
 	ValueTask UpdateStoreAsync(int storeId, Store updatedStore, CancellationToken ct);
-	Task DeleteStoreAsync(int storeId, CancellationToken ct);
-	Task<bool> StoreExists(Store store);
+	ValueTask DeleteStoreAsync(int storeId, CancellationToken ct);
 }
