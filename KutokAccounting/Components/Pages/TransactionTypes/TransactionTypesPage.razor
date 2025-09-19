@@ -1,17 +1,19 @@
-@page "/vendors"
+@page "/transactionTypes"
+@using KutokAccounting.Components.Pages.TransactionTypes.Models
 @using KutokAccounting.DataProvider.Models
-@using KutokAccounting.Services.Vendors.Models
-@inject IVendorService VendorService
+@using KutokAccounting.Services.TransactionTypes.Interfaces
+@using KutokAccounting.Services.TransactionTypes.Models;
+@inject ITransactionTypeService TransactionTypeService
 @inject IDialogService DialogService
 
 <MudDataGrid
     @ref="_dataGrid"
-    T="Vendor"
-    ServerData="GetVendorsAsync"
+    T="TransactionTypeView"
+    ServerData="GetTransactionTypesAsync"
     FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
         <MudStack Style="width: 100%;">
-            <MudText Typo="Typo.h6" Style="margin-top:6px;">Постачальники</MudText>
+            <MudText Typo="Typo.h6" Style="margin-top:6px;">Типи транзакцій</MudText>
             <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
                 <MudTextField
                     T="string"
@@ -24,16 +26,25 @@
                     IconSize="Size.Medium"
                     Style="width:450px;">
                 </MudTextField>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddButtonClick">Додати нового
-                    постачальника
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddButtonClick">
+                    Додати новий тип транзакції
                 </MudButton>
             </MudStack>
         </MudStack>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="v => v.Name" Title="Постачальник" Sortable="false" Filterable="true"
-                        FilterOperators="_filterOperators"></PropertyColumn>
-        <PropertyColumn Property="v => v.Description" Title="Опис" Sortable="false" Filterable="false"></PropertyColumn>
+        <PropertyColumn 
+            Property="tp => tp.Name" 
+            Title="Тип транзакції" 
+            Sortable="false" 
+            Filterable="true"
+            FilterOperators="_filterOperators"></PropertyColumn>
+        <PropertyColumn 
+            Property="tp => tp.Label" 
+            Title="Тип" 
+            Sortable="false" 
+            Filterable="true" 
+            FilterOperators="_filterOperators"></PropertyColumn>
         <TemplateColumn>
             <CellTemplate>
                 <MudStack Row Justify="Justify.FlexEnd">
@@ -48,6 +59,6 @@
         </TemplateColumn>
     </Columns>
     <PagerContent>
-        <MudDataGridPager T="Vendor"></MudDataGridPager>
+        <MudDataGridPager T="TransactionTypeView"></MudDataGridPager>
     </PagerContent>
 </MudDataGrid>

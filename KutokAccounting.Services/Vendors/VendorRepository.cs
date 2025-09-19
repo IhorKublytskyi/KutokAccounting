@@ -1,6 +1,6 @@
 using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
-using KutokAccounting.Services.Vendors.DataTransferObjects;
+using KutokAccounting.Services.Vendors.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,10 @@ public sealed class VendorRepository : IVendorRepository
     private readonly SemaphoreSlim _semaphoreSlim;
     private readonly ILogger<VendorRepository> _logger;
 
-    public VendorRepository(KutokDbContext dbContext, [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim, ILogger<VendorRepository> logger) 
+    public VendorRepository(
+        KutokDbContext dbContext, 
+        [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim, 
+        ILogger<VendorRepository> logger) 
     {
         _dbContext = dbContext;
         _semaphoreSlim = semaphoreSlim;
@@ -39,23 +42,23 @@ public sealed class VendorRepository : IVendorRepository
         }
     }
 
-    public async ValueTask<VendorPagedResult> GetAsync(QueryParameters queryParameters, CancellationToken cancellationToken)
+    public async ValueTask<PagedResult<Vendor>> GetAsync(VendorQueryParameters vendorQueryParameters, CancellationToken cancellationToken)
     {
-        var query = _dbContext.Vendors.AsNoTracking();
+        IQueryable<Vendor> query = _dbContext.Vendors.AsNoTracking();
  
-        if (string.IsNullOrWhiteSpace(queryParameters.Name) is false)
-            query = query.Where(v => v.Name == queryParameters.Name);
+        if (string.IsNullOrWhiteSpace(vendorQueryParameters.Name) is false)
+            query = query.Where(v => v.Name == vendorQueryParameters.Name);
 
-        if (string.IsNullOrEmpty(queryParameters.SearchString) is false)
+        if (string.IsNullOrEmpty(vendorQueryParameters.SearchString) is false)
             query = query.Where(v =>
-                EF.Functions.Like(v.Name, $"%{queryParameters.SearchString}%") || EF.Functions.Like(v.Description, $"%{queryParameters.SearchString}%"));
+                EF.Functions.Like(v.Name, $"%{vendorQueryParameters.SearchString}%") || EF.Functions.Like(v.Description, $"%{vendorQueryParameters.SearchString}%"));
         try
         {
             Task<int> countTask = query.CountAsync(cancellationToken);
 
-            var vendors = await query
-                .Skip(queryParameters.Pagination.Skip)
-                .Take(queryParameters.Pagination.PageSize)
+            List<Vendor> vendors = await query
+                .Skip(vendorQueryParameters.Pagination.Skip)
+                .Take(vendorQueryParameters.Pagination.PageSize)
                 .Select(v => new Vendor
                 {
                     Id = v.Id,
@@ -65,15 +68,15 @@ public sealed class VendorRepository : IVendorRepository
                 .OrderBy(v => v.Name)
                 .ToListAsync(cancellationToken);
 
-            return new VendorPagedResult()
+            return new PagedResult<Vendor>()
             {
-                Vendors = vendors,
+                Items = vendors,
                 Count = await countTask,
             };
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Failed to retrieve vendors with QueryParameters: {QueryParameters}", queryParameters);
+            _logger.LogError(e, "Failed to retrieve vendors with QueryParameters: {QueryParameters}", vendorQueryParameters);
 
             throw;
         }
@@ -83,7 +86,7 @@ public sealed class VendorRepository : IVendorRepository
     {
         try
         {
-            var vendor = await _dbContext.Vendors
+            Vendor? vendor = await _dbContext.Vendors
                 .AsNoTracking()
                 .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
 
