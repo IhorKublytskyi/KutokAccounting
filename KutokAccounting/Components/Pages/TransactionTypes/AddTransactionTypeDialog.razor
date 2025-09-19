@@ -21,8 +21,8 @@
                           RequiredError="Це поле обов'язкове"
                           Margin="Margin.Normal"/>
             <MudSelect T="bool"
-                       @bind-Value="_isPositiveValue"
-                       For="() => _isPositiveValue"
+                       @bind-Value="_isIncome"
+                       For="() => _isIncome"
                        Label="Тип"
                        Variant="Variant.Outlined">
                 <MudSelectItem Value="false">Витрата</MudSelectItem>
@@ -42,7 +42,7 @@
     private string[] _errors;
     
     private string _name = null!;
-    private bool _isPositiveValue;
+    private bool _isIncome;
 
     private bool _isSuccess;
 
@@ -53,7 +53,7 @@
         TransactionTypeDto transactionType = new TransactionTypeDto
         {
             Name = _name,
-            IsIncome = _isPositiveValue
+            IsIncome = _isIncome
         };
 
         await TransactionTypeService.CreateAsync(transactionType, tokenSource.Token);

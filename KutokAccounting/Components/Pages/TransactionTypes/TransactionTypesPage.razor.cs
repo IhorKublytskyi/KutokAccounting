@@ -42,29 +42,9 @@ public partial class TransactionTypesPage
     {
         using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        string?[] filter = state.FilterDefinitions.Select(f => f?.Value?.ToString()).ToArray();
-
-        _page += state.Page;
-        _pageSize = state.PageSize;
-
-        TransactionTypeQueryParameters transactionTypeQueryParameters = BuildQuery(state);
-
         try
         {
-            PagedResult<TransactionType> pagedResult = await TransactionTypeService.GetAsync(transactionTypeQueryParameters, tokenSource.Token);
-
-            List<TransactionTypeView> view = pagedResult.Items.Select(tp => new TransactionTypeView
-            {
-                Id = tp.Id,
-                Name = tp.Name,
-                IsPositiveValue = tp.IsIncome
-            }).ToList();
-
-            return new GridData<TransactionTypeView>
-            {
-                Items = view ?? new List<TransactionTypeView>(),
-                TotalItems = view.Count
-            };
+            return await GetTransactionTypeInternalAsync(state, tokenSource.Token);
         }
         catch (Exception)
         {
@@ -79,6 +59,31 @@ public partial class TransactionTypesPage
             StateHasChanged();
         }
     }
+
+    private async ValueTask<GridData<TransactionTypeView>> GetTransactionTypeInternalAsync(GridState<TransactionTypeView> state, CancellationToken cancellationToken)
+    {
+        string?[] filter = state.FilterDefinitions.Select(f => f?.Value?.ToString()).ToArray();
+
+        _page += state.Page;
+        _pageSize = state.PageSize;
+
+        TransactionTypeQueryParameters transactionTypeQueryParameters = BuildQuery(state);
+
+        PagedResult<TransactionType> pagedResult = await TransactionTypeService.GetAsync(transactionTypeQueryParameters, cancellationToken);
+
+        List<TransactionTypeView> view = pagedResult.Items.Select(tp => new TransactionTypeView
+        {
+            Id = tp.Id,
+            Name = tp.Name,
+            IsIncome = tp.IsIncome
+        }).ToList();
+
+        return new GridData<TransactionTypeView>
+        {
+            Items = view ?? new List<TransactionTypeView>(),
+            TotalItems = view.Count
+        };
+    } 
 
     private async Task OnDeleteButtonClick(TransactionTypeView transactionType)
     {

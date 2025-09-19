@@ -21,8 +21,8 @@
                           RequiredError="Це поле обов'язкове"
                           Margin="Margin.Normal"/>
             <MudSelect T="bool"
-                       @bind-Value="TransactionTypeView.IsPositiveValue"
-                       For="() => TransactionTypeView.IsPositiveValue"
+                       @bind-Value="TransactionTypeView.IsIncome"
+                       For="() => TransactionTypeView.IsIncome"
                        Label="Тип"
                        Variant="Variant.Outlined">
                 <MudSelectItem Value="false">Витрата</MudSelectItem>
@@ -51,7 +51,7 @@
         {
             Id = TransactionTypeView.Id,
             Name = TransactionTypeView.Name,
-            IsIncome = TransactionTypeView.IsPositiveValue
+            IsIncome = TransactionTypeView.IsIncome
         };
 
         await TransactionTypeService.UpdateAsync(transactionType, tokenSource.Token);
