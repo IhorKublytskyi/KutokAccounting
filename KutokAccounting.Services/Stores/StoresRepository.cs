@@ -5,7 +5,6 @@ using KutokAccounting.Services.Stores.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using NullReferenceException = System.NullReferenceException;
 
 namespace KutokAccounting.Services.Stores;
 
@@ -29,6 +28,7 @@ public class StoresRepository : IStoresRepository
 		var storeExists = await StoreExists(store.Id);
 		if (storeExists)
 		{
+			_logger.LogWarning("Store with {storeId} already exists}", store.Id);
 			throw new ArgumentException($"Store {store.Name} already exists");
 		}
 		
@@ -38,6 +38,9 @@ public class StoresRepository : IStoresRepository
 		{
 			_dbContext.Stores.Add(store);
 			await _dbContext.SaveChangesAsync(ct);
+			
+			_logger.LogInformation("New store created with following properties. Name: {storeName}, Address: {storeAddress}, Is opened: {isOpened}, Setup date: {setUpDate}"
+				, store.Name, store.Address, store.IsOpened, store.SetupDate);
 		}
 		finally
 		{
@@ -79,9 +82,11 @@ public class StoresRepository : IStoresRepository
 		try
 		{
 			var storeExists = await StoreExists(storeId);
-
+			
 			if (storeExists is false)
 			{
+				_logger.LogWarning("Store with {storeId} does not exists", storeId);
+
 				throw new NullReferenceException($"Store {storeId} does not exist");
 			}
 			
@@ -93,6 +98,8 @@ public class StoresRepository : IStoresRepository
 					.SetProperty(st => st.Address, updatedStore.Address)
 					.SetProperty(st => st.Name, updatedStore.Name)
 					.SetProperty(st => st.IsOpened, updatedStore.IsOpened), ct);
+			
+			_logger.LogInformation("Store with {storeId} was updated", storeId);
 		}
 		finally
 		{
@@ -111,9 +118,11 @@ public class StoresRepository : IStoresRepository
 			
 			if (store is null)
 			{
+				_logger.LogWarning("Store with {storeId} does not exists", storeId);
 				throw new ArgumentException($"Store with id {storeId} does not exist");
 			}
 			await _dbContext.Stores.Where(s => s.Id == storeId).ExecuteDeleteAsync(ct);
+			_logger.LogInformation("Store with {storeId} was deleted", storeId);
 		}
 		finally
 		{
