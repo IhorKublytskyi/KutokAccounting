@@ -1,0 +1,78 @@
+@inject IStoresService StoresService
+
+<MudDialog >
+    <TitleContent>
+        Додати магазин
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="_storeName"
+                          Placeholder="Назва магазину"
+                          Label="Назва"
+                          Variant="Variant.Outlined"
+                          Counter="100"
+                          MaxLength="100"
+                          Lines="1"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"
+                          Margin="Margin.Normal">
+            </MudTextField>
+            <MudTextField
+                @bind-Value="_storeAddress"
+                Placeholder="Адресса"
+                Label="Адресса"
+                Variant="Variant.Outlined"
+                Counter="100"
+                MaxLength="100"
+                Lines="1"
+                Immediate="true"
+                Required="false"
+                Margin="Margin.Normal">
+            </MudTextField>
+            <MudCheckBox @bind-Value="_isOpened"
+                         Required="false"
+                         Color="Color.Primary"
+                         UncheckedColor="Color.Default"
+                         >
+                Відчинений
+            </MudCheckBox>
+            <MudDatePicker Label="Дата відкриття" @bind-Date="_openingDate"/>
+            
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton OnClick="AddStore" Disabled="!_isValid" Color="Color.Primary">Додати</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
+    private bool _isValid = true;
+    private string _storeName = String.Empty;
+    private DateTime? _openingDate = DateTime.Now;
+    private bool _isOpened = true;
+    private string? _storeAddress;
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+
+    private async Task AddStore()
+    {
+        using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); //TODO add scoped service
+        
+        StoreDto store = new()
+        {
+            Name = _storeName,
+            IsOpened = _isOpened,
+            SetupDate = _openingDate.GetValueOrDefault(),
+            Address = _storeAddress
+        };
+        
+        await StoresService.CreateStoreAsync(store, cts.Token);
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

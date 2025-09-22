@@ -11,7 +11,7 @@ public static class StoreDtoExtensions
 		{
 			Name = dto.Name,
 			IsOpened = dto.IsOpened,
-			SetupDate = dto.SetupDate,
+			SetupDate = dto.SetupDate.GetValueOrDefault(),
 			Address = dto.Address,
 		};
 	}
@@ -20,6 +20,7 @@ public static class StoreDtoExtensions
 	{
 		return new()
 		{
+			Id = store.Id,
 			Name = store.Name,
 			IsOpened = store.IsOpened,
 			SetupDate = store.SetupDate,

@@ -35,7 +35,7 @@ public static class MauiProgram
         builder.Services.AddScoped<QueryParametersValidator>();
         builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore,  new SemaphoreSlim(1, 1));
 
-        builder.Services.AddScoped<IStoreFilter, StoreFilter>();
+        builder.Services.AddScoped<IStoreBuilder, StoreQueryBuilder>();
         builder.Services.AddScoped<PageDtoValidator>();
         builder.Services.AddScoped<StoreDtoValidator>();
         builder.Services.AddScoped<IStoresRepository, StoresRepository>();

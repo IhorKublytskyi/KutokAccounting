@@ -143,9 +143,9 @@
         };
 
         var dialog = await DialogService.ShowAsync<AddVendorDialog>("Додати нового постачальника", options);
-
+        
         var result = await dialog.Result;
-
+        
         if (_dataGrid != null && !result.Canceled)
             await _dataGrid.ReloadServerData();
     }

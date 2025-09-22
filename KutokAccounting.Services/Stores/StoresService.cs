@@ -25,11 +25,11 @@ public class StoresService : IStoresService
 		await _repository.CreateStoreAsync(storeModel, ct);
 	}
 
-	public async ValueTask<List<StoreDto>> GetStoresPageAsync(SearchParameters searchParameters, Page page, CancellationToken ct)
+	public async ValueTask<List<StoreDto>> GetStoresPageAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
 	{
 		ct.ThrowIfCancellationRequested();
 		
-		var stores = await _repository.GetFilteredPageOfStoresAsync(searchParameters, page, ct);
+		var stores = await _repository.GetFilteredPageOfStoresAsync(page, ct, searchParameters);
 		return stores.Select(x => x.ToDto()).ToList();
 	}
 

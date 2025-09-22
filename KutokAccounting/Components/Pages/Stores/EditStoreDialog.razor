@@ -1,0 +1,77 @@
+@inject IStoresService StoresService
+@inject IDialogService DialogService
+
+<MudDialog>
+    <TitleContent>
+        Редагувати магазин
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="Store.Name"
+                          Placeholder="Назва магазину"
+                          Label="Назва"
+                          Variant="Variant.Outlined"
+                          Counter="100"
+                          MaxLength="100"
+                          Lines="1"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"
+                          Margin="Margin.Normal">
+            </MudTextField>
+            <MudTextField
+                @bind-Value="Store.Address"
+                Placeholder="Адресса"
+                Label="Адресса"
+                Variant="Variant.Outlined"
+                Counter="100"
+                MaxLength="100"
+                Lines="1"
+                Immediate="true"
+                Required="false"
+                Margin="Margin.Normal">
+            </MudTextField>
+            <MudCheckBox @bind-Value="Store.IsOpened"
+                         Required="false"
+                         Color="Color.Primary"
+                         UncheckedColor="Color.Default">
+                Відчинений
+            </MudCheckBox>
+            <MudDatePicker Label="Дата відкриття" @bind-Date="Store.SetupDate"
+                           Required="true"
+                           RequiredError="Це поле обов'язкове"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton OnClick="Edit" Disabled="!_isValid" Color="Color.Primary">Підтвердити</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    
+    private bool _isValid = true;
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public StoreDto Store { get; set; } = null!;
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+
+    private async Task Edit()
+    {
+        using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); //TODO add scoped service
+
+        try
+        {
+            await StoresService.UpdateStoreAsync(Store.Id, Store, cts.Token);
+        }
+        catch (Exception e)
+        {
+            await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
+        }
+        
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+}

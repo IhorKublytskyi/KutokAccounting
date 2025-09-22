@@ -12,14 +12,14 @@ public class StoresRepository : IStoresRepository
 {
 	private readonly KutokDbContext _dbContext;
 	private readonly SemaphoreSlim _semaphoreSlim;
-	private readonly IStoreFilter _storeFilter;
+	private readonly IStoreBuilder _storeBuilder;
 	private readonly ILogger<StoresRepository> _logger;
 	public StoresRepository(KutokDbContext dbContext, [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim,
-		IStoreFilter storeFilter,
+		IStoreBuilder storeBuilder,
 		ILogger<StoresRepository> logger)
 	{
 		_semaphoreSlim = semaphoreSlim;
-		_storeFilter = storeFilter;
+		_storeBuilder = storeBuilder;
 		_logger = logger;
 		_dbContext = dbContext;
 	}
@@ -63,9 +63,9 @@ public class StoresRepository : IStoresRepository
 
 		return await query.ToListAsync(ct);
 	}
-	public async ValueTask<IEnumerable<Store>> GetFilteredPageOfStoresAsync(SearchParameters searchParameters, Page page, CancellationToken ct)
+	public async ValueTask<IEnumerable<Store>> GetFilteredPageOfStoresAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
 	{
-		var query = _storeFilter.GetFilteredQuery(_dbContext.Stores.AsNoTracking(), searchParameters);
+		var query = _storeBuilder.GetQuery(_dbContext.Stores.AsNoTracking(), searchParameters);
 		var stores = await GetStoresPageAsync(query, page, ct);
 		return stores;
 	}

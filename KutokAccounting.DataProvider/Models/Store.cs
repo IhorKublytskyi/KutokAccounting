@@ -3,7 +3,7 @@ namespace KutokAccounting.DataProvider.Models;
 public class Store
 {
     public int Id { get; set; }
-    public string? Name { get; set; }
+    public required string Name { get; set; }
     public bool IsOpened { get; set; }
     public DateTime SetupDate { get; set; }
     public string? Address { get; set; }

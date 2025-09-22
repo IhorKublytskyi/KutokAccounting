@@ -1,0 +1,131 @@
+@page "/stores"
+@using KutokAccounting.Services.Stores.Models
+@inject IStoresService StoresService
+@inject IDialogService DialogService
+
+<MudDataGrid
+    @ref="_dataGrid"
+    T="StoreDto"
+    ServerData="GetStoresAsync"
+    FilterMode="DataGridFilterMode.ColumnFilterMenu">
+    <ToolBarContent>
+        <MudStack Style="width: 100%;">
+            <MudText Typo="Typo.h6" Style="margin-top:6px;">Магазини</MudText>
+            <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
+                <MudTextField
+                    T="string"
+                    @bind-Value="_searchString"
+                    @bind-Value:after="() => _dataGrid.ReloadServerData()"
+                    Placeholder="Пошук"
+                    Immediate="true"
+                    Adornment="Adornment.End"
+                    AdornmentIcon="@Icons.Material.Filled.Search"
+                    IconSize="Size.Medium"
+                    Style="width:450px;">
+                </MudTextField>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddShopButtonClick">
+                    Додати новий магазин
+                </MudButton>
+            </MudStack>
+        </MudStack>
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="s => s.Name" Title="Назва" Sortable="false"></PropertyColumn>
+        <TemplateColumn CellClass="d-flex justify-end">
+            <CellTemplate>
+                <MudStack Row>
+                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
+                               OnClick="() => OnEditButtonClick(context.Item)">Редагувати
+                    </MudButton>
+                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
+                               OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
+                    </MudButton>
+                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Default"
+                               OnClick="() => OnMoreButtonClick(context.Item)">Більше
+                    </MudButton>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager T="StoreDto"></MudDataGridPager>
+    </PagerContent>
+</MudDataGrid>
+@code {
+    private MudDataGrid<StoreDto> _dataGrid;
+    private string _searchString = String.Empty;
+    private readonly DialogOptions _dialogOptions = new()
+    {
+        FullWidth = true,
+        MaxWidth = MaxWidth.Medium,
+        CloseButton = true,
+        CloseOnEscapeKey = true
+    };
+    
+    public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
+    {
+        using CancellationTokenSource cts = new();
+
+        var page = new Services.Stores.Models.Page
+        {
+            PageNumber = state.Page + 1,
+            PageSize = state.PageSize
+        };
+        
+        var gridData = new GridData<StoreDto>
+        {
+            Items = new List<StoreDto>(),
+            TotalItems = 0
+        };
+        
+        try
+        {
+            var stores = await StoresService.GetStoresPageAsync(page, cts.Token);
+            var totalItems = await StoresService.GetAllStoresCountAsync(cts.Token);
+
+            gridData.Items = stores;
+            gridData.TotalItems = totalItems;
+        }
+        catch (Exception e)
+        {
+            await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+
+        return gridData;
+    }
+    public async Task OnAddShopButtonClick()
+    {
+        var dialog = await DialogService.ShowAsync<AddStoreDialog>("Додати магазин", _dialogOptions);
+        var dialogResult = await dialog.Result;
+        
+        
+        if (_dataGrid != null && !dialogResult.Canceled)
+            await _dataGrid.ReloadServerData();
+    }
+
+    public async Task OnEditButtonClick(StoreDto? storeDto)
+    {
+        var parameters = new DialogParameters<EditStoreDialog> { { d => d.Store, storeDto } };
+        
+        var dialog = await DialogService.ShowAsync<EditStoreDialog>("Редагувати данні магазину", parameters, _dialogOptions);
+        var dialogResult = await dialog.Result;
+
+        if (_dataGrid != null && !dialogResult.Canceled)
+            await _dataGrid.ReloadServerData();
+    }
+
+    private async Task OnDeleteButtonClick(StoreDto? storeDto)
+    {
+        
+    }
+
+    private async Task OnMoreButtonClick(StoreDto storeDto)
+    {
+        
+    }
+
+}

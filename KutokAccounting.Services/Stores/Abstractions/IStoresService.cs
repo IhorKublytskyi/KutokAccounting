@@ -8,9 +8,9 @@ public interface IStoresService
 {
 	ValueTask CreateStoreAsync(StoreDto storeDto, CancellationToken ct);
 
-	ValueTask<List<StoreDto>> GetStoresPageAsync(SearchParameters searchParameters,
-		Page page,
-		CancellationToken ct);
+	ValueTask<List<StoreDto>> GetStoresPageAsync(Page page,
+		CancellationToken ct,
+		SearchParameters? searchParameters = null);
 	ValueTask<int> GetAllStoresCountAsync(CancellationToken ct);
 	ValueTask UpdateStoreAsync(int storeId, StoreDto updatedStoreDto, CancellationToken ct);
 	ValueTask DeleteStoreAsync(int storeId, CancellationToken ct);
