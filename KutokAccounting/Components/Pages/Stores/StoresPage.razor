@@ -2,8 +2,11 @@
 @using KutokAccounting.Services.Stores.Models
 @inject IStoresService StoresService
 @inject IDialogService DialogService
+@inject CancellationTokenSource Cts
+@inject ILogger<StoresPage> Logger
 
 <MudDataGrid
+    SortMode="SortMode.Multiple"
     @ref="_dataGrid"
     T="StoreDto"
     ServerData="GetStoresAsync"
@@ -30,14 +33,14 @@
         </MudStack>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="s => s.Name" Title="Назва" Sortable="false"></PropertyColumn>
+        <PropertyColumn Property="s => s.Name" Title="Назва" Sortable="true" />
         <TemplateColumn CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudStack Row>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
                                OnClick="() => OnEditButtonClick(context.Item)">Редагувати
                     </MudButton>
-                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
+                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Error"
                                OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
                     </MudButton>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Default"
@@ -64,8 +67,6 @@
     
     public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
     {
-        using CancellationTokenSource cts = new();
-
         var page = new Services.Stores.Models.Page
         {
             PageNumber = state.Page + 1,
@@ -77,18 +78,24 @@
             Items = new List<StoreDto>(),
             TotalItems = 0
         };
-        
+
+        var searchParameters = new SearchParameters
+        {
+            Address = _searchString,
+            Name = _searchString,
+        };
         try
         {
-            var stores = await StoresService.GetStoresPageAsync(page, cts.Token);
-            var totalItems = await StoresService.GetAllStoresCountAsync(cts.Token);
-
+            var stores = await StoresService.GetStoresPageAsync(page, Cts.Token, searchParameters);
+            var totalItems = await StoresService.GetAllStoresCountAsync(Cts.Token);
+            
             gridData.Items = stores;
             gridData.TotalItems = totalItems;
         }
         catch (Exception e)
         {
             await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
+            Logger.LogError($"Exception occured while retreiving stores from db. Exception message: {e.Message}");
         }
         finally
         {
@@ -113,19 +120,39 @@
         
         var dialog = await DialogService.ShowAsync<EditStoreDialog>("Редагувати данні магазину", parameters, _dialogOptions);
         var dialogResult = await dialog.Result;
-
+        
         if (_dataGrid != null && !dialogResult.Canceled)
             await _dataGrid.ReloadServerData();
     }
 
     private async Task OnDeleteButtonClick(StoreDto? storeDto)
-    {
+    { 
+        var shouldBeDeleted = await DialogService.ShowMessageBox("Увага!", $"Ви точно хочете видалити магазин {storeDto.Name}?", yesText:"Так", noText:"Ні");
         
+        if (shouldBeDeleted.GetValueOrDefault())
+        {
+            await TryDeleteStoreAsync(storeDto);
+        }
     }
 
+    private async Task TryDeleteStoreAsync(StoreDto storeDto)
+    {
+        try
+        {
+            await StoresService.DeleteStoreAsync(storeDto.Id, Cts.Token);
+            
+            if (_dataGrid != null)
+                await _dataGrid.ReloadServerData();
+        }
+        catch (Exception e)
+        {
+            Logger.LogError($"Exception occured while deleting store. Messgae: {e.Message}");
+            await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
+        }
+    }
     private async Task OnMoreButtonClick(StoreDto storeDto)
     {
-        
+        var parameters = new DialogParameters<EditStoreDialog> { { d => d.Store, storeDto } };
+        await DialogService.ShowAsync<MoreStoreInfoDialog>("Більше інформації про магазин", parameters);
     }
-
 }

@@ -21,9 +21,10 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
 
+        builder.Services.AddTransient<CancellationTokenSource>(_ => new CancellationTokenSource());
         builder.Services.AddMudServices();
         builder.Services.AddMauiBlazorWebView();
-
+        
         builder.Services.AddDbContext<KutokDbContext>(options =>
         {
             options.UseSqlite(KutokConfigurations.ConnectionString);

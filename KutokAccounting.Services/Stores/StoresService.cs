@@ -16,7 +16,7 @@ public class StoresService : IStoresService
 		_repository = repository;
 		_storeDtoValidator = storeDtoValidator;
 	}
-
+	
 	public async ValueTask CreateStoreAsync(StoreDto storeDto, CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();

@@ -1,5 +1,8 @@
 @inject IStoresService StoresService
 @inject IDialogService DialogService
+@inject CancellationTokenSource Cts
+@inject ILogger<StoresPage> Logger
+
 
 <MudDialog>
     <TitleContent>
@@ -44,7 +47,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Назад</MudButton>
-        <MudButton OnClick="Edit" Disabled="!_isValid" Color="Color.Primary">Підтвердити</MudButton>
+        <MudButton OnClick="EditAsync" Disabled="!_isValid" Color="Color.Primary">Підтвердити</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -59,19 +62,17 @@
         MudDialog.Close();
     }
 
-    private async Task Edit()
+    private async Task EditAsync()
     {
-        using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); //TODO add scoped service
-
         try
         {
-            await StoresService.UpdateStoreAsync(Store.Id, Store, cts.Token);
+            await StoresService.UpdateStoreAsync(Store.Id, Store, Cts.Token);
         }
         catch (Exception e)
         {
             await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
+            Logger.LogError($"Exception occured while editing store. Messgae: {e.Message}");
         }
-        
         MudDialog.Close(DialogResult.Ok(true));
     }
 }

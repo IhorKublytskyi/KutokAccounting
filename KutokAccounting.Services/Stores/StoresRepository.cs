@@ -59,7 +59,8 @@ public class StoresRepository : IStoresRepository
 		var startPosition = page.PageSize * (page.PageNumber - 1);
 		var query = stores
 			.Skip(startPosition)
-			.Take(page.PageSize);
+			.Take(page.PageSize)
+			.OrderByDescending(s => s.SetupDate);
 
 		return await query.ToListAsync(ct);
 	}

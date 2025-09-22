@@ -1,6 +1,9 @@
 @inject IStoresService StoresService
+@inject CancellationTokenSource Cts
+@inject IDialogService DialogService
+@inject ILogger<StoresPage> Logger
 
-<MudDialog >
+<MudDialog>
     <TitleContent>
         Додати магазин
     </TitleContent>
@@ -43,7 +46,7 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Назад</MudButton>
-        <MudButton OnClick="AddStore" Disabled="!_isValid" Color="Color.Primary">Додати</MudButton>
+        <MudButton OnClick="AddStoreAsync" Disabled="!_isValid" Color="Color.Primary">Додати</MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -60,10 +63,8 @@
         MudDialog.Close();
     }
 
-    private async Task AddStore()
+    private async Task AddStoreAsync()
     {
-        using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)); //TODO add scoped service
-        
         StoreDto store = new()
         {
             Name = _storeName,
@@ -71,8 +72,16 @@
             SetupDate = _openingDate.GetValueOrDefault(),
             Address = _storeAddress
         };
-        
-        await StoresService.CreateStoreAsync(store, cts.Token);
-        MudDialog.Close(DialogResult.Ok(true));
+
+        try
+        {
+            await StoresService.CreateStoreAsync(store, Cts.Token);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception e)
+        {
+            await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
+            Logger.LogError($"Exception occured while adding store. Messgae: {e.Message}");
+        }
     }
 }

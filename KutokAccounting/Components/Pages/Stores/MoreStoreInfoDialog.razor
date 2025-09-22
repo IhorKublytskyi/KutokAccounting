@@ -1,0 +1,33 @@
+
+<MudDialog>
+    <TitleContent>
+        Більше інформації про магазин
+    </TitleContent>
+    <DialogContent>
+        <MudForm>
+            <MudText>Назва: @Store.Name</MudText>
+            <MudText>Адреса: @Store.Address</MudText>
+            <MudText>Дата відкриття: @Store.SetupDate</MudText>
+            <MudText>Відчиненний: @BoolValueConverter.ConvertToString(Store.IsOpened)</MudText>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton >
+            Дивитися транзакції
+        </MudButton>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+    </DialogActions>
+</MudDialog>
+
+
+
+@code {
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
+    [Parameter] public StoreDto Store { get; set; } = null!;
+
+    private void Cancel(MouseEventArgs obj)
+    {
+        MudDialog.Cancel();
+    }
+
+}

@@ -40,7 +40,6 @@ public class StoreConfiguration : IEntityTypeConfiguration<Store>
             .Property(s => s.Address)
             .HasColumnName("address")
             .HasColumnType("TEXT")
-            .HasMaxLength(100)
-            .IsRequired();
+            .HasMaxLength(100);
     }
 }
