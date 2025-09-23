@@ -86,11 +86,10 @@
         };
         try
         {
-            var stores = await StoresService.GetStoresPageAsync(page, Cts.Token, searchParameters);
-            var totalItems = await StoresService.GetAllStoresCountAsync(Cts.Token);
+            var storesPage = await StoresService.GetStoresPageAsync(page, Cts.Token, searchParameters);
             
-            gridData.Items = stores;
-            gridData.TotalItems = totalItems;
+            gridData.Items = storesPage.Items;
+            gridData.TotalItems = storesPage.Count;
         }
         catch (Exception e)
         {

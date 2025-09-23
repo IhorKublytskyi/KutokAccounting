@@ -47,28 +47,36 @@ public class StoresRepository : IStoresRepository
 			_semaphoreSlim.Release();
 		}
 	}
-	public async ValueTask<int> GetStoresCountAsync()
-	{
-		return await _dbContext.Stores
-			.AsNoTracking()
-			.CountAsync();
-	}
 
 	private async ValueTask<List<Store>> GetStoresPageAsync(IQueryable<Store> stores, Page page, CancellationToken ct)
 	{
 		var startPosition = page.PageSize * (page.PageNumber - 1);
 		var query = stores
+			.Select(s => new Store
+			{
+				Id = s.Id,
+				Name = s.Name,
+				IsOpened = s.IsOpened,
+				SetupDate = s.SetupDate,
+				Address = s.Address,
+			})
 			.Skip(startPosition)
 			.Take(page.PageSize)
 			.OrderByDescending(s => s.SetupDate);
-
+		
 		return await query.ToListAsync(ct);
 	}
-	public async ValueTask<IEnumerable<Store>> GetFilteredPageOfStoresAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
+	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
 	{
 		var query = _storeBuilder.GetQuery(_dbContext.Stores.AsNoTracking(), searchParameters);
 		var stores = await GetStoresPageAsync(query, page, ct);
-		return stores;
+		var count = await query.CountAsync(ct);
+		
+		return new PagedResult<Store>()
+		{
+			Items = stores,
+			Count = count,
+		};
 	}
 	
 	/// <summary>

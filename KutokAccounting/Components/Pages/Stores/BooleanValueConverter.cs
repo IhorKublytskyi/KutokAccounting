@@ -1,6 +1,6 @@
 namespace KutokAccounting.Components.Pages.Stores;
 
-public static class BoolValueConverter
+public static class BooleanValueConverter
 {
 	public static string ConvertToString(bool value)
 	{

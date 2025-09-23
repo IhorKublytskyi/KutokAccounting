@@ -1,8 +1,8 @@
+using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores.Abstractions;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Extensions;
 using KutokAccounting.Services.Stores.Models;
-using KutokAccounting.Services.Vendors.Validators;
 
 namespace KutokAccounting.Services.Stores;
 
@@ -25,21 +25,17 @@ public class StoresService : IStoresService
 		await _repository.CreateStoreAsync(storeModel, ct);
 	}
 
-	public async ValueTask<List<StoreDto>> GetStoresPageAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
+	public async ValueTask<PagedResult<StoreDto>> GetStoresPageAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
 	{
 		ct.ThrowIfCancellationRequested();
 		
-		var stores = await _repository.GetFilteredPageOfStoresAsync(page, ct, searchParameters);
-		return stores.Select(x => x.ToDto()).ToList();
+		PagedResult<Store> storesPagedResult = await _repository.GetFilteredPageOfStoresAsync(page, ct, searchParameters);
+		return new PagedResult<StoreDto>()
+		{
+			Count = storesPagedResult.Count,
+			Items = storesPagedResult.Items.Select(x => x.ToDto())
+		};
 	}
-
-	public async ValueTask<int> GetAllStoresCountAsync(CancellationToken ct)
-	{
-		ct.ThrowIfCancellationRequested();
-
-		return await _repository.GetStoresCountAsync();
-	}
-
 	public async ValueTask UpdateStoreAsync(int storeId, StoreDto updatedStoreDto, CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
