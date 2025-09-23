@@ -26,7 +26,7 @@ public static class MauiProgram
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
 
-        builder.Services.AddSingleton<CancellationTokenSource>(_ => new CancellationTokenSource());
+        builder.Services.AddScoped<CancellationTokenSource>(_ => new CancellationTokenSource());
         builder.Services.AddMudServices();
         builder.Services.AddMauiBlazorWebView();
         

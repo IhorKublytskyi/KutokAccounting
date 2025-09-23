@@ -72,7 +72,7 @@
             SetupDate = _openingDate.GetValueOrDefault(),
             Address = _storeAddress
         };
-
+        
         try
         {
             await StoresService.CreateStoreAsync(store, Cts.Token);
