@@ -1,14 +1,16 @@
-﻿@using KutokAccounting.Services.Vendors.Models
-@inject IVendorService VendorService
+@using KutokAccounting.Services.TransactionTypes.Interfaces
+@using KutokAccounting.Services.TransactionTypes.Models
+@inject ITransactionTypeService TransactionTypeService
 
 <MudDialog>
     <TitleContent>
         Додати нового постачальника
     </TitleContent>
     <DialogContent>
-        <MudForm @bind-IsValid="_isSuccess">
+        <MudForm @bind-IsValid="_isSuccess"
+                 @bind-Errors="_errors">
             <MudTextField @bind-Value="_name"
-                          Placeholder="Назва постачальника"
+                          Placeholder="Назва типу транзакції"
                           Label="Назва"
                           Variant="Variant.Outlined"
                           Counter="100"
@@ -18,16 +20,14 @@
                           Required="true"
                           RequiredError="Це поле обов'язкове"
                           Margin="Margin.Normal"/>
-            <MudTextField @bind-Value="_description"
-                          Placeholder="Нотатки"
-                          Label="Нотатки"
-                          Variant="Variant.Outlined"
-                          Counter="1024"
-                          MaxLength="1024"
-                          Lines="5"
-                          Immediate="true"
-                          Required="false"
-                          Margin="Margin.Normal"/>
+            <MudSelect T="bool"
+                       @bind-Value="_isIncome"
+                       For="() => _isIncome"
+                       Label="Тип"
+                       Variant="Variant.Outlined">
+                <MudSelectItem Value="false">Витрата</MudSelectItem>
+                <MudSelectItem Value="true">Прибуток</MudSelectItem>
+            </MudSelect>
         </MudForm>
     </DialogContent>
     <DialogActions>
@@ -39,8 +39,10 @@
 @code{
     [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
     
+    private string[] _errors;
+    
     private string _name = null!;
-    private string _description = null!;
+    private bool _isIncome;
 
     private bool _isSuccess;
 
@@ -48,13 +50,13 @@
     {
         using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
-        var vendor = new VendorDto
+        TransactionTypeDto transactionType = new TransactionTypeDto
         {
             Name = _name,
-            Description = _description
+            IsIncome = _isIncome
         };
 
-        await VendorService.CreateAsync(vendor, tokenSource.Token);
+        await TransactionTypeService.CreateAsync(transactionType, tokenSource.Token);
 
         MudDialog.Close(DialogResult.Ok(true));
     }

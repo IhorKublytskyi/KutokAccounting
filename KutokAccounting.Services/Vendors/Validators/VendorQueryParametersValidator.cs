@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using KutokAccounting.Services.Vendors.DataTransferObjects;
+using KutokAccounting.Services.Vendors.Models;
 
 namespace KutokAccounting.Services.Vendors.Validators;
 
-public sealed class QueryParametersValidator : AbstractValidator<QueryParameters>
+public sealed class VendorQueryParametersValidator : AbstractValidator<VendorQueryParameters>
 {
-    public QueryParametersValidator()
+    public VendorQueryParametersValidator()
     {
         RuleFor(p => p.Name).Length(1, 100);
 

@@ -1,5 +1,5 @@
 ﻿using FluentValidation;
-using KutokAccounting.Services.Vendors.DataTransferObjects;
+using KutokAccounting.Services.Vendors.Models;
 
 namespace KutokAccounting.Services.Vendors.Validators;
 

@@ -1,0 +1,66 @@
+@using KutokAccounting.Components.Pages.TransactionTypes.Models
+@using KutokAccounting.Services.TransactionTypes.Interfaces
+@using KutokAccounting.Services.TransactionTypes.Models
+@inject ITransactionTypeService TransactionTypeService
+
+<MudDialog>
+    <TitleContent>
+        Редагувати тип транзації
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isSuccess">
+            <MudTextField @bind-Value="TransactionTypeView.Name"
+                          Placeholder="Назва типу транзакції"
+                          Label="Назва"
+                          Variant="Variant.Outlined"
+                          Counter="100"
+                          MaxLength="100"
+                          Lines="1"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"
+                          Margin="Margin.Normal"/>
+            <MudSelect T="bool"
+                       @bind-Value="TransactionTypeView.IsIncome"
+                       For="() => TransactionTypeView.IsIncome"
+                       Label="Тип"
+                       Variant="Variant.Outlined">
+                <MudSelectItem Value="false">Витрата</MudSelectItem>
+                <MudSelectItem Value="true">Прибуток</MudSelectItem>
+            </MudSelect>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton OnClick="Update" Disabled="!_isSuccess" Color="Color.Primary">Підтвердити</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
+    
+    [Parameter] public TransactionTypeView TransactionTypeView { get; set; } = null!;
+    
+    private bool _isSuccess;
+
+    private async Task Update()
+    {
+        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+        TransactionTypeDto transactionType = new TransactionTypeDto()
+        {
+            Id = TransactionTypeView.Id,
+            Name = TransactionTypeView.Name,
+            IsIncome = TransactionTypeView.IsIncome
+        };
+
+        await TransactionTypeService.UpdateAsync(transactionType, tokenSource.Token);
+
+        MudDialog.Close(DialogResult.Ok(true));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Close();
+    }
+}

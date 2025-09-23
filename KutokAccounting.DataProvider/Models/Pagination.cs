@@ -1,4 +1,4 @@
-namespace KutokAccounting.Services.Vendors.DataTransferObjects;
+namespace KutokAccounting.DataProvider.Models;
 
 public record struct Pagination()
 {
