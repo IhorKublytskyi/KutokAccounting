@@ -11,7 +11,7 @@ public static class StoreDtoExtensions
 		{
 			Name = dto.Name,
 			IsOpened = dto.IsOpened,
-			SetupDate = dto.SetupDate.GetValueOrDefault(),
+			SetupDate = dto.SetupDate,
 			Address = dto.Address,
 		};
 	}

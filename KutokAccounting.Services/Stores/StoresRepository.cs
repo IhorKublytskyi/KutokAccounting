@@ -48,9 +48,9 @@ public class StoresRepository : IStoresRepository
 		}
 	}
 
-	private async ValueTask<List<Store>> GetStoresPageAsync(IQueryable<Store> stores, Page page, CancellationToken ct)
+	private async ValueTask<List<Store>> GetStoresPageAsync(IQueryable<Store> stores, Pagination pagination, CancellationToken ct)
 	{
-		var startPosition = page.PageSize * (page.PageNumber - 1);
+		var startPosition = pagination.PageSize * (pagination.Page - 1);
 		var query = stores
 			.Select(s => new Store
 			{
@@ -61,16 +61,17 @@ public class StoresRepository : IStoresRepository
 				Address = s.Address,
 			})
 			.Skip(startPosition)
-			.Take(page.PageSize)
+			.Take(pagination.PageSize)
 			.OrderByDescending(s => s.SetupDate);
 		
 		return await query.ToListAsync(ct);
 	}
-	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
+	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(Pagination pagination, SearchParameters? searchParameters, CancellationToken ct)
 	{
-		var query = _storeBuilder.GetQuery(_dbContext.Stores.AsNoTracking(), searchParameters);
-		var stores = await GetStoresPageAsync(query, page, ct);
-		var count = await query.CountAsync(ct);
+		var getAllStoresQuery = _dbContext.Stores.AsNoTracking();
+		var query = _storeBuilder.GetQuery(getAllStoresQuery, searchParameters);
+		var stores = await GetStoresPageAsync(query, pagination, ct);
+		var count = await getAllStoresQuery.CountAsync(ct);
 		
 		return new PagedResult<Store>()
 		{

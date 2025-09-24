@@ -1,4 +1,5 @@
 
+using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Models;
 using Microsoft.Extensions.Logging;
@@ -21,18 +22,19 @@ partial class StoresPage
     
     public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
     {
-        var page = new Services.Stores.Models.Page
+        var pagination = new Pagination
         {
-            PageNumber = state.Page + 1,
+            Page = state.Page + 1,
             PageSize = state.PageSize
         };
-        
+
         var gridData = new GridData<StoreDto>
         {
             Items = new List<StoreDto>(),
             TotalItems = 0
         };
-
+        
+        //TODO: search for specific fields
         var searchParameters = new SearchParameters
         {
             Address = _searchString,
@@ -40,7 +42,8 @@ partial class StoresPage
         };
         try
         {
-            var storesPage = await StoresService.GetStoresPageAsync(page, Cts.Token, searchParameters);
+            //TODO: create cts in each op
+            var storesPage = await StoresService.GetStoresPageAsync(pagination, searchParameters, Cts.Token);
             
             gridData.Items = storesPage.Items;
             gridData.TotalItems = storesPage.Count;

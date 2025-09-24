@@ -25,11 +25,11 @@ public class StoresService : IStoresService
 		await _repository.CreateStoreAsync(storeModel, ct);
 	}
 
-	public async ValueTask<PagedResult<StoreDto>> GetStoresPageAsync(Page page, CancellationToken ct, SearchParameters? searchParameters = null)
+	public async ValueTask<PagedResult<StoreDto>> GetStoresPageAsync(Pagination pagination, SearchParameters? searchParameters, CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
 		
-		PagedResult<Store> storesPagedResult = await _repository.GetFilteredPageOfStoresAsync(page, ct, searchParameters);
+		PagedResult<Store> storesPagedResult = await _repository.GetFilteredPageOfStoresAsync(pagination, searchParameters, ct);
 		return new PagedResult<StoreDto>()
 		{
 			Count = storesPagedResult.Count,

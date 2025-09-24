@@ -1,3 +1,4 @@
+@using System.ComponentModel.DataAnnotations
 @inject IStoresService StoresService
 @inject IDialogService DialogService
 @inject CancellationTokenSource Cts
@@ -40,7 +41,7 @@
                          UncheckedColor="Color.Default">
                 Відчинений
             </MudCheckBox>
-            <MudDatePicker Label="Дата відкриття" @bind-Date="Store.SetupDate"
+            <MudDatePicker Label="Дата відкриття" @bind-Date="@NullableSetUpDate"
                            Required="true"
                            RequiredError="Це поле обов'язкове"/>
         </MudForm>
@@ -57,6 +58,22 @@
     [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
     [Parameter] public StoreDto Store { get; set; } = null!;
 
+    public DateTime? NullableSetUpDate
+    {
+        get => Store.SetupDate;
+        set
+        {
+            if (value is null)
+            {
+                DialogService.ShowMessageBox("Обов'язкові данні не обрані!", $"Оберіть дату відкриття магазину");
+            }
+            else
+            {
+                Store.SetupDate = value.Value;
+            }
+        }
+    }
+
     private void Cancel()
     {
         MudDialog.Close();
@@ -72,6 +89,7 @@
         {
             await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
             Logger.LogError($"Exception occured while editing store. Messgae: {e.Message}");
+            MudDialog.Close(DialogResult.Cancel());
         }
         MudDialog.Close(DialogResult.Ok(true));
     }
