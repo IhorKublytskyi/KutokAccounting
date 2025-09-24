@@ -22,6 +22,8 @@ partial class StoresPage
     
     public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
     {
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
         var pagination = new Pagination
         {
             Page = state.Page + 1,
@@ -43,7 +45,7 @@ partial class StoresPage
         try
         {
             //TODO: create cts in each op
-            var storesPage = await StoresService.GetStoresPageAsync(pagination, searchParameters, Cts.Token);
+            var storesPage = await StoresService.GetStoresPageAsync(pagination, searchParameters, tokenSource.Token);
             
             gridData.Items = storesPage.Items;
             gridData.TotalItems = storesPage.Count;
@@ -53,11 +55,7 @@ partial class StoresPage
             await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
             Logger.LogError($"Exception occured while retreiving stores from db. Exception message: {e.Message}");
         }
-        finally
-        {
-            StateHasChanged();
-        }
-
+        
         return gridData;
     }
     public async Task OnAddShopButtonClick()
@@ -72,6 +70,8 @@ partial class StoresPage
 
     public async Task OnEditButtonClick(StoreDto? storeDto)
     {
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
         var parameters = new DialogParameters<EditStoreDialog> { { d => d.Store, storeDto } };
         
         var dialog = await DialogService.ShowAsync<EditStoreDialog>("Редагувати данні магазину", parameters, _dialogOptions);
@@ -93,9 +93,11 @@ partial class StoresPage
 
     private async Task TryDeleteStoreAsync(StoreDto storeDto)
     {
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
         try
         {
-            await StoresService.DeleteStoreAsync(storeDto.Id, Cts.Token);
+            await StoresService.DeleteStoreAsync(storeDto.Id, tokenSource.Token);
             
             if (_dataGrid != null)
                 await _dataGrid.ReloadServerData();

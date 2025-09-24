@@ -81,9 +81,11 @@
 
     private async Task EditAsync()
     {
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
         try
         {
-            await StoresService.UpdateStoreAsync(Store.Id, Store, Cts.Token);
+            await StoresService.UpdateStoreAsync(Store.Id, Store, tokenSource.Token);
         }
         catch (Exception e)
         {

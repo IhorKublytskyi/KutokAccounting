@@ -65,6 +65,8 @@
 
     private async Task AddStoreAsync()
     {
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
         StoreDto store = new()
         {
             Name = _storeName,
@@ -75,7 +77,7 @@
         
         try
         {
-            await StoresService.CreateStoreAsync(store, Cts.Token);
+            await StoresService.CreateStoreAsync(store, tokenSource.Token);
             MudDialog.Close(DialogResult.Ok(true));
         }
         catch (Exception e)
