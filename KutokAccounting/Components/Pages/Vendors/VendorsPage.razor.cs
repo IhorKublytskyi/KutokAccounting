@@ -7,6 +7,7 @@ namespace KutokAccounting.Components.Pages.Vendors;
 public partial class VendorsPage
 {
     private MudDataGrid<Vendor> _dataGrid = new();
+
     private readonly HashSet<string> _filterOperators = new()
     {
         "equals"

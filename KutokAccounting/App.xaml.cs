@@ -1,6 +1,7 @@
 ﻿using KutokAccounting.DataProvider;
 using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
+using KutokAccounting.Services.Logging;
 
 namespace KutokAccounting;
 
@@ -22,9 +23,14 @@ public partial class App : Application
         _dbContext.Database.MigrateAsync().ContinueWith(t =>
         {
             if (t.IsCompletedSuccessfully)
-                _logger.LogInformation("Migration applied successfully");
+                _logger.LogInformation("Migration applied successfully.");
             else
-                _logger.LogInformation(t.Exception, "Migration failed");
+                _logger.LogInformation(t.Exception, "Migration failed.");
+        });
+
+        LogFilesCleaner.CleanAsync(CancellationToken.None).ContinueWith(t => 
+        {
+            _logger.LogInformation("Old logs was successfully cleaned.");
         });
     }
 

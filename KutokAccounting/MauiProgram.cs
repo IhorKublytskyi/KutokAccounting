@@ -1,5 +1,7 @@
 using FluentValidation;
 using KutokAccounting.DataProvider;
+using KutokAccounting.Services.Logging;
+using KutokAccounting.Services.Logging.Extensions;
 using KutokAccounting.Services.TransactionTypes;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Models;
@@ -9,6 +11,7 @@ using KutokAccounting.Services.Vendors.Models;
 using KutokAccounting.Services.Vendors.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MudBlazor.Services;
 
 namespace KutokAccounting;
@@ -22,7 +25,6 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
-
         builder.Services.AddMudServices();
         builder.Services.AddMauiBlazorWebView();
 
@@ -31,6 +33,15 @@ public static class MauiProgram
             options.UseSqlite(KutokConfigurations.ConnectionString);
         });
 
+        builder.Services.AddLogging(builder => 
+        {
+            builder.ClearProviders();
+
+            builder.AddProvider<FileLoggerProvider>(s => new FileLoggerProvider(
+                s.GetRequiredKeyedService<SemaphoreSlim>(KutokConfigurations.LogOperationsSemaphore), s.GetRequiredService<IOptionsMonitor<FileLoggerConfiguration>>()));
+        });
+
+        builder.Services.AddSingleton<IOptionsMonitor<FileLoggerConfiguration>, OptionsMonitor<FileLoggerConfiguration>>();
         builder.Services.AddScoped<IVendorService, VendorService>();
         builder.Services.AddScoped<IVendorRepository, VendorRepository>();
         builder.Services.AddScoped<IValidator<TransactionTypeDto>, TransactionTypeDtoValidator>();
@@ -39,11 +50,11 @@ public static class MauiProgram
         builder.Services.AddScoped<ITransactionTypeRepository, TransactionTypeRepository>();
         builder.Services.AddScoped<IValidator<VendorDto>, VendorDtoValidator>();
         builder.Services.AddScoped<IValidator<VendorQueryParameters>, VendorQueryParametersValidator>();
-        builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore,  new SemaphoreSlim(1, 1));
+        builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore, new SemaphoreSlim(1, 1));
+        builder.Services.AddKeyedSingleton(KutokConfigurations.LogOperationsSemaphore, new SemaphoreSlim(1, 1));
         
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
-        builder.Logging.AddDebug();
 #endif
 
         return builder.Build();
