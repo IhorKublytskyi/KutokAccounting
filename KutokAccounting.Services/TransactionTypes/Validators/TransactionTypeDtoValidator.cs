@@ -5,11 +5,11 @@ namespace KutokAccounting.Services.TransactionTypes.Validators;
 
 public class TransactionTypeDtoValidator : AbstractValidator<TransactionTypeDto>
 {
-    public TransactionTypeDtoValidator()
-    {
-        RuleFor(r => r.Name)
-            .NotNull()
-            .NotEmpty()
-            .MaximumLength(100);
-    }
+	public TransactionTypeDtoValidator()
+	{
+		RuleFor(r => r.Name)
+			.NotNull()
+			.NotEmpty()
+			.MaximumLength(100);
+	}
 }

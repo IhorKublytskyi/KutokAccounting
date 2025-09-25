@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KutokAccounting.Services", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KutokAccounting.DataProvider", "KutokAccounting.DataProvider\KutokAccounting.DataProvider.csproj", "{C45A571D-99F2-46ED-AC62-DA580C609E97}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KutokAccounting.Logging", "KutokAccounting.Logging\KutokAccounting.Logging.csproj", "{ECC422C5-F173-4460-A0BC-93CED8EBB806}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{C45A571D-99F2-46ED-AC62-DA580C609E97}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C45A571D-99F2-46ED-AC62-DA580C609E97}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C45A571D-99F2-46ED-AC62-DA580C609E97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECC422C5-F173-4460-A0BC-93CED8EBB806}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECC422C5-F173-4460-A0BC-93CED8EBB806}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECC422C5-F173-4460-A0BC-93CED8EBB806}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECC422C5-F173-4460-A0BC-93CED8EBB806}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

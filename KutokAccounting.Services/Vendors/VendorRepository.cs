@@ -9,136 +9,146 @@ namespace KutokAccounting.Services.Vendors;
 
 public sealed class VendorRepository : IVendorRepository
 {
-    private readonly KutokDbContext _dbContext;
-    private readonly SemaphoreSlim _semaphoreSlim;
-    private readonly ILogger<VendorRepository> _logger;
+	private readonly KutokDbContext _dbContext;
+	private readonly SemaphoreSlim _semaphoreSlim;
+	private readonly ILogger<VendorRepository> _logger;
 
-    public VendorRepository(
-        KutokDbContext dbContext, 
-        [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim, 
-        ILogger<VendorRepository> logger) 
-    {
-        _dbContext = dbContext;
-        _semaphoreSlim = semaphoreSlim;
-        _logger = logger;
-    }
+	public VendorRepository(
+		KutokDbContext dbContext,
+		[FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)]
+		SemaphoreSlim semaphoreSlim,
+		ILogger<VendorRepository> logger)
+	{
+		_dbContext = dbContext;
+		_semaphoreSlim = semaphoreSlim;
+		_logger = logger;
+	}
 
-    public async ValueTask CreateAsync(Vendor vendor, CancellationToken cancellationToken)
-    {
-        await _semaphoreSlim.WaitAsync(cancellationToken);
+	public async ValueTask CreateAsync(Vendor vendor, CancellationToken cancellationToken)
+	{
+		await _semaphoreSlim.WaitAsync(cancellationToken);
 
-        try
-        {
-            await _dbContext.Vendors.AddAsync(vendor, cancellationToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
-        }
-        catch(Exception e)
-        {
-            _logger.LogInformation(e, "Failed to create vendor with Name: {VendorName}", vendor.Name);
-        }
-        finally 
-        {
-            _semaphoreSlim.Release();
-        }
-    }
+		try
+		{
+			await _dbContext.Vendors.AddAsync(vendor, cancellationToken);
+			await _dbContext.SaveChangesAsync(cancellationToken);
+		}
+		catch (Exception e)
+		{
+			_logger.LogInformation(e, "Failed to create vendor with Name: {VendorName}", vendor.Name);
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
+	}
 
-    public async ValueTask<PagedResult<Vendor>> GetAsync(VendorQueryParameters vendorQueryParameters, CancellationToken cancellationToken)
-    {
-        IQueryable<Vendor> query = _dbContext.Vendors.AsNoTracking();
- 
-        if (string.IsNullOrWhiteSpace(vendorQueryParameters.Name) is false)
-            query = query.Where(v => v.Name == vendorQueryParameters.Name);
+	public async ValueTask<PagedResult<Vendor>> GetAsync(VendorQueryParameters vendorQueryParameters,
+		CancellationToken cancellationToken)
+	{
+		IQueryable<Vendor> query = _dbContext.Vendors.AsNoTracking();
 
-        if (string.IsNullOrEmpty(vendorQueryParameters.SearchString) is false)
-            query = query.Where(v =>
-                EF.Functions.Like(v.Name, $"%{vendorQueryParameters.SearchString}%") || EF.Functions.Like(v.Description, $"%{vendorQueryParameters.SearchString}%"));
-        try
-        {
-            Task<int> countTask = query.CountAsync(cancellationToken);
+		if (string.IsNullOrWhiteSpace(vendorQueryParameters.Name) is false)
+		{
+			query = query.Where(v => v.Name == vendorQueryParameters.Name);
+		}
 
-            List<Vendor> vendors = await query
-                .Skip(vendorQueryParameters.Pagination.Skip)
-                .Take(vendorQueryParameters.Pagination.PageSize)
-                .Select(v => new Vendor
-                {
-                    Id = v.Id,
-                    Name = v.Name,
-                    Description = v.Description
-                })
-                .OrderBy(v => v.Name)
-                .ToListAsync(cancellationToken);
+		if (string.IsNullOrEmpty(vendorQueryParameters.SearchString) is false)
+		{
+			query = query.Where(v =>
+				EF.Functions.Like(v.Name, $"%{vendorQueryParameters.SearchString}%") ||
+				EF.Functions.Like(v.Description, $"%{vendorQueryParameters.SearchString}%"));
+		}
 
-            return new PagedResult<Vendor>()
-            {
-                Items = vendors,
-                Count = await countTask,
-            };
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to retrieve vendors with QueryParameters: {QueryParameters}", vendorQueryParameters);
+		try
+		{
+			Task<int> countTask = query.CountAsync(cancellationToken);
 
-            throw;
-        }
-    }
+			List<Vendor> vendors = await query
+				.Skip(vendorQueryParameters.Pagination.Skip)
+				.Take(vendorQueryParameters.Pagination.PageSize)
+				.Select(v => new Vendor
+				{
+					Id = v.Id,
+					Name = v.Name,
+					Description = v.Description
+				})
+				.OrderBy(v => v.Name)
+				.ToListAsync(cancellationToken);
 
-    public async ValueTask<Vendor?> GetByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        try
-        {
-            Vendor? vendor = await _dbContext.Vendors
-                .AsNoTracking()
-                .FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
+			return new PagedResult<Vendor>
+			{
+				Items = vendors,
+				Count = await countTask
+			};
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to retrieve vendors with QueryParameters: {QueryParameters}",
+				vendorQueryParameters);
 
-            return vendor;
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to retrieve vendor with Id: {VendorId}", id);
+			throw;
+		}
+	}
 
-            throw;
-        }
-    }
+	public async ValueTask<Vendor?> GetByIdAsync(int id, CancellationToken cancellationToken)
+	{
+		try
+		{
+			Vendor? vendor = await _dbContext.Vendors
+				.AsNoTracking()
+				.FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
 
-    public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
-    {
-        await _semaphoreSlim.WaitAsync(cancellationToken);
+			return vendor;
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to retrieve vendor with Id: {VendorId}", id);
 
-        try
-        {
-            await _dbContext.Vendors
-                .Where(v => v.Id == id)
-                .ExecuteDeleteAsync(cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to delete vendor with Id: {VendorId}", id);
-        }
-        finally
-        {
-            _semaphoreSlim.Release();
-        }
-    }
+			throw;
+		}
+	}
 
-    public async ValueTask UpdateAsync(Vendor vendor, CancellationToken cancellationToken)
-    {
-        await _semaphoreSlim.WaitAsync(cancellationToken);
+	public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
+	{
+		await _semaphoreSlim.WaitAsync(cancellationToken);
 
-        try
-        {
-            await _dbContext.Vendors
-                .Where(v => v.Id == vendor.Id)
-                .ExecuteUpdateAsync(v => v
-                    .SetProperty(p => p.Name, vendor.Name)
-                    .SetProperty(p => p.Description, vendor.Description), cancellationToken);
-        }
-        catch (Exception e)
-        {
-            _logger.LogError(e, "Failed to update vendor with Id: {VendorId}, Name: {VendorName}", vendor.Id, vendor.Name);
-        }
-        finally
-        {
-            _semaphoreSlim.Release();
-        }
-    }
+		try
+		{
+			await _dbContext.Vendors
+				.Where(v => v.Id == id)
+				.ExecuteDeleteAsync(cancellationToken);
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to delete vendor with Id: {VendorId}", id);
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
+	}
+
+	public async ValueTask UpdateAsync(Vendor vendor, CancellationToken cancellationToken)
+	{
+		await _semaphoreSlim.WaitAsync(cancellationToken);
+
+		try
+		{
+			await _dbContext.Vendors
+				.Where(v => v.Id == vendor.Id)
+				.ExecuteUpdateAsync(v => v
+					.SetProperty(p => p.Name, vendor.Name)
+					.SetProperty(p => p.Description, vendor.Description), cancellationToken);
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to update vendor with Id: {VendorId}, Name: {VendorName}", vendor.Id,
+				vendor.Name);
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
+	}
 }

@@ -1,8 +1,6 @@
 @page "/transactionTypes"
 @using KutokAccounting.Components.Pages.TransactionTypes.Models
-@using KutokAccounting.DataProvider.Models
 @using KutokAccounting.Services.TransactionTypes.Interfaces
-@using KutokAccounting.Services.TransactionTypes.Models;
 @inject ITransactionTypeService TransactionTypeService
 @inject IDialogService DialogService
 
@@ -33,17 +31,17 @@
         </MudStack>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn 
-            Property="tp => tp.Name" 
-            Title="Тип транзакції" 
-            Sortable="false" 
+        <PropertyColumn
+            Property="tp => tp.Name"
+            Title="Тип транзакції"
+            Sortable="false"
             Filterable="true"
             FilterOperators="_filterOperators"></PropertyColumn>
-        <PropertyColumn 
-            Property="tp => tp.Label" 
-            Title="Тип" 
-            Sortable="false" 
-            Filterable="true" 
+        <PropertyColumn
+            Property="tp => tp.Label"
+            Title="Тип"
+            Sortable="false"
+            Filterable="true"
             FilterOperators="_filterOperators"></PropertyColumn>
         <TemplateColumn>
             <CellTemplate>

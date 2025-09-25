@@ -37,17 +37,20 @@
 </MudDialog>
 
 @code {
-    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
-    
-    [Parameter] public TransactionTypeView TransactionTypeView { get; set; } = null!;
-    
+
+    [CascadingParameter]
+    public IMudDialogInstance MudDialog { get; set; }
+
+    [Parameter]
+    public TransactionTypeView TransactionTypeView { get; set; } = null!;
+
     private bool _isSuccess;
 
     private async Task Update()
     {
-        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-        TransactionTypeDto transactionType = new TransactionTypeDto()
+        TransactionTypeDto transactionType = new()
         {
             Id = TransactionTypeView.Id,
             Name = TransactionTypeView.Name,
@@ -63,4 +66,5 @@
     {
         MudDialog.Close();
     }
+
 }

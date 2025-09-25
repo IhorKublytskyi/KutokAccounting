@@ -37,20 +37,23 @@
 </MudDialog>
 
 @code{
-    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
-    
+
+    [CascadingParameter]
+    public IMudDialogInstance MudDialog { get; set; }
+
     private string[] _errors;
-    
+
     private string _name = null!;
+    
     private bool _isIncome;
 
     private bool _isSuccess;
 
     private async Task AddAsync()
     {
-        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-        TransactionTypeDto transactionType = new TransactionTypeDto
+        TransactionTypeDto transactionType = new()
         {
             Name = _name,
             IsIncome = _isIncome
@@ -65,4 +68,5 @@
     {
         MudDialog.Close();
     }
+
 }

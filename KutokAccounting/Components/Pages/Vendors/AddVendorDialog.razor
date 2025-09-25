@@ -37,8 +37,10 @@
 </MudDialog>
 
 @code{
-    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
-    
+
+    [CascadingParameter]
+    public IMudDialogInstance MudDialog { get; set; }
+
     private string _name = null!;
     private string _description = null!;
 
@@ -46,9 +48,9 @@
 
     private async Task AddAsync()
     {
-        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-        var vendor = new VendorDto
+        VendorDto vendor = new()
         {
             Name = _name,
             Description = _description
@@ -63,4 +65,5 @@
     {
         MudDialog.Close();
     }
+
 }
