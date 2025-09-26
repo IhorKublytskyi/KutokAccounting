@@ -11,6 +11,7 @@ public partial class App : Application
 	private readonly KutokDbContext _dbContext;
 	private readonly ILogger<App> _logger;
 	private readonly IFileLoggerProcessor _processor;
+	private CancellationTokenSource _cancellationTokenSource = new();
 	private Task _loggingTask;
 
 	public App(KutokDbContext dbContext,
@@ -26,7 +27,7 @@ public partial class App : Application
 	{
 		InitializeComponent();
 
-		_dbContext.Database.MigrateAsync().ContinueWith(t =>
+		_dbContext.Database.MigrateAsync(_cancellationTokenSource.Token).ContinueWith(t =>
 		{
 			if (t.IsCompletedSuccessfully)
 			{
@@ -34,16 +35,30 @@ public partial class App : Application
 			}
 			else
 			{
-				_logger.LogInformation(t.Exception, "Migration failed.");
+				_logger.LogError(t.Exception, "Migration failed.");
 			}
 		});
 
-		LogFilesCleaner.CleanAsync(CancellationToken.None).ContinueWith(t =>
+		LogFilesCleaner.CleanAsync(_cancellationTokenSource.Token).ContinueWith(t =>
 		{
 			_logger.LogInformation("Old logs was successfully cleaned.");
 		});
 
-		_loggingTask = _processor.ProcessAsync(CancellationToken.None);
+		_loggingTask = _processor.ProcessAsync(_cancellationTokenSource.Token);
+	}
+
+	protected override void OnSleep()
+	{
+		_cancellationTokenSource.Cancel();
+	}
+
+	protected override void OnResume()
+	{
+		if (_loggingTask.IsCompleted)
+		{
+			_cancellationTokenSource = new CancellationTokenSource();
+			_loggingTask = _processor.ProcessAsync(_cancellationTokenSource.Token);
+		}
 	}
 
 	protected override Window CreateWindow(IActivationState? activationState)

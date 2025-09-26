@@ -132,7 +132,7 @@ namespace KutokAccounting.DataProvider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("IsPositiveValue")
+                    b.Property<int>("IsIncome")
                         .HasColumnType("INTEGER")
                         .HasColumnName("is_positive_value");
 
