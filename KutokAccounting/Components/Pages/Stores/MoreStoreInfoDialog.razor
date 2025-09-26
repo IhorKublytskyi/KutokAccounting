@@ -12,22 +12,9 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton >
+        <MudButton>
             Дивитися транзакції
         </MudButton>
         <MudButton OnClick="Cancel">Назад</MudButton>
     </DialogActions>
 </MudDialog>
-
-
-
-@code {
-    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; }
-    [Parameter] public StoreDto Store { get; set; } = null!;
-
-    private void Cancel(MouseEventArgs obj)
-    {
-        MudDialog.Cancel();
-    }
-
-}

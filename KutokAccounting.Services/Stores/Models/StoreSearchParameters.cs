@@ -1,6 +1,6 @@
 namespace KutokAccounting.Services.Stores.Models;
 
-public class SearchParameters
+public class StoreSearchParameters
 {
 	public string? Address { get; set; }
 	public string? Name { get; set; }

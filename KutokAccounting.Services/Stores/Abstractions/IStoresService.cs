@@ -6,11 +6,11 @@ namespace KutokAccounting.Services.Stores.Abstractions;
 
 public interface IStoresService
 {
-	ValueTask CreateStoreAsync(StoreDto storeDto, CancellationToken ct);
+	ValueTask CreateAsync(StoreDto storeDto, CancellationToken ct);
 
-	ValueTask<PagedResult<StoreDto>> GetStoresPageAsync(Pagination pagination,
-		SearchParameters? searchParameters, 
+	ValueTask<PagedResult<StoreDto>> GetPageAsync(Pagination pagination,
+		StoreSearchParameters? searchParameters, 
 		CancellationToken ct);
-	ValueTask UpdateStoreAsync(int storeId, StoreDto updatedStoreDto, CancellationToken ct);
-	ValueTask DeleteStoreAsync(int storeId, CancellationToken ct);
+	ValueTask UpdateAsync(int storeId, StoreDto updatedStoreDto, CancellationToken ct);
+	ValueTask DeleteAsync(int storeId, CancellationToken ct);
 }

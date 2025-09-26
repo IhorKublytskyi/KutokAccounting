@@ -1,7 +1,9 @@
 using FluentValidation;
 using KutokAccounting.DataProvider;
+using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores;
 using KutokAccounting.Services.Stores.Abstractions;
+using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Services.TransactionTypes;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
@@ -12,6 +14,7 @@ using KutokAccounting.Services.Vendors.Models;
 using KutokAccounting.Services.Vendors.Validators;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Debug;
 using MudBlazor.Services;
 
 namespace KutokAccounting;
@@ -25,7 +28,8 @@ public static class MauiProgram
         builder
             .UseMauiApp<App>()
             .ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
-
+        
+        
         builder.Services.AddMudServices();
         builder.Services.AddMauiBlazorWebView();
         
@@ -44,9 +48,9 @@ public static class MauiProgram
         builder.Services.AddScoped<IValidator<VendorQueryParameters>, VendorQueryParametersValidator>();
         builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore,  new SemaphoreSlim(1, 1));
 
-        builder.Services.AddScoped<IStoreBuilder, StoreQueryBuilder>();
-        builder.Services.AddScoped<PageDtoValidator>();
-        builder.Services.AddScoped<StoreDtoValidator>();
+        builder.Services.AddScoped<IQueryBuilder, StoreQueryBuilder>();
+        builder.Services.AddScoped<IValidator<Pagination>, PaginationValidator>();
+        builder.Services.AddScoped<IValidator<StoreDto>, StoreDtoValidator>();
         builder.Services.AddScoped<IStoresRepository, StoresRepository>();
         builder.Services.AddScoped<IStoresService, StoresService>();
         
@@ -54,7 +58,6 @@ public static class MauiProgram
         
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
-        builder.Logging.AddDebug();
 #endif
 
         return builder.Build();

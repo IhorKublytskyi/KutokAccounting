@@ -1,7 +1,6 @@
 @page "/stores"
 @inject IStoresService StoresService
 @inject IDialogService DialogService
-@inject ILogger<StoresPage> Logger
 
 <MudDataGrid
     SortMode="SortMode.Multiple"
@@ -10,22 +9,20 @@
     ServerData="GetStoresAsync"
     FilterMode="DataGridFilterMode.ColumnFilterMenu">
     <ToolBarContent>
-        <MudStack Style="width: 100%;">
-            <MudText Typo="Typo.h6" Style="margin-top:6px;">Магазини</MudText>
-            <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
-                <MudTextField
-                    T="string"
-                    @bind-Value="_searchString"
-                    @bind-Value:after="() => _dataGrid.ReloadServerData()"
-                    Placeholder="Пошук"
-                    Immediate="true"
-                    Adornment="Adornment.End"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    IconSize="Size.Medium"
-                    Style="width:450px;">
-                </MudTextField>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddShopButtonClick">
-                    Додати новий магазин
+        <MudStack Justify="Justify.SpaceAround" Style="width: 100%; margin-top: 9px">
+            <MudStack Row="true" Justify="Justify.SpaceAround" AlignItems="AlignItems.Center" Style="width:100%;">
+                <MudStack Row="true" Style="width:50%;" Justify="Justify.FlexStart">
+                    <MudText Typo="Typo.h6">МАГАЗИНИ</MudText>
+                </MudStack>
+                <MudButton aria-label="search"
+                               EndIcon="@Icons.Material.Filled.Search"
+                               Variant="Variant.Filled"
+                               Color="Color.Info"
+                               Size="Size.Medium"
+                               OnClick="OnSearchButtonClick">ПОШУК</MudButton>
+                
+                <MudButton Variant="Variant.Filled" Style="max-height: 38px" Color="Color.Primary" OnClick="OnAddShopButtonClick">
+                    ДОДАТИ МАГАЗИН
                 </MudButton>
             </MudStack>
         </MudStack>
@@ -36,13 +33,13 @@
             <CellTemplate>
                 <MudStack Row>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
-                               OnClick="() => OnEditButtonClick(context.Item)">Редагувати
+                               OnClick="() => OnEditButtonClick(context.Item)">РЕДАГУВАТИ
                     </MudButton>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Error"
-                               OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
+                               OnClick="() => OnDeleteButtonClick(context.Item)">ВИДАЛИТИ
                     </MudButton>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Default"
-                               OnClick="() => OnMoreButtonClick(context.Item)">Більше
+                               OnClick="() => OnMoreButtonClick(context.Item)">БІЛЬШЕ
                     </MudButton>
                 </MudStack>
             </CellTemplate>

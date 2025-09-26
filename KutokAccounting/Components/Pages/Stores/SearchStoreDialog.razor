@@ -1,0 +1,35 @@
+<MudDialog>
+    <TitleContent>
+        Пошук
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isValid">
+            <MudTextField
+                T="string"
+                Placeholder="Назва"
+                Margin="Margin.Normal"
+                ValueChanged="OnNameChanged"/>
+            <MudTextField
+                T="string"
+                Placeholder="Aдреса"
+                Margin="Margin.Normal"
+                ValueChanged="OnAddressChanged"/>
+            <MudCheckBox
+                         Required="false"
+                         Color="Color.Primary"
+                         UncheckedColor="Color.Default"
+                         ValueChanged="OnIsOpenedChanged"
+                         T="bool">
+                Відчинений
+            </MudCheckBox>
+            <MudDatePicker Label="Дата відкриття" DateChanged="OnOpeningDateChanged"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton OnClick="Search">Пошук</MudButton>
+        
+    </DialogActions>
+</MudDialog>
+
+

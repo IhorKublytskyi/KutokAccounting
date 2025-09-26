@@ -12,35 +12,26 @@ public class StoresRepository : IStoresRepository
 {
 	private readonly KutokDbContext _dbContext;
 	private readonly SemaphoreSlim _semaphoreSlim;
-	private readonly IStoreBuilder _storeBuilder;
+	private readonly IQueryBuilder _queryBuilder;
 	private readonly ILogger<StoresRepository> _logger;
 	public StoresRepository(KutokDbContext dbContext, [FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim,
-		IStoreBuilder storeBuilder,
+		IQueryBuilder queryBuilder,
 		ILogger<StoresRepository> logger)
 	{
 		_semaphoreSlim = semaphoreSlim;
-		_storeBuilder = storeBuilder;
+		_queryBuilder = queryBuilder;
 		_logger = logger;
 		_dbContext = dbContext;
 	}
 	public async ValueTask CreateStoreAsync(Store store, CancellationToken ct)
 	{
-		var storeExists = await StoreExists(store.Id);
-		if (storeExists)
-		{
-			_logger.LogWarning("Store with {storeId} already exists}", store.Id);
-			throw new ArgumentException($"Store {store.Name} already exists");
-		}
-		
 		await _semaphoreSlim.WaitAsync(ct);
 
 		try
 		{
-			_dbContext.Stores.Add(store);
+			await _dbContext.Stores.AddAsync(store, ct);
 			await _dbContext.SaveChangesAsync(ct);
 			
-			_logger.LogInformation("New store created with following properties. Name: {storeName}, Address: {storeAddress}, Is opened: {isOpened}, Setup date: {setUpDate}"
-				, store.Name, store.Address, store.IsOpened, store.SetupDate);
 		}
 		finally
 		{
@@ -50,7 +41,7 @@ public class StoresRepository : IStoresRepository
 
 	private async ValueTask<List<Store>> GetStoresPageAsync(IQueryable<Store> stores, Pagination pagination, CancellationToken ct)
 	{
-		var startPosition = pagination.PageSize * (pagination.Page - 1);
+		var startPosition = pagination.Skip;
 		var query = stores
 			.Select(s => new Store
 			{
@@ -66,10 +57,10 @@ public class StoresRepository : IStoresRepository
 		
 		return await query.ToListAsync(ct);
 	}
-	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(Pagination pagination, SearchParameters? searchParameters, CancellationToken ct)
+	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(Pagination pagination, StoreSearchParameters? searchParameters, CancellationToken ct)
 	{
 		var getAllStoresQuery = _dbContext.Stores.AsNoTracking();
-		var query = _storeBuilder.GetQuery(getAllStoresQuery, searchParameters);
+		var query = _queryBuilder.GetQuery(getAllStoresQuery, searchParameters);
 		var stores = await GetStoresPageAsync(query, pagination, ct);
 		var count = await getAllStoresQuery.CountAsync(ct);
 		
@@ -95,7 +86,7 @@ public class StoresRepository : IStoresRepository
 			
 			if (storeExists is false)
 			{
-				_logger.LogWarning("Store with {storeId} does not exists", storeId);
+				_logger.LogError("Store with {storeId} does not exists", storeId);
 
 				throw new NullReferenceException($"Store {storeId} does not exist");
 			}
@@ -124,7 +115,7 @@ public class StoresRepository : IStoresRepository
 
 		try
 		{
-			var store = _dbContext.Stores.Find(storeId);
+			var store = await _dbContext.Stores.FindAsync(storeId);
 			
 			if (store is null)
 			{
@@ -143,11 +134,8 @@ public class StoresRepository : IStoresRepository
 
 	private async ValueTask<bool> StoreExists(int storeId)
 	{
-		
 		return await _dbContext.Stores
 			.AsNoTracking()
 			.AnyAsync(s => s.Id == storeId);
 	}
-
-	
 }

@@ -3,7 +3,7 @@ using KutokAccounting.Services.Stores.Models;
 
 namespace KutokAccounting.Services.Stores.Abstractions;
 
-public interface IStoreBuilder
+public interface IQueryBuilder
 {
-	IQueryable<Store> GetQuery(IQueryable<Store> allStoresQuery, SearchParameters? searchParameters);
+	IQueryable<Store> GetQuery(IQueryable<Store> allStoresQuery, StoreSearchParameters? searchParameters);
 }

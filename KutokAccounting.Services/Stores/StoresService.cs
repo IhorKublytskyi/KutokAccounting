@@ -1,63 +1,106 @@
+using FluentValidation;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores.Abstractions;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Extensions;
 using KutokAccounting.Services.Stores.Models;
+using Microsoft.Extensions.Logging;
 
 namespace KutokAccounting.Services.Stores;
 
 public class StoresService : IStoresService
 {
 	private readonly IStoresRepository _repository;
-	private readonly StoreDtoValidator _storeDtoValidator;
+	private readonly IValidator<StoreDto> _storeDtoValidator;
+	private readonly ILogger<StoresService> _logger;
+	private readonly IValidator<Pagination> _paginationValidator;
 	public StoresService(IStoresRepository repository,
-		StoreDtoValidator storeDtoValidator)
+		IValidator<StoreDto> storeDtoValidator,
+		ILogger<StoresService> logger,
+		IValidator<Pagination> paginationValidator)
 	{
 		_repository = repository;
 		_storeDtoValidator = storeDtoValidator;
+		_logger = logger;
+		_paginationValidator = paginationValidator;
 	}
-	
-	public async ValueTask CreateStoreAsync(StoreDto storeDto, CancellationToken ct)
+
+	public async ValueTask CreateAsync(StoreDto storeDto, CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
+		var validationResult = await _storeDtoValidator.ValidateAsync(storeDto, ct);
+
+		if (validationResult.IsValid is false)
+		{
+			_logger.LogError("Store validation failed. Errors: {Errors}", validationResult.Errors);
+		}
 
 		var storeModel = storeDto.FromDto();
 		await _repository.CreateStoreAsync(storeModel, ct);
+		
+		_logger.LogInformation("A new store with following properties was created. Name: {storeName}, Address: {storeAddress}, Is opened: {isOpened}, Setup date: {setUpDate}"
+			, storeDto.Name, storeDto.Address, storeDto.IsOpened, storeDto.SetupDate);
 	}
 
-	public async ValueTask<PagedResult<StoreDto>> GetStoresPageAsync(Pagination pagination, SearchParameters? searchParameters, CancellationToken ct)
+	public async ValueTask<PagedResult<StoreDto>> GetPageAsync(Pagination pagination,
+		StoreSearchParameters? searchParameters,
+		CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
+		var validationResult = await _paginationValidator.ValidateAsync(pagination, ct);
+
+		if (validationResult.IsValid is false)
+		{
+			_logger.LogError("Store validation failed. Errors: {Errors}", validationResult.Errors);
+		}
 		
-		PagedResult<Store> storesPagedResult = await _repository.GetFilteredPageOfStoresAsync(pagination, searchParameters, ct);
+		PagedResult<Store> storesPagedResult =
+			await _repository.GetFilteredPageOfStoresAsync(pagination, searchParameters, ct);
+		
+		_logger.LogInformation("Pages of stores were fetched");
+		
 		return new PagedResult<StoreDto>()
 		{
 			Count = storesPagedResult.Count,
 			Items = storesPagedResult.Items.Select(x => x.ToDto())
 		};
 	}
-	public async ValueTask UpdateStoreAsync(int storeId, StoreDto updatedStoreDto, CancellationToken ct)
+
+	public async ValueTask UpdateAsync(int storeId,
+		StoreDto updatedStoreDto,
+		CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
-		
+
 		var validationResult = await _storeDtoValidator.ValidateAsync(updatedStoreDto, ct);
+
 		if (validationResult.IsValid is false)
 		{
+			_logger.LogError("Failed to update store with Name: {StoreName}: {Errors}", updatedStoreDto.Name,
+				validationResult.Errors);
+
 			throw new ArgumentException("Invalid store data");
 		}
+
 		var updatedStoreModel = updatedStoreDto.FromDto();
 		await _repository.UpdateStoreAsync(storeId, updatedStoreModel, ct);
-	}
-	
-	public async ValueTask DeleteStoreAsync(int storeId, CancellationToken ct)
-	{
-        ct.ThrowIfCancellationRequested();
 		
+		_logger.LogInformation("Store with id: {StoreId} was updated", storeId);
+	}
+
+	public async ValueTask DeleteAsync(int storeId, CancellationToken ct)
+	{
+		ct.ThrowIfCancellationRequested();
+
 		if (storeId < 0)
 		{
+			_logger.LogWarning("Store with id {storeId} does not exist", storeId);
+
 			throw new ArgumentException("Invalid store id");
 		}
-		
+
 		await _repository.DeleteStoreAsync(storeId, ct);
+		_logger.LogInformation("Store with id {storeId} was deleted", storeId);
+
 	}
 }

@@ -2,7 +2,6 @@
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Models;
-using Microsoft.Extensions.Logging;
 using MudBlazor;
 
 namespace KutokAccounting.Components.Pages.Stores;
@@ -11,7 +10,7 @@ namespace KutokAccounting.Components.Pages.Stores;
 partial class StoresPage
 {
 	private MudDataGrid<StoreDto> _dataGrid;
-    private string _searchString = String.Empty;
+    private StoreSearchParameters? _searchStoreParameters;
     private readonly DialogOptions _dialogOptions = new()
     {
         FullWidth = true,
@@ -22,38 +21,34 @@ partial class StoresPage
     
     public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
     {
-        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-
-        var pagination = new Pagination
-        {
-            Page = state.Page + 1,
-            PageSize = state.PageSize
-        };
-
         var gridData = new GridData<StoreDto>
         {
             Items = new List<StoreDto>(),
             TotalItems = 0
         };
-        
-        //TODO: search for specific fields
-        var searchParameters = new SearchParameters
-        {
-            Address = _searchString,
-            Name = _searchString,
-        };
         try
         {
-            //TODO: create cts in each op
-            var storesPage = await StoresService.GetStoresPageAsync(pagination, searchParameters, tokenSource.Token);
+            using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
+            var pagination = new Pagination
+            {
+                Page = state.Page + 1,
+                PageSize = state.PageSize
+            };
+
             
+            var storesPage = await StoresService.GetPageAsync(pagination, _searchStoreParameters, tokenSource.Token);
+
             gridData.Items = storesPage.Items;
             gridData.TotalItems = storesPage.Count;
         }
         catch (Exception e)
         {
             await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
-            Logger.LogError($"Exception occured while retreiving stores from db. Exception message: {e.Message}");
+        }
+        finally
+        {
+            StateHasChanged();
         }
         
         return gridData;
@@ -70,15 +65,23 @@ partial class StoresPage
 
     public async Task OnEditButtonClick(StoreDto? storeDto)
     {
-        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+        try
+        {
+            using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-        var parameters = new DialogParameters<EditStoreDialog> { { d => d.Store, storeDto } };
+            var parameters = new DialogParameters<EditStoreDialog> { { d => d.Store, storeDto } };
         
-        var dialog = await DialogService.ShowAsync<EditStoreDialog>("Редагувати данні магазину", parameters, _dialogOptions);
-        var dialogResult = await dialog.Result;
+            var dialog = await DialogService.ShowAsync<EditStoreDialog>("Редагувати данні магазину", parameters, _dialogOptions);
+            var dialogResult = await dialog.Result;
         
-        if (_dataGrid != null && !dialogResult.Canceled)
-            await _dataGrid.ReloadServerData();
+            if (_dataGrid != null && !dialogResult.Canceled)
+                await _dataGrid.ReloadServerData();
+        }
+        catch (Exception e)
+        {
+            await DialogService.ShowMessageBox("Exception", $"{e.Message}");
+        }
+        
     }
 
     private async Task OnDeleteButtonClick(StoreDto? storeDto)
@@ -97,20 +100,34 @@ partial class StoresPage
 
         try
         {
-            await StoresService.DeleteStoreAsync(storeDto.Id, tokenSource.Token);
+            await StoresService.DeleteAsync(storeDto.Id, tokenSource.Token);
             
             if (_dataGrid != null)
                 await _dataGrid.ReloadServerData();
         }
         catch (Exception e)
         {
-            Logger.LogError($"Exception occured while deleting store. Messgae: {e.Message}");
             await DialogService.ShowMessageBox("Виникла помилка", $"Текст помилки: {e}");
         }
     }
     private async Task OnMoreButtonClick(StoreDto storeDto)
     {
         var parameters = new DialogParameters<EditStoreDialog> { { d => d.Store, storeDto } };
-        await DialogService.ShowAsync<MoreStoreInfoDialog>("Більше інформації про магазин", parameters);
+        await DialogService.ShowAsync<MoreStoreInfoDialog>("Більше інформації про магазин", parameters, _dialogOptions);
+    }
+
+    private async Task OnSearchButtonClick()
+    {
+        var dialog = await DialogService.ShowAsync<SearchStoreDialog>("Пошук", _dialogOptions);
+        var dialogResult = await dialog.Result;
+        
+        if (dialogResult!.Data != null && dialogResult.Data is StoreSearchParameters storeProperties)
+        {
+            await DialogService.ShowMessageBox("reloaded", $"{storeProperties.Name}, {storeProperties.Address}, {storeProperties.SetupDate}, {storeProperties.IsOpened}");
+            _searchStoreParameters = storeProperties;
+        }
+        
+        if (_dataGrid != null && !dialogResult.Canceled)
+            await _dataGrid.ReloadServerData();
     }
 }
