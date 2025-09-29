@@ -22,7 +22,7 @@ public partial class EditStoreDialog
 		{
 			if (value is null)
 			{
-				DialogService.ShowMessageBox("Обов'язкові данні не обрані!", $"Оберіть дату відкриття магазину");
+				DialogService.ShowMessageBox("Обов'язкові данні не обрані!", "Оберіть дату відкриття магазину");
 			}
 			else
 			{
