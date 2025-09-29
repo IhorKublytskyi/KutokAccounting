@@ -8,18 +8,10 @@ namespace KutokAccounting.Components.Pages.Stores;
 
 public partial class SearchStoreDialog
 {
-	private string? _storeNameString;
-	private string? _storeAddressString;
-	private bool? _isOpened;
-	private DateTime? _openingDate;
 	private bool _isValid;
-	
-	private bool _isNameChanged = false;
-	private bool _isAddressChanged = false;
-	private bool _isOpenedCheckboxChanged = false;
-	private bool _isSetupDateChanged = false;
+	[Parameter]
+	public StoreSearchParameters StoreSearchParameters { get; set; }
 
-	
 	[CascadingParameter]
 	public IMudDialogInstance MudDialog { get; set; }
 	
@@ -30,52 +22,48 @@ public partial class SearchStoreDialog
 
 	private void Search()
 	{
-		StoreSearchParameters storeToSearch = new();
+		StoreSearchParameters storeSearchParameters = new();
 
-		if (string.IsNullOrEmpty(_storeNameString) is false && _isNameChanged)
+		if (string.IsNullOrEmpty(StoreSearchParameters?.Name) is false)
 		{
-			storeToSearch.Name = _storeNameString;
+			storeSearchParameters.Name = StoreSearchParameters.Name;
 		}
 
-		if (string.IsNullOrEmpty(_storeAddressString) is false && _isAddressChanged)
+		if (string.IsNullOrEmpty(StoreSearchParameters?.Address) is false)
 		{
-			storeToSearch.Address = _storeAddressString;
+			storeSearchParameters.Address = StoreSearchParameters.Address;
 		}
 
-		if (_isOpened is not null && _isOpenedCheckboxChanged)
+		if (StoreSearchParameters?.IsOpened is not null)
 		{
-			storeToSearch.IsOpened = _isOpened.Value;
+			storeSearchParameters.IsOpened = StoreSearchParameters.IsOpened.Value;
 		}
 
-		if (_openingDate is not null && _isSetupDateChanged)
+		if (StoreSearchParameters?.SetupDate is not null)
 		{
-			storeToSearch.SetupDate = _openingDate.Value;
+			storeSearchParameters.SetupDate = StoreSearchParameters.SetupDate.Value;
 		}
 		
-		MudDialog.Close(DialogResult.Ok(storeToSearch));
+		MudDialog.Close(DialogResult.Ok(storeSearchParameters));
 	}
 
 	private void OnNameChanged(string name)
 	{
-		_storeNameString = name;
-		_isNameChanged = true;
+		StoreSearchParameters.Name = name;
 	}
 
 	private void OnAddressChanged(string address)
 	{
-		_storeAddressString = address;
-		_isAddressChanged = true;
+		StoreSearchParameters.Address = address;
 	}
 
 	private void OnIsOpenedChanged(bool isOpened)
 	{
-		_isOpened = isOpened;
-		_isOpenedCheckboxChanged = true;
+		StoreSearchParameters.IsOpened = isOpened;
 	}
 
 	private void OnOpeningDateChanged(DateTime? setupDate)
 	{
-		_openingDate = setupDate;
-		_isSetupDateChanged = true;
+		StoreSearchParameters.SetupDate = setupDate.Value;
 	}
 }

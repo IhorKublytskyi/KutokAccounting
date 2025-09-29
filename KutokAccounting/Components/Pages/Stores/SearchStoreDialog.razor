@@ -6,23 +6,28 @@
         <MudForm @bind-IsValid="_isValid">
             <MudTextField
                 T="string"
-                Placeholder="Назва"
+                Label="Назва"
+                Value="@StoreSearchParameters?.Name"
                 Margin="Margin.Normal"
                 ValueChanged="OnNameChanged"/>
             <MudTextField
                 T="string"
-                Placeholder="Aдреса"
+                Label="Aдреса"
+                Value="@StoreSearchParameters?.Address"
                 Margin="Margin.Normal"
                 ValueChanged="OnAddressChanged"/>
             <MudCheckBox
-                         Required="false"
+                         Value="@StoreSearchParameters.IsOpened.GetValueOrDefault()"
                          Color="Color.Primary"
                          UncheckedColor="Color.Default"
                          ValueChanged="OnIsOpenedChanged"
                          T="bool">
                 Відчинений
             </MudCheckBox>
-            <MudDatePicker Label="Дата відкриття" DateChanged="OnOpeningDateChanged"/>
+            <MudDatePicker 
+                Date="@StoreSearchParameters.SetupDate"
+                Label="Дата відкриття" 
+                DateChanged="OnOpeningDateChanged"/>
         </MudForm>
     </DialogContent>
     <DialogActions>

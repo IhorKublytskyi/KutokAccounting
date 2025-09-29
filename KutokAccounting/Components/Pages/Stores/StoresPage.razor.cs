@@ -10,7 +10,7 @@ namespace KutokAccounting.Components.Pages.Stores;
 partial class StoresPage
 {
 	private MudDataGrid<StoreDto> _dataGrid;
-    private StoreSearchParameters? _searchStoreParameters;
+    private StoreSearchParameters? _searchStoreParameters = new();
     private readonly DialogOptions _dialogOptions = new()
     {
         FullWidth = true,
@@ -69,7 +69,10 @@ partial class StoresPage
         {
             using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-            var parameters = new DialogParameters<EditStoreDialog> { { d => d.Store, storeDto } };
+            var parameters = new DialogParameters<EditStoreDialog>
+            {
+                { d => d.Store, storeDto }
+            };
         
             var dialog = await DialogService.ShowAsync<EditStoreDialog>("Редагувати данні магазину", parameters, _dialogOptions);
             var dialogResult = await dialog.Result;
@@ -118,7 +121,9 @@ partial class StoresPage
 
     private async Task OnSearchButtonClick()
     {
-        var dialog = await DialogService.ShowAsync<SearchStoreDialog>("Пошук", _dialogOptions);
+        var dialogParameters = new DialogParameters<SearchStoreDialog> { {d => d.StoreSearchParameters, _searchStoreParameters} };
+        
+        var dialog = await DialogService.ShowAsync<SearchStoreDialog>("Пошук", dialogParameters, _dialogOptions);
         var dialogResult = await dialog.Result;
         
         if (dialogResult!.Data != null && dialogResult.Data is StoreSearchParameters storeProperties)
