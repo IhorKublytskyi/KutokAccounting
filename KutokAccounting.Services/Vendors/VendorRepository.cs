@@ -35,7 +35,9 @@ public sealed class VendorRepository : IVendorRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogInformation(e, "Failed to create vendor with Name: {VendorName}", vendor.Name);
+			_logger.LogError(e, "Failed to create vendor with Name: {VendorName}", vendor.Name);
+
+			throw;
 		}
 		finally
 		{
@@ -91,7 +93,7 @@ public sealed class VendorRepository : IVendorRepository
 		}
 	}
 
-	public async ValueTask<Vendor?> GetByIdAsync(int id, CancellationToken cancellationToken)
+	public async ValueTask<Vendor> GetByIdAsync(int id, CancellationToken cancellationToken)
 	{
 		try
 		{
@@ -99,7 +101,7 @@ public sealed class VendorRepository : IVendorRepository
 				.AsNoTracking()
 				.FirstOrDefaultAsync(v => v.Id == id, cancellationToken);
 
-			return vendor;
+			return vendor ?? throw new Exception("Vendor not found");
 		}
 		catch (Exception e)
 		{
@@ -122,6 +124,8 @@ public sealed class VendorRepository : IVendorRepository
 		catch (Exception e)
 		{
 			_logger.LogError(e, "Failed to delete vendor with Id: {VendorId}", id);
+
+			throw;
 		}
 		finally
 		{
@@ -145,6 +149,8 @@ public sealed class VendorRepository : IVendorRepository
 		{
 			_logger.LogError(e, "Failed to update vendor with Id: {VendorId}, Name: {VendorName}", vendor.Id,
 				vendor.Name);
+
+			throw;
 		}
 		finally
 		{

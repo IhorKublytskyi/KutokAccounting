@@ -14,7 +14,6 @@ public sealed class VendorQueryParametersValidator : AbstractValidator<VendorQue
 			.LessThanOrEqualTo(100);
 
 		RuleFor(p => p.Pagination.PageSize)
-			.GreaterThan(0)
-			.LessThanOrEqualTo(10);
+			.GreaterThanOrEqualTo(10);
 	}
 }

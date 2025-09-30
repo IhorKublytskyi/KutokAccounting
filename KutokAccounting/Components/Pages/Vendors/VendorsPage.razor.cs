@@ -91,7 +91,7 @@ public partial class VendorsPage
 
 		DialogResult? result = await dialog.Result;
 
-		if (_dataGrid != null && !result.Canceled)
+		if (_dataGrid is not null && result.Canceled is false)
 		{
 			await _dataGrid.ReloadServerData();
 		}
@@ -112,7 +112,7 @@ public partial class VendorsPage
 
 		DialogResult? result = await dialog.Result;
 
-		if (_dataGrid != null && !result.Canceled)
+		if (_dataGrid is not null && result.Canceled is false)
 		{
 			await _dataGrid.ReloadServerData();
 		}

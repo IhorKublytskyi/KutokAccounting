@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 
 namespace KutokAccounting.Logging;
 
-[ProviderAlias("FileLogger")]
 public sealed class FileLoggerProvider : ILoggerProvider
 {
 	private readonly ConcurrentDictionary<string, FileLoggerSink> _loggers = new(StringComparer.OrdinalIgnoreCase);

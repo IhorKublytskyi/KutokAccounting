@@ -103,7 +103,7 @@ public partial class TransactionTypesPage
 
 		await TransactionTypeService.DeleteAsync(transactionType.Id, tokenSource.Token);
 
-		if (_dataGrid != null)
+		if (_dataGrid is not null)
 		{
 			await _dataGrid.ReloadServerData();
 		}
@@ -131,7 +131,7 @@ public partial class TransactionTypesPage
 
 		DialogResult? result = await dialog.Result;
 
-		if (_dataGrid != null && !result.Canceled)
+		if (_dataGrid is not null && result.Canceled is false)
 		{
 			await _dataGrid.ReloadServerData();
 		}
@@ -152,7 +152,7 @@ public partial class TransactionTypesPage
 
 		DialogResult? result = await dialog.Result;
 
-		if (_dataGrid != null && !result.Canceled)
+		if (_dataGrid is not null && result.Canceled is false)
 		{
 			await _dataGrid.ReloadServerData();
 		}
