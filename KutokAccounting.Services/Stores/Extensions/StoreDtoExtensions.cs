@@ -5,7 +5,7 @@ namespace KutokAccounting.Services.Stores.Extensions;
 
 public static class StoreDtoExtensions
 {
-	public static Store FromDto(this StoreDto dto)
+	public static Store FromDtoToModel(this StoreDto dto)
 	{
 		return new Store
 		{
@@ -15,7 +15,7 @@ public static class StoreDtoExtensions
 			Address = dto.Address,
 		};
 	}
-
+	//box struct -> class
 	public static StoreDto ToDto(this Store store)
 	{
 		return new()

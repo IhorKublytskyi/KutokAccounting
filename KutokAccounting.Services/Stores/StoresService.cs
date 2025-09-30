@@ -35,11 +35,11 @@ public class StoresService : IStoresService
 			_logger.LogError("Store validation failed. Errors: {Errors}", validationResult.Errors);
 		}
 
-		var storeModel = storeDto.FromDto();
+		var storeModel = storeDto.FromDtoToModel();
 		await _repository.CreateStoreAsync(storeModel, ct);
 		
 		_logger.LogInformation("A new store with following properties was created. Name: {storeName}, Address: {storeAddress}, Is opened: {isOpened}, Setup date: {setUpDate}"
-			, storeDto.Name, storeDto.Address, storeDto.IsOpened, storeDto.SetupDate);
+			, storeDto.Name, storeDto.Address, storeDto.IsOpened.ToString(), storeDto.SetupDate.ToString());
 	}
 
 	public async ValueTask<PagedResult<StoreDto>> GetPageAsync(Pagination pagination,
@@ -82,7 +82,7 @@ public class StoresService : IStoresService
 			throw new ArgumentException("Invalid store data");
 		}
 
-		var updatedStoreModel = updatedStoreDto.FromDto();
+		var updatedStoreModel = updatedStoreDto.FromDtoToModel();
 		await _repository.UpdateStoreAsync(storeId, updatedStoreModel, ct);
 		
 		_logger.LogInformation("Store with id: {StoreId} was updated", storeId);

@@ -8,7 +8,7 @@ public interface IStoresService
 {
 	ValueTask CreateAsync(StoreDto storeDto, CancellationToken ct);
 
-	ValueTask<PagedResult<StoreDto>> GetPageAsync(Pagination pagination,
+	ValueTask<PagedResult<StoreDto>> GetPageAsync(Pagination pagination, //pagination + searchParameters
 		StoreSearchParameters? searchParameters, 
 		CancellationToken ct);
 	ValueTask UpdateAsync(int storeId, StoreDto updatedStoreDto, CancellationToken ct);

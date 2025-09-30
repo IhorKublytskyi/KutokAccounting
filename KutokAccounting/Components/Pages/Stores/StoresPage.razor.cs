@@ -16,7 +16,7 @@ partial class StoresPage
 	};
 
 	private MudDataGrid<StoreDto> _dataGrid;
-	private StoreSearchParameters? _searchStoreParameters = new();
+	private StoreSearchParameters _searchStoreParameters = new();
 
 	public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
 	{

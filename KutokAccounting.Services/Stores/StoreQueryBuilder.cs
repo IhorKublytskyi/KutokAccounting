@@ -17,12 +17,12 @@ public class StoreQueryBuilder : IQueryBuilder
 
 		IQueryable<Store> filteredQuery = allStoresQuery;
 
-		if (searchParameters.Name != null)
+		if (string.IsNullOrEmpty(searchParameters.Name) is false)
 		{
 			filteredQuery = filteredQuery.Where(s => EF.Functions.Like(s.Name, $"%{searchParameters.Name}%"));
 		}
 
-		if (searchParameters.Address != null)
+		if (string.IsNullOrEmpty(searchParameters.Address) is false)
 		{
 			filteredQuery = filteredQuery.Where(s => EF.Functions.Like(s.Address, $"%{searchParameters.Address}%"));
 		}
@@ -31,7 +31,7 @@ public class StoreQueryBuilder : IQueryBuilder
 		{
 			DateTime utcDateTimeSearched = searchParameters.SetupDate.Value.ToUniversalTime();
 			DateTimeRange dateTimeRange = DateTimeHelper.GetHourRange(utcDateTimeSearched);
-
+			
 			filteredQuery = filteredQuery.Where(s =>
 				s.SetupDate >= dateTimeRange.StartOfRange && s.SetupDate <= dateTimeRange.EndOfRange);
 		}

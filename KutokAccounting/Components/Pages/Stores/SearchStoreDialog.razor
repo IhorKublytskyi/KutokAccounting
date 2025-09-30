@@ -32,6 +32,10 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton Disabled=" string.IsNullOrEmpty(StoreSearchParameters.Name) &&
+                   string.IsNullOrEmpty(StoreSearchParameters.Address) &&
+                   StoreSearchParameters.SetupDate == null"
+                   OnClick="ResetSearchParameters">Очистити</MudButton>
         <MudButton OnClick="Search">Пошук</MudButton>
         
     </DialogActions>

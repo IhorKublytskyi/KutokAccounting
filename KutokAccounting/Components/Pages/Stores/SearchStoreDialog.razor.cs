@@ -64,6 +64,14 @@ public partial class SearchStoreDialog
 
 	private void OnOpeningDateChanged(DateTime? setupDate)
 	{
-		StoreSearchParameters.SetupDate = setupDate.Value;
+		StoreSearchParameters.SetupDate = setupDate?.Date;
+	}
+
+	private void ResetSearchParameters()
+	{
+		StoreSearchParameters.Name = string.Empty;
+		StoreSearchParameters.Address = string.Empty;
+		StoreSearchParameters.SetupDate = null;
+		StoreSearchParameters.IsOpened = null;
 	}
 }
