@@ -30,14 +30,14 @@ partial class StoresPage
 		{
 			using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-			Pagination pagination = new Pagination
+			_searchStoreParameters.Pagination = new Pagination
 			{
 				Page = state.Page + 1,
 				PageSize = state.PageSize
 			};
 
 			PagedResult<StoreDto> storesPage =
-				await StoresService.GetPageAsync(pagination, _searchStoreParameters, tokenSource.Token);
+				await StoresService.GetPageAsync(_searchStoreParameters, tokenSource.Token);
 
 			gridData.Items = storesPage.Items;
 			gridData.TotalItems = storesPage.Count;

@@ -39,15 +39,14 @@ public class StoresService : IStoresService
 		await _repository.CreateStoreAsync(storeModel, ct);
 		
 		_logger.LogInformation("A new store with following properties was created. Name: {storeName}, Address: {storeAddress}, Is opened: {isOpened}, Setup date: {setUpDate}"
-			, storeDto.Name, storeDto.Address, storeDto.IsOpened.ToString(), storeDto.SetupDate.ToString());
+			, storeDto.Name, storeDto.Address, storeDto.IsOpened.ToString(), storeDto.SetupDate.ToString("mm/dd/yyyy"));
 	}
 
-	public async ValueTask<PagedResult<StoreDto>> GetPageAsync(Pagination pagination,
-		StoreSearchParameters? searchParameters,
+	public async ValueTask<PagedResult<StoreDto>> GetPageAsync(StoreSearchParameters searchParameters,
 		CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
-		var validationResult = await _paginationValidator.ValidateAsync(pagination, ct);
+		var validationResult = await _paginationValidator.ValidateAsync(searchParameters.Pagination, ct);
 
 		if (validationResult.IsValid is false)
 		{
@@ -55,14 +54,14 @@ public class StoresService : IStoresService
 		}
 		
 		PagedResult<Store> storesPagedResult =
-			await _repository.GetFilteredPageOfStoresAsync(pagination, searchParameters, ct);
+			await _repository.GetFilteredPageOfStoresAsync(searchParameters, ct);
 		
 		_logger.LogInformation("Pages of stores were fetched");
 		
 		return new PagedResult<StoreDto>()
 		{
 			Count = storesPagedResult.Count,
-			Items = storesPagedResult.Items.Select(x => x.ToDto())
+			Items = storesPagedResult.Items.Select(x => x.ModelToDto())
 		};
 	}
 

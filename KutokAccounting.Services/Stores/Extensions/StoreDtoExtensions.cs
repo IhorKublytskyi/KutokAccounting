@@ -15,8 +15,7 @@ public static class StoreDtoExtensions
 			Address = dto.Address,
 		};
 	}
-	//box struct -> class
-	public static StoreDto ToDto(this Store store)
+	public static StoreDto ModelToDto(this Store store)
 	{
 		return new()
 		{

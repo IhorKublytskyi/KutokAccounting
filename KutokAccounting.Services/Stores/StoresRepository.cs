@@ -42,13 +42,12 @@ public class StoresRepository : IStoresRepository
 		}
 	}
 
-	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(Pagination pagination,
-		StoreSearchParameters? searchParameters,
+	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(StoreSearchParameters searchParameters,
 		CancellationToken ct)
 	{
 		IQueryable<Store> getAllStoresQuery = _dbContext.Stores.AsNoTracking();
-		IQueryable<Store> query = _queryBuilder.GetQuery(getAllStoresQuery, searchParameters);
-		List<Store> stores = await GetStoresPageAsync(query, pagination, ct);
+		IQueryable<Store> query = _queryBuilder.GetStoresFilteredQuery(getAllStoresQuery, searchParameters);
+		List<Store> stores = await GetStoresPageAsync(query, searchParameters.Pagination, ct);
 		int filteredStoresCount = await query.CountAsync(ct);
 		
 		return new PagedResult<Store>
@@ -101,8 +100,6 @@ public class StoresRepository : IStoresRepository
 		Pagination pagination,
 		CancellationToken ct)
 	{
-		int startPosition = pagination.Skip;
-
 		IOrderedQueryable<Store> query = stores
 			.Select(s => new Store
 			{
@@ -112,7 +109,7 @@ public class StoresRepository : IStoresRepository
 				SetupDate = s.SetupDate,
 				Address = s.Address
 			})
-			.Skip(startPosition)
+			.Skip(pagination.Skip)
 			.Take(pagination.PageSize)
 			.OrderByDescending(s => s.SetupDate);
 
