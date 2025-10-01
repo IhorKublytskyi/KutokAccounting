@@ -1,6 +1,4 @@
-﻿
-
-// To learn more about WinUI, the WinUI project structure,
+﻿// To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
 
 namespace KutokAccounting.WinUI;
@@ -15,12 +13,12 @@ public partial class App : MauiWinUIApplication
 	///     executed, and as such is the logical equivalent of main() or WinMain().
 	/// </summary>
 	public App()
-    {
-        InitializeComponent();
-    }
+	{
+		InitializeComponent();
+	}
 
-    protected override MauiApp CreateMauiApp()
-    {
-        return MauiProgram.CreateMauiApp();
-    }
+	protected override MauiApp CreateMauiApp()
+	{
+		return MauiProgram.CreateMauiApp();
+	}
 }

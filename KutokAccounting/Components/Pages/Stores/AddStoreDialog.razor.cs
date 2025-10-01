@@ -7,14 +7,14 @@ namespace KutokAccounting.Components.Pages.Stores;
 
 public partial class AddStoreDialog
 {
-	[CascadingParameter]
-	public IMudDialogInstance MudDialog { get; set; }
-
 	private bool _isValid = true;
-	private string _storeName = String.Empty;
+	private string _storeName = string.Empty;
 	private DateTime? _openingDate = DateTime.Now;
 	private bool _isOpened = true;
 	private string? _storeAddress;
+
+	[CascadingParameter]
+	public IMudDialogInstance MudDialog { get; set; }
 
 	private void Cancel()
 	{

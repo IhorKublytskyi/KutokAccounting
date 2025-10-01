@@ -49,7 +49,7 @@ public class StoresRepository : IStoresRepository
 		IQueryable<Store> query = _queryBuilder.GetStoresFilteredQuery(getAllStoresQuery, searchParameters);
 		List<Store> stores = await GetStoresPageAsync(query, searchParameters.Pagination, ct);
 		int filteredStoresCount = await query.CountAsync(ct);
-		
+
 		return new PagedResult<Store>
 		{
 			Items = stores,

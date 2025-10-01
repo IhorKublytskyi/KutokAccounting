@@ -9,7 +9,7 @@ public class DateTimeHelper
 		DateOnly today = DateOnly.FromDateTime(dateTime);
 		DateTime start = today.ToDateTime(TimeOnly.MinValue);
 		DateTime end = today.ToDateTime(TimeOnly.MaxValue);
-	
+
 		return new DateTimeRange(start, end);
 	}
 }

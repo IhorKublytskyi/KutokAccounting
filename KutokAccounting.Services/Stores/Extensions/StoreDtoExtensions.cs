@@ -12,18 +12,19 @@ public static class StoreDtoExtensions
 			Name = dto.Name,
 			IsOpened = dto.IsOpened,
 			SetupDate = dto.SetupDate,
-			Address = dto.Address,
+			Address = dto.Address
 		};
 	}
+
 	public static StoreDto ModelToDto(this Store store)
 	{
-		return new()
+		return new StoreDto
 		{
 			Id = store.Id,
 			Name = store.Name,
 			IsOpened = store.IsOpened,
 			SetupDate = store.SetupDate,
-			Address = store.Address,
+			Address = store.Address
 		};
 	}
 }

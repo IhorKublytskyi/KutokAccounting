@@ -15,12 +15,14 @@
                     <MudText Typo="Typo.h6">МАГАЗИНИ</MudText>
                 </MudStack>
                 <MudButton aria-label="search"
-                               EndIcon="@Icons.Material.Filled.Search"
-                               Variant="Variant.Filled"
-                               Color="Color.Info"
-                               Size="Size.Medium"
-                               OnClick="OnSearchButtonClick">ПОШУК</MudButton>
-                
+                           EndIcon="@Icons.Material.Filled.Search"
+                           Variant="Variant.Filled"
+                           Color="Color.Info"
+                           Size="Size.Medium"
+                           OnClick="OnSearchButtonClick">
+                    ПОШУК
+                </MudButton>
+
                 <MudButton Variant="Variant.Filled" Style="max-height: 38px" Color="Color.Primary" OnClick="OnAddShopButtonClick">
                     ДОДАТИ МАГАЗИН
                 </MudButton>
@@ -28,18 +30,21 @@
         </MudStack>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="s => s.Name" Title="Назва" Sortable="true" />
+        <PropertyColumn Property="s => s.Name" Title="Назва" Sortable="true"/>
         <TemplateColumn CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudStack Row>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
-                               OnClick="() => OnEditButtonClick(context.Item)">РЕДАГУВАТИ
+                               OnClick="() => OnEditButtonClick(context.Item)">
+                        РЕДАГУВАТИ
                     </MudButton>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Error"
-                               OnClick="() => OnDeleteButtonClick(context.Item)">ВИДАЛИТИ
+                               OnClick="() => OnDeleteButtonClick(context.Item)">
+                        ВИДАЛИТИ
                     </MudButton>
                     <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Default"
-                               OnClick="() => OnMoreButtonClick(context.Item)">БІЛЬШЕ
+                               OnClick="() => OnMoreButtonClick(context.Item)">
+                        БІЛЬШЕ
                     </MudButton>
                 </MudStack>
             </CellTemplate>

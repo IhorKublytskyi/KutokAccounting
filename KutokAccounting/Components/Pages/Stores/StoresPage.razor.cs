@@ -20,7 +20,7 @@ partial class StoresPage
 
 	public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
 	{
-		GridData<StoreDto> gridData = new GridData<StoreDto>
+		GridData<StoreDto> gridData = new()
 		{
 			Items = new List<StoreDto>(),
 			TotalItems = 0
@@ -71,7 +71,7 @@ partial class StoresPage
 		{
 			using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-			DialogParameters<EditStoreDialog> parameters = new DialogParameters<EditStoreDialog>
+			DialogParameters<EditStoreDialog> parameters = new()
 			{
 				{
 					d => d.Store, storeDto
@@ -126,7 +126,7 @@ partial class StoresPage
 
 	private async Task OnMoreButtonClick(StoreDto storeDto)
 	{
-		DialogParameters<EditStoreDialog> parameters = new DialogParameters<EditStoreDialog>
+		DialogParameters<EditStoreDialog> parameters = new()
 		{
 			{
 				d => d.Store, storeDto
@@ -138,7 +138,7 @@ partial class StoresPage
 
 	private async Task OnSearchButtonClick()
 	{
-		DialogParameters<SearchStoreDialog> dialogParameters = new DialogParameters<SearchStoreDialog>
+		DialogParameters<SearchStoreDialog> dialogParameters = new()
 		{
 			{
 				d => d.StoreSearchParameters, _searchStoreParameters

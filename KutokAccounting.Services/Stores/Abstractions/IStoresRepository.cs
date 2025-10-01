@@ -6,10 +6,14 @@ namespace KutokAccounting.Services.Stores.Abstractions;
 public interface IStoresRepository
 {
 	ValueTask CreateStoreAsync(Store store, CancellationToken ct);
+
 	ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(
 		StoreSearchParameters searchParameters,
 		CancellationToken ct);
-	ValueTask UpdateStoreAsync(int storeId, Store updatedStore, CancellationToken ct);
+
+	ValueTask UpdateStoreAsync(int storeId,
+		Store updatedStore,
+		CancellationToken ct);
+
 	ValueTask DeleteStoreAsync(int storeId, CancellationToken ct);
-	
 }
