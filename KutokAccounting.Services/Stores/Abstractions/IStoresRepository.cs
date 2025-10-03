@@ -8,7 +8,7 @@ public interface IStoresRepository
 	ValueTask CreateStoreAsync(Store store, CancellationToken ct);
 
 	ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(
-		StoreSearchParameters searchParameters,
+		StoreQueryParameters queryParameters,
 		CancellationToken ct);
 
 	ValueTask UpdateStoreAsync(int storeId,

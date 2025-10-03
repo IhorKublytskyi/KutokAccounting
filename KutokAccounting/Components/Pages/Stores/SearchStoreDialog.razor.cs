@@ -9,7 +9,7 @@ public partial class SearchStoreDialog
 	private bool _isValid;
 
 	[Parameter]
-	public StoreSearchParameters StoreSearchParameters { get; set; }
+	public StoreQueryParameters StoreQueryParameters { get; set; }
 
 	[CascadingParameter]
 	public IMudDialogInstance MudDialog { get; set; }
@@ -21,57 +21,57 @@ public partial class SearchStoreDialog
 
 	private void Search()
 	{
-		StoreSearchParameters storeSearchParameters = new();
+		StoreQueryParameters storeQueryParameters = new();
 
-		if (string.IsNullOrEmpty(StoreSearchParameters?.Name) is false)
+		if (string.IsNullOrEmpty(StoreQueryParameters?.Name) is false)
 		{
-			storeSearchParameters.Name = StoreSearchParameters.Name;
+			storeQueryParameters.Name = StoreQueryParameters.Name;
 		}
 
-		if (string.IsNullOrEmpty(StoreSearchParameters?.Address) is false)
+		if (string.IsNullOrEmpty(StoreQueryParameters?.Address) is false)
 		{
-			storeSearchParameters.Address = StoreSearchParameters.Address;
+			storeQueryParameters.Address = StoreQueryParameters.Address;
 		}
 
-		if (StoreSearchParameters?.IsOpened is not null)
+		if (StoreQueryParameters?.IsOpened is not null)
 		{
-			storeSearchParameters.IsOpened = StoreSearchParameters.IsOpened.Value;
+			storeQueryParameters.IsOpened = StoreQueryParameters.IsOpened.Value;
 		}
 
-		if (StoreSearchParameters?.SetupDate is not null)
+		if (StoreQueryParameters?.SetupDate is not null)
 		{
-			storeSearchParameters.SetupDate = StoreSearchParameters.SetupDate.Value;
+			storeQueryParameters.SetupDate = StoreQueryParameters.SetupDate.Value;
 		}
 
-		MudDialog.Close(DialogResult.Ok(storeSearchParameters));
+		MudDialog.Close(DialogResult.Ok(storeQueryParameters));
 	}
 
 	private void OnNameChanged(string name)
 	{
-		StoreSearchParameters.Name = name;
+		StoreQueryParameters.Name = name;
 	}
 
 	private void OnAddressChanged(string address)
 	{
-		StoreSearchParameters.Address = address;
+		StoreQueryParameters.Address = address;
 	}
 
 	private void OnIsOpenedChanged(bool isOpened)
 	{
-		StoreSearchParameters.IsOpened = isOpened;
+		StoreQueryParameters.IsOpened = isOpened;
 	}
 
 	private void OnOpeningDateChanged(DateTime? setupDate)
 	{
-		StoreSearchParameters.SetupDate = setupDate?.Date;
+		StoreQueryParameters.SetupDate = setupDate?.Date;
 	}
 
 	private void ResetParametersAndSearch()
 	{
-		StoreSearchParameters.Name = string.Empty;
-		StoreSearchParameters.Address = string.Empty;
-		StoreSearchParameters.SetupDate = null;
-		StoreSearchParameters.IsOpened = null;
+		StoreQueryParameters.Name = string.Empty;
+		StoreQueryParameters.Address = string.Empty;
+		StoreQueryParameters.SetupDate = null;
+		StoreQueryParameters.IsOpened = null;
 
 		Search();
 	}

@@ -43,12 +43,12 @@ public class StoresRepository : IStoresRepository
 	}
 
 	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(
-		StoreSearchParameters searchParameters,
+		StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
 		IQueryable<Store> getAllStoresQuery = _dbContext.Stores.AsNoTracking();
-		IQueryable<Store> storesQuery = _queryBuilder.FilterStoresByParametersQuery(getAllStoresQuery, searchParameters);
-		List<Store> pagedStores = await GetStoresPageAsync(storesQuery, searchParameters.Pagination, ct);
+		IQueryable<Store> storesQuery = _queryBuilder.FilterStoresByParametersQuery(getAllStoresQuery, queryParameters);
+		List<Store> pagedStores = await GetStoresPageAsync(storesQuery, queryParameters.Pagination, ct);
 		int filteredStoresCount = await storesQuery.CountAsync(ct);
 
 		return new PagedResult<Store>

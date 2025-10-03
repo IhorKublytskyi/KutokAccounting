@@ -5,5 +5,5 @@ namespace KutokAccounting.Services.Stores.Abstractions;
 
 public interface IQueryBuilder
 {
-	IQueryable<Store> FilterStoresByParametersQuery(IQueryable<Store> allStoresQuery, StoreSearchParameters? searchParameters);
+	IQueryable<Store> FilterStoresByParametersQuery(IQueryable<Store> allStoresQuery, StoreQueryParameters? searchParameters);
 }

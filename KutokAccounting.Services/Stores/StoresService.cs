@@ -45,11 +45,11 @@ public class StoresService : IStoresService
 			, storeDto.Name, storeDto.Address, storeDto.IsOpened.ToString(), storeDto.SetupDate.ToString("mm/dd/yyyy"));
 	}
 
-	public async ValueTask<PagedResult<StoreDto>> GetPageAsync(StoreSearchParameters searchParameters,
+	public async ValueTask<PagedResult<StoreDto>> GetPageAsync(StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
 		ct.ThrowIfCancellationRequested();
-		ValidationResult? validationResult = await _paginationValidator.ValidateAsync(searchParameters.Pagination, ct);
+		ValidationResult? validationResult = await _paginationValidator.ValidateAsync(queryParameters.Pagination, ct);
 
 		if (validationResult.IsValid is false)
 		{
@@ -57,7 +57,7 @@ public class StoresService : IStoresService
 		}
 
 		PagedResult<Store> storesPagedResult =
-			await _repository.GetFilteredPageOfStoresAsync(searchParameters, ct);
+			await _repository.GetFilteredPageOfStoresAsync(queryParameters, ct);
 
 		_logger.LogInformation("Pages of stores were fetched");
 

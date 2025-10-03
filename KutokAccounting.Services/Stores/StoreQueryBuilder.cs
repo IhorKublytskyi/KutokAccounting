@@ -9,7 +9,7 @@ namespace KutokAccounting.Services.Stores;
 public class StoreQueryBuilder : IQueryBuilder
 {
 	public IQueryable<Store> FilterStoresByParametersQuery(IQueryable<Store> allStoresQuery,
-		StoreSearchParameters? searchParameters)
+		StoreQueryParameters? searchParameters)
 	{
 		if (searchParameters is null)
 		{

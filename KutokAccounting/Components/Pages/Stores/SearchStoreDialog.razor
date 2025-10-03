@@ -7,17 +7,17 @@
             <MudTextField
                 T="string"
                 Label="Назва"
-                Value="@StoreSearchParameters?.Name"
+                Value="@StoreQueryParameters?.Name"
                 Margin="Margin.Normal"
                 ValueChanged="OnNameChanged"/>
             <MudTextField
                 T="string"
                 Label="Aдреса"
-                Value="@StoreSearchParameters?.Address"
+                Value="@StoreQueryParameters?.Address"
                 Margin="Margin.Normal"
                 ValueChanged="OnAddressChanged"/>
             <MudCheckBox
-                Value="@StoreSearchParameters.IsOpened.GetValueOrDefault()"
+                Value="@StoreQueryParameters.IsOpened.GetValueOrDefault()"
                 Color="Color.Primary"
                 UncheckedColor="Color.Default"
                 ValueChanged="OnIsOpenedChanged"
@@ -25,14 +25,14 @@
                 Відчинений
             </MudCheckBox>
             <MudDatePicker
-                Date="@StoreSearchParameters.SetupDate"
+                Date="@StoreQueryParameters.SetupDate"
                 Label="Дата відкриття"
                 DateChanged="OnOpeningDateChanged"/>
         </MudForm>
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Назад</MudButton>
-        <MudButton Disabled=" string.IsNullOrEmpty(StoreSearchParameters.Name) && string.IsNullOrEmpty(StoreSearchParameters.Address) && StoreSearchParameters.SetupDate == null"
+        <MudButton Disabled=" string.IsNullOrEmpty(StoreQueryParameters.Name) && string.IsNullOrEmpty(StoreQueryParameters.Address) && StoreQueryParameters.SetupDate == null"
                    OnClick="ResetParametersAndSearch">
             Очистити
         </MudButton>

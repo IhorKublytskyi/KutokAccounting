@@ -16,7 +16,7 @@ partial class StoresPage
 	};
 
 	private MudDataGrid<StoreDto> _dataGrid;
-	private StoreSearchParameters _searchStoreParameters = new();
+	private StoreQueryParameters _queryStoreParameters = new();
 
 	public async Task<GridData<StoreDto>> GetStoresAsync(GridState<StoreDto> state)
 	{
@@ -30,14 +30,14 @@ partial class StoresPage
 		{
 			using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-			_searchStoreParameters.Pagination = new Pagination
+			_queryStoreParameters.Pagination = new Pagination
 			{
 				Page = state.Page + 1,
 				PageSize = state.PageSize
 			};
 
 			PagedResult<StoreDto> storesPage =
-				await StoresService.GetPageAsync(_searchStoreParameters, tokenSource.Token);
+				await StoresService.GetPageAsync(_queryStoreParameters, tokenSource.Token);
 
 			gridData.Items = storesPage.Items;
 			gridData.TotalItems = storesPage.Count;
@@ -141,7 +141,7 @@ partial class StoresPage
 		DialogParameters<SearchStoreDialog> dialogParameters = new()
 		{
 			{
-				d => d.StoreSearchParameters, _searchStoreParameters
+				d => d.StoreQueryParameters, _queryStoreParameters
 			}
 		};
 
@@ -150,9 +150,9 @@ partial class StoresPage
 
 		DialogResult? dialogResult = await dialog.Result;
 
-		if (dialogResult!.Data != null && dialogResult.Data is StoreSearchParameters storeProperties)
+		if (dialogResult!.Data != null && dialogResult.Data is StoreQueryParameters storeProperties)
 		{
-			_searchStoreParameters = storeProperties;
+			_queryStoreParameters = storeProperties;
 		}
 
 		if (_dataGrid != null && !dialogResult.Canceled)

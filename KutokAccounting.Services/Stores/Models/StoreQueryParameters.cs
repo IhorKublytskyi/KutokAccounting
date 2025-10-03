@@ -2,7 +2,7 @@ using KutokAccounting.DataProvider.Models;
 
 namespace KutokAccounting.Services.Stores.Models;
 
-public class StoreSearchParameters
+public record StoreQueryParameters
 {
 	public string? Address { get; set; }
 	public string? Name { get; set; }
