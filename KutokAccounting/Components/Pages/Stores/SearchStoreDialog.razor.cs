@@ -66,11 +66,13 @@ public partial class SearchStoreDialog
 		StoreSearchParameters.SetupDate = setupDate?.Date;
 	}
 
-	private void ResetSearchParameters()
+	private void ResetParametersAndSearch()
 	{
 		StoreSearchParameters.Name = string.Empty;
 		StoreSearchParameters.Address = string.Empty;
 		StoreSearchParameters.SetupDate = null;
 		StoreSearchParameters.IsOpened = null;
+
+		Search();
 	}
 }
