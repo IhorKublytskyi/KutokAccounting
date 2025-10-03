@@ -4,11 +4,11 @@ namespace KutokAccounting.Services.Helpers;
 
 public class DateTimeHelper
 {
-	public static DateTimeRange GetHourRange(DateTime dateTime)
+	public static DateTimeRange GetDayStartEndRange(DateTime dateTime)
 	{
-		DateOnly today = DateOnly.FromDateTime(dateTime);
-		DateTime start = today.ToDateTime(TimeOnly.MinValue);
-		DateTime end = today.ToDateTime(TimeOnly.MaxValue);
+		DateOnly date = DateOnly.FromDateTime(dateTime);
+		DateTime start = date.ToDateTime(TimeOnly.MinValue);
+		DateTime end = date.ToDateTime(TimeOnly.MaxValue);
 
 		return new DateTimeRange(start, end);
 	}

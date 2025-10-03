@@ -8,7 +8,7 @@ namespace KutokAccounting.Services.Stores;
 
 public class StoreQueryBuilder : IQueryBuilder
 {
-	public IQueryable<Store> GetStoresFilteredQuery(IQueryable<Store> allStoresQuery,
+	public IQueryable<Store> FilterStoresByParametersQuery(IQueryable<Store> allStoresQuery,
 		StoreSearchParameters? searchParameters)
 	{
 		if (searchParameters is null)
@@ -31,7 +31,7 @@ public class StoreQueryBuilder : IQueryBuilder
 		if (searchParameters.SetupDate != null)
 		{
 			DateTime utcDateTimeSearched = searchParameters.SetupDate.Value.ToUniversalTime();
-			DateTimeRange dateTimeRange = DateTimeHelper.GetHourRange(utcDateTimeSearched);
+			DateTimeRange dateTimeRange = DateTimeHelper.GetDayStartEndRange(utcDateTimeSearched);
 
 			filteredQuery = filteredQuery.Where(s =>
 				s.SetupDate >= dateTimeRange.StartOfRange && s.SetupDate <= dateTimeRange.EndOfRange);
