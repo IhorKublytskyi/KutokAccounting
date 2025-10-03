@@ -94,13 +94,6 @@ public class StoresService : IStoresService
 	{
 		ct.ThrowIfCancellationRequested();
 
-		if (storeId < 0)
-		{
-			_logger.LogWarning("Store with id {storeId} does not exist", storeId);
-
-			throw new ArgumentException("Invalid store id");
-		}
-
 		await _repository.DeleteStoreAsync(storeId, ct);
 		_logger.LogInformation("Store with id {storeId} was deleted", storeId);
 	}
