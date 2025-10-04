@@ -63,10 +63,7 @@ public partial class VendorsPage
 
 		await VendorService.DeleteAsync(vendor.Id, tokenSource.Token);
 
-		if (_dataGrid != null)
-		{
-			await _dataGrid.ReloadServerData();
-		}
+		await _dataGrid.ReloadServerData();
 	}
 
 	private async Task OnEditButtonClick(Vendor vendor)
@@ -91,7 +88,7 @@ public partial class VendorsPage
 
 		DialogResult? result = await dialog.Result;
 
-		if (_dataGrid is not null && result.Canceled is false)
+		if (result?.Canceled is false)
 		{
 			await _dataGrid.ReloadServerData();
 		}
@@ -112,7 +109,7 @@ public partial class VendorsPage
 
 		DialogResult? result = await dialog.Result;
 
-		if (_dataGrid is not null && result.Canceled is false)
+		if (result?.Canceled is false)
 		{
 			await _dataGrid.ReloadServerData();
 		}

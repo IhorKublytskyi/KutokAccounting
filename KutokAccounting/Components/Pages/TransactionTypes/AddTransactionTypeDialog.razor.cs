@@ -8,7 +8,7 @@ public partial class AddTransactionTypeDialog
 {
 	private string[] _errors;
 
-	private string _name = null!;
+	private string? _name;
 
 	private bool _isIncome;
 

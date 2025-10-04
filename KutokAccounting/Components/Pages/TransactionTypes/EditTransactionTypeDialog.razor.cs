@@ -13,7 +13,7 @@ public partial class EditTransactionTypeDialog
 	public IMudDialogInstance MudDialog { get; set; }
 
 	[Parameter]
-	public TransactionTypeView TransactionTypeView { get; set; } = null!;
+	public TransactionTypeView? TransactionTypeView { get; set; }
 
 	private async Task Update()
 	{

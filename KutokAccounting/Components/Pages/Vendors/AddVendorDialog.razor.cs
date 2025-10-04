@@ -6,8 +6,8 @@ namespace KutokAccounting.Components.Pages.Vendors;
 
 public partial class AddVendorDialog
 {
-	private string _name = null!;
-	private string _description = null!;
+	private string? _name;
+	private string? _description;
 
 	private bool _isSuccess;
 

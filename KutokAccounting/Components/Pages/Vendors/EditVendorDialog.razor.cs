@@ -13,7 +13,7 @@ public partial class EditVendorDialog
 	public IMudDialogInstance MudDialog { get; set; }
 
 	[Parameter]
-	public Vendor Vendor { get; set; } = null!;
+	public Vendor? Vendor { get; set; }
 
 	private async Task Update()
 	{
