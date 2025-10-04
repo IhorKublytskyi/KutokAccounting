@@ -36,36 +36,3 @@
         <MudButton OnClick="Update" Disabled="!_isSuccess" Color="Color.Primary">Підтвердити</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-
-    [CascadingParameter]
-    public IMudDialogInstance MudDialog { get; set; }
-
-    [Parameter]
-    public Vendor Vendor { get; set; } = null!;
-
-    private bool _isSuccess;
-
-    private async Task Update()
-    {
-        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-
-        VendorDto vendor = new()
-        {
-            Id = Vendor.Id,
-            Name = Vendor.Name,
-            Description = Vendor.Description
-        };
-
-        await VendorService.UpdateAsync(vendor, tokenSource.Token);
-
-        MudDialog.Close(DialogResult.Ok(true));
-    }
-
-    private void Cancel()
-    {
-        MudDialog.Close();
-    }
-
-}

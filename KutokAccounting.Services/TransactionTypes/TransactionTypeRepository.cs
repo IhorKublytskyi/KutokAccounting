@@ -90,7 +90,7 @@ public class TransactionTypeRepository : ITransactionTypeRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to retrieve transaction types with QueryParameters: {QueryParameters}",
+			_logger.LogWarning(e, "Failed to retrieve transaction types with QueryParameters: {QueryParameters}",
 				transactionTypeQueryParameters);
 
 			throw;
@@ -109,7 +109,7 @@ public class TransactionTypeRepository : ITransactionTypeRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to retrieve transaction type with Id: {TransactionTypeId}", id);
+			_logger.LogWarning(e, "Failed to retrieve transaction type with Id: {TransactionTypeId}", id);
 
 			throw;
 		}
@@ -127,7 +127,7 @@ public class TransactionTypeRepository : ITransactionTypeRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to delete transaction type with Id: {TransactionTypeId}", id);
+			_logger.LogWarning(e, "Failed to delete transaction type with Id: {TransactionTypeId}", id);
 		}
 		finally
 		{
@@ -149,7 +149,7 @@ public class TransactionTypeRepository : ITransactionTypeRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e,
+			_logger.LogWarning(e,
 				"Failed to update transaction type with Id: {TransactionTypeId}, Name: {TransactionTypeName}",
 				transactionType.Id, transactionType.Name);
 		}

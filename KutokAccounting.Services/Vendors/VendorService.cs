@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using KutokAccounting.DataProvider.Models;
+using KutokAccounting.Services.TransactionTypes.Exceptions;
 using KutokAccounting.Services.Vendors.Models;
 using Microsoft.Extensions.Logging;
 
@@ -67,7 +68,7 @@ public sealed class VendorService : IVendorService
 		{
 			_logger.LogWarning("Vendor with ID {VendorId} not found", id);
 
-			throw new Exception("Vendor not found");
+			throw new NotFoundException("Vendor not found");
 		}
 
 		_logger.LogInformation("Vendor with ID {VendorId} retrieved successfully. Name: {VendorName}", vendor.Id,

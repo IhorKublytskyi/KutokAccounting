@@ -35,38 +35,3 @@
         <MudButton OnClick="AddAsync" Disabled="!_isSuccess" Color="Color.Primary">Додати</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code{
-
-    [CascadingParameter]
-    public IMudDialogInstance MudDialog { get; set; }
-
-    private string[] _errors;
-
-    private string _name = null!;
-    
-    private bool _isIncome;
-
-    private bool _isSuccess;
-
-    private async Task AddAsync()
-    {
-        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-
-        TransactionTypeDto transactionType = new()
-        {
-            Name = _name,
-            IsIncome = _isIncome
-        };
-
-        await TransactionTypeService.CreateAsync(transactionType, tokenSource.Token);
-
-        MudDialog.Close(DialogResult.Ok(true));
-    }
-
-    private void Cancel()
-    {
-        MudDialog.Close();
-    }
-
-}

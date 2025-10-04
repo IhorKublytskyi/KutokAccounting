@@ -35,36 +35,3 @@
         <MudButton OnClick="Update" Disabled="!_isSuccess" Color="Color.Primary">Підтвердити</MudButton>
     </DialogActions>
 </MudDialog>
-
-@code {
-
-    [CascadingParameter]
-    public IMudDialogInstance MudDialog { get; set; }
-
-    [Parameter]
-    public TransactionTypeView TransactionTypeView { get; set; } = null!;
-
-    private bool _isSuccess;
-
-    private async Task Update()
-    {
-        using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-
-        TransactionTypeDto transactionType = new()
-        {
-            Id = TransactionTypeView.Id,
-            Name = TransactionTypeView.Name,
-            IsIncome = TransactionTypeView.IsIncome
-        };
-
-        await TransactionTypeService.UpdateAsync(transactionType, tokenSource.Token);
-
-        MudDialog.Close(DialogResult.Ok(true));
-    }
-
-    private void Cancel()
-    {
-        MudDialog.Close();
-    }
-
-}

@@ -35,7 +35,7 @@ public sealed class VendorRepository : IVendorRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to create vendor with Name: {VendorName}", vendor.Name);
+			_logger.LogWarning(e, "Failed to create vendor with Name: {VendorName}", vendor.Name);
 
 			throw;
 		}
@@ -86,7 +86,7 @@ public sealed class VendorRepository : IVendorRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to retrieve vendors with QueryParameters: {QueryParameters}",
+			_logger.LogWarning(e, "Failed to retrieve vendors with QueryParameters: {QueryParameters}",
 				vendorQueryParameters);
 
 			throw;
@@ -105,7 +105,7 @@ public sealed class VendorRepository : IVendorRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to retrieve vendor with Id: {VendorId}", id);
+			_logger.LogWarning(e, "Failed to retrieve vendor with Id: {VendorId}", id);
 
 			throw;
 		}
@@ -123,7 +123,7 @@ public sealed class VendorRepository : IVendorRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to delete vendor with Id: {VendorId}", id);
+			_logger.LogWarning(e, "Failed to delete vendor with Id: {VendorId}", id);
 
 			throw;
 		}
@@ -147,7 +147,7 @@ public sealed class VendorRepository : IVendorRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to update vendor with Id: {VendorId}, Name: {VendorName}", vendor.Id,
+			_logger.LogWarning(e, "Failed to update vendor with Id: {VendorId}, Name: {VendorName}", vendor.Id,
 				vendor.Name);
 
 			throw;
