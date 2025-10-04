@@ -5,16 +5,15 @@ namespace KutokAccounting.Services.Vendors.Validators;
 
 public sealed class VendorQueryParametersValidator : AbstractValidator<VendorQueryParameters>
 {
-    public VendorQueryParametersValidator()
-    {
-        RuleFor(p => p.Name).Length(1, 100);
+	public VendorQueryParametersValidator()
+	{
+		RuleFor(p => p.Name).Length(1, 100);
 
-        RuleFor(p => p.Pagination.Page)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(100);
+		RuleFor(p => p.Pagination.Page)
+			.GreaterThan(0)
+			.LessThanOrEqualTo(100);
 
-        RuleFor(p => p.Pagination.PageSize)
-            .GreaterThan(0)
-            .LessThanOrEqualTo(10);
-    }
+		RuleFor(p => p.Pagination.PageSize)
+			.GreaterThanOrEqualTo(10);
+	}
 }

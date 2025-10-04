@@ -6,97 +6,112 @@ namespace KutokAccounting.Components.Pages.Vendors;
 
 public partial class VendorsPage
 {
-    private MudDataGrid<Vendor> _dataGrid = new();
-    private readonly HashSet<string> _filterOperators = new()
-    {
-        "equals"
-    };
+	private readonly HashSet<string> _filterOperators = new()
+	{
+		"equals"
+	};
 
-    private int _page = 1;
-    private int _pageSize = 10;
+	private MudDataGrid<Vendor> _dataGrid = new();
 
-    private string? _searchString;
+	private int _page = 1;
+	private int _pageSize = 10;
 
-    private async Task<GridData<Vendor>> GetVendorsAsync(GridState<Vendor> state)
-    {
-        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+	private string? _searchString;
 
-        var filter = state.FilterDefinitions.FirstOrDefault()?.Value?.ToString();
+	private async Task<GridData<Vendor>> GetVendorsAsync(GridState<Vendor> state)
+	{
+		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-        _page += state.Page;
-        _pageSize = state.PageSize;
+		string? filter = state.FilterDefinitions.FirstOrDefault()?.Value?.ToString();
 
-        var queryParameters = new VendorQueryParameters(filter, _searchString, new Pagination() { Page = _page, PageSize = _pageSize });
+		_page += state.Page;
+		_pageSize = state.PageSize;
 
-        try
-        {
-            PagedResult<Vendor> pagedResult = await VendorService.GetAsync(queryParameters, tokenSource.Token);
+		VendorQueryParameters queryParameters = new(filter, _searchString, new Pagination
+		{
+			Page = _page,
+			PageSize = _pageSize
+		});
 
-            return new GridData<Vendor>
-            {
-                Items = pagedResult.Items ?? new List<Vendor>(),
-                TotalItems = pagedResult.Count
-            };
-        }
-        catch (Exception)
-        {
-            return new GridData<Vendor>
-            {
-                Items = new List<Vendor>(),
-                TotalItems = 0
-            };
-        }
-        finally
-        {
-            StateHasChanged();
-        }
-    }
+		try
+		{
+			PagedResult<Vendor> pagedResult = await VendorService.GetAsync(queryParameters, tokenSource.Token);
 
-    private async Task OnDeleteButtonClick(Vendor vendor)
-    {
-        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+			return new GridData<Vendor>
+			{
+				Items = pagedResult.Items ?? new List<Vendor>(),
+				TotalItems = pagedResult.Count
+			};
+		}
+		catch (Exception)
+		{
+			return new GridData<Vendor>
+			{
+				Items = new List<Vendor>(),
+				TotalItems = 0
+			};
+		}
+		finally
+		{
+			StateHasChanged();
+		}
+	}
 
-        await VendorService.DeleteAsync(vendor.Id, tokenSource.Token);
+	private async Task OnDeleteButtonClick(Vendor vendor)
+	{
+		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-        if (_dataGrid != null)
-            await _dataGrid.ReloadServerData();
-    }
+		await VendorService.DeleteAsync(vendor.Id, tokenSource.Token);
 
-    private async Task OnEditButtonClick(Vendor vendor)
-    {
-        DialogOptions options = new DialogOptions
-        {
-            FullWidth = true,
-            MaxWidth = MaxWidth.Medium,
-            CloseButton = true,
-            CloseOnEscapeKey = true
-        };
+		await _dataGrid.ReloadServerData();
+	}
 
-        DialogParameters<EditVendorDialog> parameters = new DialogParameters<EditVendorDialog> { { d => d.Vendor, vendor } };
+	private async Task OnEditButtonClick(Vendor vendor)
+	{
+		DialogOptions options = new()
+		{
+			FullWidth = true,
+			MaxWidth = MaxWidth.Medium,
+			CloseButton = true,
+			CloseOnEscapeKey = true
+		};
 
-        IDialogReference dialog = await DialogService.ShowAsync<EditVendorDialog>("Редагувати постачальника", parameters, options);
+		DialogParameters<EditVendorDialog> parameters = new()
+		{
+			{
+				d => d.Vendor, vendor
+			}
+		};
 
-        DialogResult? result = await dialog.Result;
+		IDialogReference dialog =
+			await DialogService.ShowAsync<EditVendorDialog>("Редагувати постачальника", parameters, options);
 
-        if (_dataGrid != null && !result.Canceled)
-            await _dataGrid.ReloadServerData();
-    }
+		DialogResult? result = await dialog.Result;
 
-    private async Task OnAddButtonClick()
-    {
-        DialogOptions options = new DialogOptions
-        {
-            FullWidth = true,
-            MaxWidth = MaxWidth.Medium,
-            CloseButton = true,
-            CloseOnEscapeKey = true
-        };
+		if (result?.Canceled is false)
+		{
+			await _dataGrid.ReloadServerData();
+		}
+	}
 
-        IDialogReference dialog = await DialogService.ShowAsync<AddVendorDialog>("Додати нового постачальника", options);
+	private async Task OnAddButtonClick()
+	{
+		DialogOptions options = new()
+		{
+			FullWidth = true,
+			MaxWidth = MaxWidth.Medium,
+			CloseButton = true,
+			CloseOnEscapeKey = true
+		};
 
-        DialogResult? result = await dialog.Result;
+		IDialogReference dialog =
+			await DialogService.ShowAsync<AddVendorDialog>("Додати нового постачальника", options);
 
-        if (_dataGrid != null && !result.Canceled)
-            await _dataGrid.ReloadServerData();
-    }
+		DialogResult? result = await dialog.Result;
+
+		if (result?.Canceled is false)
+		{
+			await _dataGrid.ReloadServerData();
+		}
+	}
 }

@@ -4,144 +4,156 @@ using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.TransactionTypes.Exceptions;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Models;
-using KutokAccounting.Services.TransactionTypes.Validators;
 using Microsoft.Extensions.Logging;
 
 namespace KutokAccounting.Services.TransactionTypes;
 
 public sealed class TransactionTypeService : ITransactionTypeService
 {
-    private readonly ILogger<TransactionTypeService> _logger;
-    private readonly IValidator<TransactionTypeDto> _transactionTypeDtoValidator;
-    private readonly IValidator<TransactionTypeQueryParameters> _transactionTypeQueryValidator;
-    private readonly ITransactionTypeRepository _repository;
-    
+	private readonly ILogger<TransactionTypeService> _logger;
+	private readonly IValidator<TransactionTypeDto> _transactionTypeDtoValidator;
+	private readonly IValidator<TransactionTypeQueryParameters> _transactionTypeQueryValidator;
+	private readonly ITransactionTypeRepository _repository;
 
-    public TransactionTypeService(
-        ITransactionTypeRepository repository, 
-        ILogger<TransactionTypeService> logger, 
-        IValidator<TransactionTypeDto> transactionTypeDtoValidator, 
-        IValidator<TransactionTypeQueryParameters> transactionTypeQueryValidator)
-    {
-        _repository = repository;
-        _logger = logger;
-        _transactionTypeDtoValidator = transactionTypeDtoValidator;
-        _transactionTypeQueryValidator = transactionTypeQueryValidator;
-    }
+	public TransactionTypeService(
+		ITransactionTypeRepository repository,
+		ILogger<TransactionTypeService> logger,
+		IValidator<TransactionTypeDto> transactionTypeDtoValidator,
+		IValidator<TransactionTypeQueryParameters> transactionTypeQueryValidator)
+	{
+		_repository = repository;
+		_logger = logger;
+		_transactionTypeDtoValidator = transactionTypeDtoValidator;
+		_transactionTypeQueryValidator = transactionTypeQueryValidator;
+	}
 
-    public async ValueTask<TransactionType> CreateAsync(TransactionTypeDto request, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
+	public async ValueTask<TransactionType> CreateAsync(TransactionTypeDto request, CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
 
-        ValidationResult validationResult = await _transactionTypeDtoValidator.ValidateAsync(request, cancellationToken);
+		ValidationResult validationResult =
+			await _transactionTypeDtoValidator.ValidateAsync(request, cancellationToken);
 
-        if (validationResult.IsValid is false)
-        {
-            _logger.LogWarning("Transaction type creation request validation failed. Errors: {Errors}", validationResult.Errors);
+		if (validationResult.IsValid is false)
+		{
+			_logger.LogWarning("Transaction type creation request validation failed. Errors: {Errors}",
+				validationResult.Errors);
 
-            throw new ArgumentException(validationResult.ToString());
-        }
+			throw new ArgumentException(validationResult.ToString());
+		}
 
-        _logger.LogInformation("Validation succeeded for vendor {TransactionTypeName}", request.Name);
+		_logger.LogInformation("Validation succeeded for vendor {TransactionTypeName}", request.Name);
 
-        TransactionType transactionType = new TransactionType()
-        {
-            Name = request.Name,
-            IsIncome = request.IsIncome
-        };
-        
-        _logger.LogInformation("Saving transaction type to repository. Name: {TransactionTypeName}", transactionType.Name);
+		TransactionType transactionType = new()
+		{
+			Name = request.Name,
+			IsIncome = request.IsIncome
+		};
 
-        await _repository.CreateAsync(transactionType, cancellationToken);
+		_logger.LogInformation("Saving transaction type to repository. Name: {TransactionTypeName}",
+			transactionType.Name);
 
-        _logger.LogInformation("Transaction type {TransactionTypeName} successfully created with ID {TransactionTypeId}", transactionType.Name, transactionType.Id);
+		await _repository.CreateAsync(transactionType, cancellationToken);
 
-        return transactionType;
-    }
+		_logger.LogInformation(
+			"Transaction type {TransactionTypeName} successfully created with ID {TransactionTypeId}",
+			transactionType.Name, transactionType.Id);
 
-    public async ValueTask<TransactionType> GetByIdAsync(int id, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
+		return transactionType;
+	}
 
-        _logger.LogInformation("Fetching transaction type by ID: {TransactionTypeId}", id);
-        
-        TransactionType? transactionType = await _repository.GetByIdAsync(id, cancellationToken);
+	public async ValueTask<TransactionType> GetByIdAsync(int id, CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
 
-        if (transactionType is null)
-        {
-            _logger.LogWarning("Transaction type with ID {TransactionTypeId} not found", id);
+		_logger.LogInformation("Fetching transaction type by ID: {TransactionTypeId}", id);
 
-            throw new NotFoundException("Transaction type not found");
-        }
+		TransactionType? transactionType = await _repository.GetByIdAsync(id, cancellationToken);
 
-        _logger.LogInformation("Transaction type with ID {TransactionTypeId} retrieved successfully. Name: {TransactionTypeName}", transactionType.Id,
-            transactionType.Name);
+		if (transactionType is null)
+		{
+			_logger.LogWarning("Transaction type with ID {TransactionTypeId} not found", id);
 
-        return transactionType;
-    }
+			throw new NotFoundException("Transaction type not found");
+		}
 
-    public async ValueTask<PagedResult<TransactionType>> GetAsync(TransactionTypeQueryParameters transactionTypeQueryParameters, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
+		_logger.LogInformation(
+			"Transaction type with ID {TransactionTypeId} retrieved successfully. Name: {TransactionTypeName}",
+			transactionType.Id,
+			transactionType.Name);
 
-        ValidationResult validationResult = await _transactionTypeQueryValidator.ValidateAsync(transactionTypeQueryParameters, cancellationToken);
-        
-        if (validationResult.IsValid is false)
-        {
-            _logger.LogWarning("Query parameters validation failed. Errors: {Errors}", validationResult.Errors);
+		return transactionType;
+	}
 
-            throw new ArgumentException(validationResult.ToString());
-        }
+	public async ValueTask<PagedResult<TransactionType>> GetAsync(
+		TransactionTypeQueryParameters transactionTypeQueryParameters,
+		CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
 
-        PagedResult<TransactionType> transactionTypes = await _repository.GetAsync(transactionTypeQueryParameters, cancellationToken);
+		ValidationResult validationResult =
+			await _transactionTypeQueryValidator.ValidateAsync(transactionTypeQueryParameters, cancellationToken);
 
-        if (transactionTypes is { Count: 0 })
-        {
-            _logger.LogWarning("No transaction types found for query parameters: {@QueryParameters}", transactionTypeQueryParameters);
+		if (validationResult.IsValid is false)
+		{
+			_logger.LogWarning("Query parameters validation failed. Errors: {Errors}", validationResult.Errors);
 
-            throw new Exception("Transaction types list is empty");
-        }
-        
-        _logger.LogInformation("Retrieved {Count} transaction types successfully", transactionTypes.Count);
+			throw new ArgumentException(validationResult.ToString());
+		}
 
-        return transactionTypes;
-    }
+		PagedResult<TransactionType> transactionTypes =
+			await _repository.GetAsync(transactionTypeQueryParameters, cancellationToken);
 
-    public async ValueTask UpdateAsync(TransactionTypeDto request, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
+		if (transactionTypes is {Count: 0})
+		{
+			_logger.LogWarning("No transaction types found for query parameters: {@QueryParameters}",
+				transactionTypeQueryParameters);
 
-        _logger.LogInformation("Updating transaction type with data: {TransactionTypeRequest}", request);
+			throw new Exception("Transaction types list is empty");
+		}
 
-        ValidationResult validationResult = await _transactionTypeDtoValidator.ValidateAsync(request, cancellationToken);
+		_logger.LogInformation("Retrieved {Count} transaction types successfully", transactionTypes.Count);
 
-        if (validationResult.IsValid is false)
-        {
-            _logger.LogWarning("Transaction type update validation failed: {ValidationErrors}", validationResult.Errors);
+		return transactionTypes;
+	}
 
-            throw new Exception(validationResult.ToString());
-        }
+	public async ValueTask UpdateAsync(TransactionTypeDto request, CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
 
-        _logger.LogDebug("Validation succeeded for transaction type update: {TransactionTypeName}", request.Name);
+		_logger.LogInformation("Updating transaction type with data: {TransactionTypeRequest}", request);
 
-        TransactionType transactionType = new TransactionType
-        {
-            Id = request.Id,
-            Name = request.Name,
-            IsIncome = request.IsIncome
-        };
+		ValidationResult validationResult =
+			await _transactionTypeDtoValidator.ValidateAsync(request, cancellationToken);
 
-        await _repository.UpdateAsync(transactionType, cancellationToken);
+		if (validationResult.IsValid is false)
+		{
+			_logger.LogWarning("Transaction type update validation failed: {ValidationErrors}",
+				validationResult.Errors);
 
-        _logger.LogInformation("Transaction type {TransactionTypeName} updated successfully", transactionType.Name);
-    }
+			throw new Exception(validationResult.ToString());
+		}
 
-    public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
-    {
-        cancellationToken.ThrowIfCancellationRequested();
+		_logger.LogDebug("Validation succeeded for transaction type update: {TransactionTypeName}", request.Name);
 
-        await _repository.DeleteAsync(id, cancellationToken);
+		TransactionType transactionType = new()
+		{
+			Id = request.Id,
+			Name = request.Name,
+			IsIncome = request.IsIncome
+		};
 
-        _logger.LogInformation("Transaction type with ID {TransactionTypeId} deleted successfully", id);
-    }
+		await _repository.UpdateAsync(transactionType, cancellationToken);
+
+		_logger.LogInformation("Transaction type {TransactionTypeName} updated successfully", transactionType.Name);
+	}
+
+	public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+
+		await _repository.DeleteAsync(id, cancellationToken);
+
+		_logger.LogInformation("Transaction type with ID {TransactionTypeId} deleted successfully", id);
+	}
 }
