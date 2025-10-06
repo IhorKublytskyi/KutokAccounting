@@ -9,7 +9,7 @@ public interface IStoresService
 	ValueTask CreateAsync(StoreDto storeDto, CancellationToken ct);
 
 	ValueTask<PagedResult<StoreDto>> GetPageAsync(
-		StoreQueryParameters queryParameters, //pagination + searchParameter, 
+		StoreQueryParameters queryParameters,
 		CancellationToken ct);
 
 	ValueTask UpdateAsync(int storeId,

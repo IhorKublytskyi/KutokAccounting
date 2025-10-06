@@ -1,3 +1,4 @@
+using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Helpers;
 using KutokAccounting.Services.Stores.Abstractions;
@@ -6,26 +7,25 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KutokAccounting.Services.Stores;
 
-public class StoreQueryBuilder : IQueryBuilder
+public class GetStoresQueryBuilder : IGetStoresQueryBuilder
 {
-	public IQueryable<Store> FilterStoresByParametersQuery(IQueryable<Store> allStoresQuery,
-		StoreQueryParameters? searchParameters)
+	private readonly KutokDbContext _dbContext;
+	public GetStoresQueryBuilder(KutokDbContext dbContext)
 	{
-		if (searchParameters is null)
-		{
-			return allStoresQuery;
-		}
-
-		IQueryable<Store> filteredQuery = allStoresQuery;
+		_dbContext = dbContext;
+	}
+	public IQueryable<Store> GetStoresByParametersQuery(StoreQueryParameters searchParameters)
+	{
+		IQueryable<Store> query = _dbContext.Stores.AsNoTracking();
 
 		if (string.IsNullOrEmpty(searchParameters.Name) is false)
 		{
-			filteredQuery = filteredQuery.Where(s => EF.Functions.Like(s.Name, $"%{searchParameters.Name}%"));
+			query = query.Where(s => EF.Functions.Like(s.Name, $"%{searchParameters.Name}%"));
 		}
 
 		if (string.IsNullOrEmpty(searchParameters.Address) is false)
 		{
-			filteredQuery = filteredQuery.Where(s => EF.Functions.Like(s.Address, $"%{searchParameters.Address}%"));
+			query = query.Where(s => EF.Functions.Like(s.Address, $"%{searchParameters.Address}%"));
 		}
 
 		if (searchParameters.SetupDate != null)
@@ -33,15 +33,15 @@ public class StoreQueryBuilder : IQueryBuilder
 			DateTime utcDateTimeSearched = searchParameters.SetupDate.Value.ToUniversalTime();
 			DateTimeRange dateTimeRange = DateTimeHelper.GetDayStartEndRange(utcDateTimeSearched);
 
-			filteredQuery = filteredQuery.Where(s =>
+			query = query.Where(s =>
 				s.SetupDate >= dateTimeRange.StartOfRange && s.SetupDate <= dateTimeRange.EndOfRange);
 		}
 
 		if (searchParameters.IsOpened != null)
 		{
-			filteredQuery = filteredQuery.Where(s => s.IsOpened == searchParameters.IsOpened);
+			query = query.Where(s => s.IsOpened == searchParameters.IsOpened);
 		}
 
-		return filteredQuery;
+		return query;
 	}
 }

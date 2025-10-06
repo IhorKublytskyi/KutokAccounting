@@ -34,11 +34,11 @@ public class StoresService : IStoresService
 
 		if (validationResult.IsValid is false)
 		{
-			_logger.LogError("Store validation failed. Errors: {Errors}", validationResult.Errors);
+			_logger.LogWarning("Store validation failed. Errors: {Errors}", validationResult.Errors);
 		}
 
-		Store storeModel = storeDto.FromDtoToModel();
-		await _repository.CreateStoreAsync(storeModel, ct);
+		Store storeModel = storeDto.MapToModel();
+		await _repository.CreateAsync(storeModel, ct);
 
 		_logger.LogInformation(
 			"A new store with following properties was created. Name: {storeName}, Address: {storeAddress}, Is opened: {isOpened}, Setup date: {setUpDate}"
@@ -53,18 +53,18 @@ public class StoresService : IStoresService
 
 		if (validationResult.IsValid is false)
 		{
-			_logger.LogError("Store validation failed. Errors: {Errors}", validationResult.Errors);
+			_logger.LogWarning("Store validation failed. Errors: {Errors}", validationResult.Errors);
 		}
 
 		PagedResult<Store> storesPagedResult =
-			await _repository.GetFilteredPageOfStoresAsync(queryParameters, ct);
+			await _repository.GetFilteredPageAsync(queryParameters, ct);
 
 		_logger.LogInformation("Pages of stores were fetched");
 
 		return new PagedResult<StoreDto>
 		{
 			Count = storesPagedResult.Count,
-			Items = storesPagedResult.Items.Select(x => x.ModelToDto())
+			Items = storesPagedResult.Items.Select(x => x.MapToDto())
 		};
 	}
 
@@ -78,14 +78,14 @@ public class StoresService : IStoresService
 
 		if (validationResult.IsValid is false)
 		{
-			_logger.LogError("Failed to update store with Name: {StoreName}: {Errors}", updatedStoreDto.Name,
+			_logger.LogWarning("Failed to update store with Name: {StoreName}: {Errors}", updatedStoreDto.Name,
 				validationResult.Errors);
 
 			throw new ArgumentException("Invalid store data");
 		}
 
-		Store updatedStoreModel = updatedStoreDto.FromDtoToModel();
-		await _repository.UpdateStoreAsync(storeId, updatedStoreModel, ct);
+		Store updatedStoreModel = updatedStoreDto.MapToModel();
+		await _repository.UpdateAsync(storeId, updatedStoreModel, ct);
 
 		_logger.LogInformation("Store with id: {StoreId} was updated", storeId);
 	}
@@ -94,7 +94,7 @@ public class StoresService : IStoresService
 	{
 		ct.ThrowIfCancellationRequested();
 
-		await _repository.DeleteStoreAsync(storeId, ct);
+		await _repository.DeleteAsync(storeId, ct);
 		_logger.LogInformation("Store with id {storeId} was deleted", storeId);
 	}
 }

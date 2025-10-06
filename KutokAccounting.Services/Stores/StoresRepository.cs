@@ -12,22 +12,19 @@ public class StoresRepository : IStoresRepository
 {
 	private readonly KutokDbContext _dbContext;
 	private readonly SemaphoreSlim _semaphoreSlim;
-	private readonly IQueryBuilder _queryBuilder;
-	private readonly ILogger<StoresRepository> _logger;
+	private readonly IGetStoresQueryBuilder _getStoresQueryBuilder;
 
 	public StoresRepository(KutokDbContext dbContext,
 		[FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)]
 		SemaphoreSlim semaphoreSlim,
-		IQueryBuilder queryBuilder,
-		ILogger<StoresRepository> logger)
+		IGetStoresQueryBuilder getStoresQueryBuilder)
 	{
 		_semaphoreSlim = semaphoreSlim;
-		_queryBuilder = queryBuilder;
-		_logger = logger;
+		_getStoresQueryBuilder = getStoresQueryBuilder;
 		_dbContext = dbContext;
 	}
 
-	public async ValueTask CreateStoreAsync(Store store, CancellationToken ct)
+	public async ValueTask CreateAsync(Store store, CancellationToken ct)
 	{
 		await _semaphoreSlim.WaitAsync(ct);
 
@@ -42,23 +39,22 @@ public class StoresRepository : IStoresRepository
 		}
 	}
 
-	public async ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(
+	public async ValueTask<PagedResult<Store>> GetFilteredPageAsync(
 		StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
-		IQueryable<Store> getAllStoresQuery = _dbContext.Stores.AsNoTracking();
-		IQueryable<Store> storesQuery = _queryBuilder.FilterStoresByParametersQuery(getAllStoresQuery, queryParameters);
-		List<Store> pagedStores = await GetStoresPageAsync(storesQuery, queryParameters.Pagination, ct);
-		int filteredStoresCount = await storesQuery.CountAsync(ct);
-
+		IQueryable<Store> storesQuery = _getStoresQueryBuilder.GetStoresByParametersQuery(queryParameters);
+		Task<int> filteredStoresCountTask = storesQuery.CountAsync(ct);
+		List<Store> pagedStores = await GetPageAsync(storesQuery, queryParameters.Pagination, ct);
+		
 		return new PagedResult<Store>
 		{
 			Items = pagedStores,
-			Count = filteredStoresCount
+			Count = await filteredStoresCountTask
 		};
 	}
 
-	public async ValueTask UpdateStoreAsync(int storeId,
+	public async ValueTask UpdateAsync(int storeId,
 		Store updatedStore,
 		CancellationToken ct)
 	{
@@ -73,8 +69,6 @@ public class StoresRepository : IStoresRepository
 					.SetProperty(st => st.Address, updatedStore.Address)
 					.SetProperty(st => st.Name, updatedStore.Name)
 					.SetProperty(st => st.IsOpened, updatedStore.IsOpened), ct);
-
-			_logger.LogInformation("Store with {storeId} was updated", storeId);
 		}
 		finally
 		{
@@ -82,14 +76,13 @@ public class StoresRepository : IStoresRepository
 		}
 	}
 
-	public async ValueTask DeleteStoreAsync(int storeId, CancellationToken ct)
+	public async ValueTask DeleteAsync(int storeId, CancellationToken ct)
 	{
 		await _semaphoreSlim.WaitAsync(ct);
 
 		try
 		{
 			await _dbContext.Stores.Where(s => s.Id == storeId).ExecuteDeleteAsync(ct);
-			_logger.LogInformation("Store with {storeId} was deleted", storeId);
 		}
 		finally
 		{
@@ -97,7 +90,7 @@ public class StoresRepository : IStoresRepository
 		}
 	}
 
-	private async ValueTask<List<Store>> GetStoresPageAsync(IQueryable<Store> stores,
+	private async ValueTask<List<Store>> GetPageAsync(IQueryable<Store> stores,
 		Pagination pagination,
 		CancellationToken ct)
 	{

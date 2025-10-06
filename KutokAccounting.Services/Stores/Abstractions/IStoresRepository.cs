@@ -5,15 +5,15 @@ namespace KutokAccounting.Services.Stores.Abstractions;
 
 public interface IStoresRepository
 {
-	ValueTask CreateStoreAsync(Store store, CancellationToken ct);
+	ValueTask CreateAsync(Store store, CancellationToken ct);
 
-	ValueTask<PagedResult<Store>> GetFilteredPageOfStoresAsync(
+	ValueTask<PagedResult<Store>> GetFilteredPageAsync(
 		StoreQueryParameters queryParameters,
 		CancellationToken ct);
 
-	ValueTask UpdateStoreAsync(int storeId,
+	ValueTask UpdateAsync(int storeId,
 		Store updatedStore,
 		CancellationToken ct);
 
-	ValueTask DeleteStoreAsync(int storeId, CancellationToken ct);
+	ValueTask DeleteAsync(int storeId, CancellationToken ct);
 }

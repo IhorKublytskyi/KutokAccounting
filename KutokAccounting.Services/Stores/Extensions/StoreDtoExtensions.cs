@@ -5,7 +5,7 @@ namespace KutokAccounting.Services.Stores.Extensions;
 
 public static class StoreDtoExtensions
 {
-	public static Store FromDtoToModel(this StoreDto dto)
+	public static Store MapToModel(this StoreDto dto)
 	{
 		return new Store
 		{
@@ -16,7 +16,7 @@ public static class StoreDtoExtensions
 		};
 	}
 
-	public static StoreDto ModelToDto(this Store store)
+	public static StoreDto MapToDto(this Store store)
 	{
 		return new StoreDto
 		{
