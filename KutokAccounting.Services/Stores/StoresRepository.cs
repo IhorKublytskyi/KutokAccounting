@@ -4,7 +4,6 @@ using KutokAccounting.Services.Stores.Abstractions;
 using KutokAccounting.Services.Stores.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace KutokAccounting.Services.Stores;
 
@@ -43,10 +42,16 @@ public class StoresRepository : IStoresRepository
 		StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
-		IQueryable<Store> storesQuery = _getStoresQueryBuilder.GetStoresByParametersQuery(queryParameters);
+		IQueryable<Store> storesQuery = _getStoresQueryBuilder
+			.SearchName(queryParameters.Name)
+			.SearchAddress(queryParameters.Address)
+			.SearchSetupDate(queryParameters.SetupDate)
+			.SearchOpened(queryParameters.IsOpened)
+			.Build();
+
 		Task<int> filteredStoresCountTask = storesQuery.CountAsync(ct);
 		List<Store> pagedStores = await GetPageAsync(storesQuery, queryParameters.Pagination, ct);
-		
+
 		return new PagedResult<Store>
 		{
 			Items = pagedStores,

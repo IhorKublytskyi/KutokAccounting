@@ -5,5 +5,9 @@ namespace KutokAccounting.Services.Stores.Abstractions;
 
 public interface IGetStoresQueryBuilder
 {
-	IQueryable<Store> GetStoresByParametersQuery(StoreQueryParameters searchParameters);
+	IGetStoresQueryBuilder SearchName(string? name);
+	IGetStoresQueryBuilder SearchAddress(string? address);
+	IGetStoresQueryBuilder SearchSetupDate(DateTime? setupDate);
+	IGetStoresQueryBuilder SearchOpened(bool? isOpened);
+	IQueryable<Store> Build();
 }
