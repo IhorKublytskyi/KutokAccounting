@@ -10,10 +10,18 @@ namespace KutokAccounting.Services.Stores;
 public class GetGetStoresQueryBuilder : IGetStoresQueryBuilder
 {
 	private IQueryable<Store> _query;
+	private readonly KutokDbContext _dbContext;
 
 	public GetGetStoresQueryBuilder(KutokDbContext dbContext)
 	{
+		_dbContext = dbContext;
 		_query = dbContext.Stores.AsNoTracking();
+	}
+
+	public IGetStoresQueryBuilder EmptyPreviousQuery()
+	{
+		_query = _dbContext.Stores.AsNoTracking();
+		return this;
 	}
 
 	public IGetStoresQueryBuilder SearchName(string? name)
@@ -28,7 +36,7 @@ public class GetGetStoresQueryBuilder : IGetStoresQueryBuilder
 
 	public IGetStoresQueryBuilder SearchAddress(string? address)
 	{
-		if (string.IsNullOrEmpty(address))
+		if (string.IsNullOrEmpty(address) is false)
 		{
 			_query = _query.Where(s => EF.Functions.Like(s.Address, $"%{address}%"));
 		}
@@ -38,23 +46,21 @@ public class GetGetStoresQueryBuilder : IGetStoresQueryBuilder
 
 	public IGetStoresQueryBuilder SearchSetupDate(DateTime? setupDate)
 	{
-		if (setupDate is null)
+		if (setupDate is not null)
 		{
-			return this;
+			DateTime utcDateTimeSearched = setupDate.Value.ToUniversalTime();
+			DateTimeRange dateTimeRange = DateTimeHelper.GetDayStartEndRange(utcDateTimeSearched);
+
+			_query = _query.Where(s =>
+				s.SetupDate >= dateTimeRange.StartOfRange && s.SetupDate <= dateTimeRange.EndOfRange);
 		}
-
-		DateTime utcDateTimeSearched = setupDate.Value.ToUniversalTime();
-		DateTimeRange dateTimeRange = DateTimeHelper.GetDayStartEndRange(utcDateTimeSearched);
-
-		_query = _query.Where(s =>
-			s.SetupDate >= dateTimeRange.StartOfRange && s.SetupDate <= dateTimeRange.EndOfRange);
-
+		
 		return this;
 	}
 
 	public IGetStoresQueryBuilder SearchOpened(bool? isOpened)
 	{
-		if (isOpened != null)
+		if (isOpened is not null)
 		{
 			_query = _query.Where(s => s.IsOpened == isOpened);
 		}
@@ -62,7 +68,7 @@ public class GetGetStoresQueryBuilder : IGetStoresQueryBuilder
 		return this;
 	}
 
-	public IQueryable<Store> Build()
+	public IQueryable<Store> BuildQuery()
 	{
 		return _query;
 	}

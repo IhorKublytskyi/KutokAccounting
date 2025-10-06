@@ -43,12 +43,13 @@ public class StoresRepository : IStoresRepository
 		CancellationToken ct)
 	{
 		IQueryable<Store> storesQuery = _getStoresQueryBuilder
+			.EmptyPreviousQuery()
 			.SearchName(queryParameters.Name)
 			.SearchAddress(queryParameters.Address)
 			.SearchSetupDate(queryParameters.SetupDate)
 			.SearchOpened(queryParameters.IsOpened)
-			.Build();
-
+			.BuildQuery();
+		
 		Task<int> filteredStoresCountTask = storesQuery.CountAsync(ct);
 		List<Store> pagedStores = await GetPageAsync(storesQuery, queryParameters.Pagination, ct);
 
