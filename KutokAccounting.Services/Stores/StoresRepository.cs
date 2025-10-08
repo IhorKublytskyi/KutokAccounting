@@ -11,15 +11,12 @@ public class StoresRepository : IStoresRepository
 {
 	private readonly KutokDbContext _dbContext;
 	private readonly SemaphoreSlim _semaphoreSlim;
-	private readonly IGetStoresQueryBuilder _getStoresQueryBuilder;
 
 	public StoresRepository(KutokDbContext dbContext,
 		[FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)]
-		SemaphoreSlim semaphoreSlim,
-		IGetStoresQueryBuilder getStoresQueryBuilder)
+		SemaphoreSlim semaphoreSlim)
 	{
 		_semaphoreSlim = semaphoreSlim;
-		_getStoresQueryBuilder = getStoresQueryBuilder;
 		_dbContext = dbContext;
 	}
 
@@ -42,14 +39,15 @@ public class StoresRepository : IStoresRepository
 		StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
-		IQueryable<Store> storesQuery = _getStoresQueryBuilder
-			.EmptyPreviousQuery()
+		GetStoresQueryBuilder getStoresQueryBuilder = new GetStoresQueryBuilder(_dbContext);
+
+		IQueryable<Store> storesQuery = getStoresQueryBuilder
 			.SearchName(queryParameters.Name)
 			.SearchAddress(queryParameters.Address)
 			.SearchSetupDate(queryParameters.SetupDate)
 			.SearchOpened(queryParameters.IsOpened)
 			.BuildQuery();
-		
+
 		Task<int> filteredStoresCountTask = storesQuery.CountAsync(ct);
 		List<Store> pagedStores = await GetPageAsync(storesQuery, queryParameters.Pagination, ct);
 
