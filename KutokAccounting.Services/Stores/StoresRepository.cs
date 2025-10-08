@@ -39,7 +39,7 @@ public class StoresRepository : IStoresRepository
 		StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
-		GetStoresQueryBuilder getStoresQueryBuilder = new GetStoresQueryBuilder(_dbContext);
+		GetStoresQueryBuilder getStoresQueryBuilder = new(_dbContext);
 
 		IQueryable<Store> storesQuery = getStoresQueryBuilder
 			.SearchName(queryParameters.Name)

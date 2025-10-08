@@ -47,11 +47,11 @@ public static class MauiProgram
 		builder.Services.AddScoped<IValidator<VendorDto>, VendorDtoValidator>();
 		builder.Services.AddScoped<IValidator<VendorQueryParameters>, VendorQueryParametersValidator>();
 		builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore, new SemaphoreSlim(1, 1));
-
+		
 		builder.Services.AddScoped<IValidator<Pagination>, PaginationValidator>();
 		builder.Services.AddScoped<IValidator<StoreDto>, StoreDtoValidator>();
-		builder.Services.AddTransient<IStoresRepository, StoresRepository>();
-		builder.Services.AddTransient<IStoresService, StoresService>();
+		builder.Services.AddScoped<IStoresRepository, StoresRepository>();
+		builder.Services.AddScoped<IStoresService, StoresService>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
