@@ -5,12 +5,12 @@ namespace KutokAccounting.DataProvider;
 
 public class KutokDbContextFactory : IDesignTimeDbContextFactory<KutokDbContext>
 {
-    public KutokDbContext CreateDbContext(string[] args)
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<KutokDbContext>();
+	public KutokDbContext CreateDbContext(string[] args)
+	{
+		DbContextOptionsBuilder<KutokDbContext> optionsBuilder = new();
 
-        optionsBuilder.UseSqlite(KutokConfigurations.ConnectionString);
+		optionsBuilder.UseSqlite(KutokConfigurations.ConnectionString);
 
-        return new KutokDbContext(optionsBuilder.Options);
-    }
+		return new KutokDbContext(optionsBuilder.Options);
+	}
 }

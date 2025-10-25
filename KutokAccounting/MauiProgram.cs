@@ -5,6 +5,7 @@ using KutokAccounting.Services.Stores;
 using KutokAccounting.Services.Stores.Abstractions;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Models;
+using KutokAccounting.Logging.Extensions;
 using KutokAccounting.Services.TransactionTypes;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Models;
@@ -34,6 +35,8 @@ public static class MauiProgram
 		{
 			options.UseSqlite(KutokConfigurations.ConnectionString);
 		});
+
+		builder.Services.AddFileLogging();
 
 		builder.Services.AddScoped<IVendorService, VendorService>();
 		builder.Services.AddScoped<IVendorRepository, VendorRepository>();

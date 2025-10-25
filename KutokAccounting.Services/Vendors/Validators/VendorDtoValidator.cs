@@ -5,14 +5,14 @@ namespace KutokAccounting.Services.Vendors.Validators;
 
 public sealed class VendorDtoValidator : AbstractValidator<VendorDto>
 {
-    public VendorDtoValidator()
-    {
-        RuleFor(r => r.Name)
-            .NotNull()
-            .NotEmpty()
-            .MaximumLength(100);
+	public VendorDtoValidator()
+	{
+		RuleFor(r => r.Name)
+			.NotNull()
+			.NotEmpty()
+			.MaximumLength(100);
 
-        RuleFor(r => r.Description)
-            .MaximumLength(1024);
-    }
+		RuleFor(r => r.Description)
+			.MaximumLength(1024);
+	}
 }

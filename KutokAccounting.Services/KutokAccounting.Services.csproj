@@ -8,6 +8,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\KutokAccounting.DataProvider\KutokAccounting.DataProvider.csproj"/>
+        <ProjectReference Include="..\KutokAccounting.Logging\KutokAccounting.Logging.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

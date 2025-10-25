@@ -2,4 +2,7 @@
 
 namespace KutokAccounting.Services.Vendors.Models;
 
-public sealed record VendorQueryParameters(string? Name, string? SearchString, Pagination Pagination);
+public sealed record VendorQueryParameters(
+	string? Name,
+	string? SearchString,
+	Pagination Pagination);

@@ -7,129 +7,151 @@ namespace KutokAccounting.Components.Pages.TransactionTypes;
 
 public partial class TransactionTypesPage
 {
-    private MudDataGrid<TransactionTypeView> _dataGrid = new();
+	private readonly HashSet<string> _filterOperators = new()
+	{
+		"equals"
+	};
 
-    private readonly HashSet<string> _filterOperators = new()
-    {
-        "equals"
-    };
+	private MudDataGrid<TransactionTypeView> _dataGrid = new();
 
-    private int _page = 1;
-    private int _pageSize = 10;
+	private int _page = 1;
+	private int _pageSize = 10;
 
-    private string? _searchString;
+	private string? _searchString;
 
-    private TransactionTypeQueryParameters BuildQuery(GridState<TransactionTypeView> state)
-    {
-        Filters? filters = new Filters();
+	private TransactionTypeQueryParameters BuildQuery(GridState<TransactionTypeView> state)
+	{
+		Filters? filters = new();
 
-        ICollection<IFilterDefinition<TransactionTypeView>> filterDefinitions = state.FilterDefinitions;
+		ICollection<IFilterDefinition<TransactionTypeView>> filterDefinitions = state.FilterDefinitions;
 
-        if (filterDefinitions is not null)
-        {
-            foreach (var filter in filterDefinitions)
-            {
-                if (filter.Title == "Назва типу транзакції")
-                    filters.Name = filter?.Value?.ToString();
-                else if (filter.Title == TransactionTypeFiltersConstants.Name)
-                    filters.IsIncome = filter.Value is TransactionTypeFiltersConstants.Expense ? false : true;
-            }
-        }
-        return new TransactionTypeQueryParameters(filters, _searchString, new Pagination() { Page = _page, PageSize = _pageSize });
-    }
+		if (filterDefinitions is not null)
+		{
+			foreach (var filter in filterDefinitions)
+			{
+				if (filter.Title == "Назва типу транзакції")
+				{
+					filters.Name = filter?.Value?.ToString();
+				}
+				else if (filter.Title == TransactionTypeFiltersConstants.Name)
+				{
+					filters.IsIncome = filter.Value is TransactionTypeFiltersConstants.Expense ? false : true;
+				}
+			}
+		}
 
-    private async Task<GridData<TransactionTypeView>> GetTransactionTypesAsync(GridState<TransactionTypeView> state)
-    {
-        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+		return new TransactionTypeQueryParameters(filters, _searchString, new Pagination
+		{
+			Page = _page,
+			PageSize = _pageSize
+		});
+	}
 
-        try
-        {
-            return await GetTransactionTypeInternalAsync(state, tokenSource.Token);
-        }
-        catch (Exception)
-        {
-            return new GridData<TransactionTypeView>
-            {
-                Items = new List<TransactionTypeView>(),
-                TotalItems = 0
-            };
-        }
-        finally
-        {
-            StateHasChanged();
-        }
-    }
+	private async Task<GridData<TransactionTypeView>> GetTransactionTypesAsync(GridState<TransactionTypeView> state)
+	{
+		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-    private async ValueTask<GridData<TransactionTypeView>> GetTransactionTypeInternalAsync(GridState<TransactionTypeView> state, CancellationToken cancellationToken)
-    {
-        string?[] filter = state.FilterDefinitions.Select(f => f?.Value?.ToString()).ToArray();
+		try
+		{
+			return await GetTransactionTypeInternalAsync(state, tokenSource.Token);
+		}
+		catch (Exception)
+		{
+			return new GridData<TransactionTypeView>
+			{
+				Items = new List<TransactionTypeView>(),
+				TotalItems = 0
+			};
+		}
+		finally
+		{
+			StateHasChanged();
+		}
+	}
 
-        _page += state.Page;
-        _pageSize = state.PageSize;
+	private async ValueTask<GridData<TransactionTypeView>> GetTransactionTypeInternalAsync(
+		GridState<TransactionTypeView> state,
+		CancellationToken cancellationToken)
+	{
+		string?[] filter = state.FilterDefinitions.Select(f => f?.Value?.ToString()).ToArray();
 
-        TransactionTypeQueryParameters transactionTypeQueryParameters = BuildQuery(state);
+		_page += state.Page;
+		_pageSize = state.PageSize;
 
-        PagedResult<TransactionType> pagedResult = await TransactionTypeService.GetAsync(transactionTypeQueryParameters, cancellationToken);
+		TransactionTypeQueryParameters transactionTypeQueryParameters = BuildQuery(state);
 
-        List<TransactionTypeView> view = pagedResult.Items.Select(tp => new TransactionTypeView
-        {
-            Id = tp.Id,
-            Name = tp.Name,
-            IsIncome = tp.IsIncome
-        }).ToList();
+		PagedResult<TransactionType> pagedResult =
+			await TransactionTypeService.GetAsync(transactionTypeQueryParameters, cancellationToken);
 
-        return new GridData<TransactionTypeView>
-        {
-            Items = view ?? new List<TransactionTypeView>(),
-            TotalItems = view.Count
-        };
-    } 
+		List<TransactionTypeView> view = pagedResult.Items.Select(tp => new TransactionTypeView
+		{
+			Id = tp.Id,
+			Name = tp.Name,
+			IsIncome = tp.IsIncome
+		}).ToList();
 
-    private async Task OnDeleteButtonClick(TransactionTypeView transactionType)
-    {
-        using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+		return new GridData<TransactionTypeView>
+		{
+			Items = view ?? new List<TransactionTypeView>(),
+			TotalItems = view.Count
+		};
+	}
 
-        await TransactionTypeService.DeleteAsync(transactionType.Id, tokenSource.Token);
+	private async Task OnDeleteButtonClick(TransactionTypeView transactionType)
+	{
+		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
-        if (_dataGrid != null)
-            await _dataGrid.ReloadServerData();
-    }
+		await TransactionTypeService.DeleteAsync(transactionType.Id, tokenSource.Token);
 
-    private async Task OnEditButtonClick(TransactionTypeView transactionType)
-    {
-        DialogOptions options = new DialogOptions
-        {
-            FullWidth = true,
-            MaxWidth = MaxWidth.Medium,
-            CloseButton = true,
-            CloseOnEscapeKey = true
-        };
+		await _dataGrid.ReloadServerData();
+	}
 
-        DialogParameters<EditTransactionTypeDialog> parameters = new DialogParameters<EditTransactionTypeDialog> { { d => d.TransactionTypeView, transactionType } };
+	private async Task OnEditButtonClick(TransactionTypeView transactionType)
+	{
+		DialogOptions options = new()
+		{
+			FullWidth = true,
+			MaxWidth = MaxWidth.Medium,
+			CloseButton = true,
+			CloseOnEscapeKey = true
+		};
 
-        IDialogReference dialog = await DialogService.ShowAsync<EditTransactionTypeDialog>("Редагувати тип транзакції", parameters, options);
+		DialogParameters<EditTransactionTypeDialog> parameters = new()
+		{
+			{
+				d => d.TransactionTypeView, transactionType
+			}
+		};
 
-        DialogResult? result = await dialog.Result;
+		IDialogReference dialog =
+			await DialogService.ShowAsync<EditTransactionTypeDialog>("Редагувати тип транзакції", parameters, options);
 
-        if (_dataGrid != null && !result.Canceled)
-            await _dataGrid.ReloadServerData();
-    }
+		DialogResult? result = await dialog.Result;
 
-    private async Task OnAddButtonClick()
-    {
-        DialogOptions options = new DialogOptions
-        {
-            FullWidth = true,
-            MaxWidth = MaxWidth.Medium,
-            CloseButton = true,
-            CloseOnEscapeKey = true
-        };
+		if (result?.Canceled is false)
+		{
+			await _dataGrid.ReloadServerData();
+		}
+	}
 
-        IDialogReference dialog = await DialogService.ShowAsync<AddTransactionTypeDialog>("Додати новий тип транзакції", options);
+	private async Task OnAddButtonClick()
+	{
+		DialogOptions options = new()
+		{
+			FullWidth = true,
+			MaxWidth = MaxWidth.Medium,
+			CloseButton = true,
+			CloseOnEscapeKey = true
+		};
 
-        DialogResult? result = await dialog.Result;
+		IDialogReference dialog =
+			await DialogService.ShowAsync<AddTransactionTypeDialog>("Додати новий тип транзакції", options);
 
-        if (_dataGrid != null && !result.Canceled)
-            await _dataGrid.ReloadServerData();
-    }
+		DialogResult? result = await dialog.Result;
+
+		if (result?.Canceled is false)
+		{
+			await _dataGrid.ReloadServerData();
+		}
+	}
 }
