@@ -1,0 +1,42 @@
+<MudDialog>
+    <TitleContent>
+        Пошук
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isValid">
+            <MudTextField
+                T="string"
+                Label="Назва"
+                Value="@StoreQueryParameters?.Name"
+                Margin="Margin.Normal"
+                ValueChanged="OnNameChanged"/>
+            <MudTextField
+                T="string"
+                Label="Aдреса"
+                Value="@StoreQueryParameters?.Address"
+                Margin="Margin.Normal"
+                ValueChanged="OnAddressChanged"/>
+            <MudCheckBox
+                Value="@StoreQueryParameters.IsOpened.GetValueOrDefault()"
+                Color="Color.Primary"
+                UncheckedColor="Color.Default"
+                ValueChanged="OnIsOpenedChanged"
+                T="bool">
+                Відчинений
+            </MudCheckBox>
+            <MudDatePicker
+                Date="@StoreQueryParameters.SetupDate"
+                Label="Дата відкриття"
+                DateChanged="OnOpeningDateChanged"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton Disabled=" string.IsNullOrEmpty(StoreQueryParameters.Name) && string.IsNullOrEmpty(StoreQueryParameters.Address) && StoreQueryParameters.SetupDate == null"
+                   OnClick="ResetParametersAndSearch">
+            Очистити
+        </MudButton>
+        <MudButton OnClick="Search">Пошук</MudButton>
+
+    </DialogActions>
+</MudDialog>

@@ -1,0 +1,51 @@
+@inject IStoresService StoresService
+@inject IDialogService DialogService
+@inject ILogger<StoresPage> Logger
+
+
+<MudDialog>
+    <TitleContent>
+        Редагувати магазин
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isValid">
+            <MudTextField @bind-Value="Store.Name"
+                          Placeholder="Назва магазину"
+                          Label="Назва"
+                          Variant="Variant.Outlined"
+                          Counter="100"
+                          MaxLength="100"
+                          Lines="1"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"
+                          Margin="Margin.Normal">
+            </MudTextField>
+            <MudTextField
+                @bind-Value="Store.Address"
+                Placeholder="Адреса"
+                Label="Адреса"
+                Variant="Variant.Outlined"
+                Counter="100"
+                MaxLength="100"
+                Lines="1"
+                Immediate="true"
+                Required="false"
+                Margin="Margin.Normal">
+            </MudTextField>
+            <MudCheckBox @bind-Value="Store.IsOpened"
+                         Required="false"
+                         Color="Color.Primary"
+                         UncheckedColor="Color.Default">
+                Відчинений
+            </MudCheckBox>
+            <MudDatePicker Label="Дата відкриття" @bind-Date="@NullableSetUpDate"
+                           Required="true"
+                           RequiredError="Це поле обов'язкове"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton OnClick="EditAsync" Disabled="!_isValid" Color="Color.Primary">Підтвердити</MudButton>
+    </DialogActions>
+</MudDialog>

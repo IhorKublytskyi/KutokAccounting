@@ -1,0 +1,19 @@
+<MudDialog>
+    <TitleContent>
+        Більше інформації про магазин
+    </TitleContent>
+    <DialogContent>
+        <MudForm>
+            <MudText>Назва: @Store.Name</MudText>
+            <MudText>Адреса: @Store.Address</MudText>
+            <MudText>Дата відкриття: @Store.SetupDate</MudText>
+            <MudText>Відчиненний: @BooleanValueConverter.ConvertToString(Store.IsOpened)</MudText>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton>
+            Дивитися транзакції
+        </MudButton>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+    </DialogActions>
+</MudDialog>

@@ -1,5 +1,10 @@
 using FluentValidation;
 using KutokAccounting.DataProvider;
+using KutokAccounting.DataProvider.Models;
+using KutokAccounting.Services.Stores;
+using KutokAccounting.Services.Stores.Abstractions;
+using KutokAccounting.Services.Stores.Dtos;
+using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Logging.Extensions;
 using KutokAccounting.Services.TransactionTypes;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
@@ -45,6 +50,11 @@ public static class MauiProgram
 		builder.Services.AddScoped<IValidator<VendorDto>, VendorDtoValidator>();
 		builder.Services.AddScoped<IValidator<VendorQueryParameters>, VendorQueryParametersValidator>();
 		builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore, new SemaphoreSlim(1, 1));
+		
+		builder.Services.AddScoped<IValidator<Pagination>, PaginationValidator>();
+		builder.Services.AddScoped<IValidator<StoreDto>, StoreDtoValidator>();
+		builder.Services.AddScoped<IStoresRepository, StoresRepository>();
+		builder.Services.AddScoped<IStoresService, StoresService>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();
