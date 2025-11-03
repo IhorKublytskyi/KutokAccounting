@@ -15,6 +15,15 @@ public class GetStoresQueryBuilder
 		_query = dbContext.Stores.AsNoTracking();
 	}
 
+	public GetStoresQueryBuilder SearchId(int? id)
+	{
+		if (id is not null)
+		{
+			_query = _query.Where(s => s.Id == id);
+		}
+
+		return this;
+	}
 	public GetStoresQueryBuilder SearchName(string? name)
 	{
 		if (string.IsNullOrEmpty(name) is false)
@@ -48,7 +57,7 @@ public class GetStoresQueryBuilder
 
 		return this;
 	}
-
+	
 	public GetStoresQueryBuilder SearchOpened(bool? isOpened)
 	{
 		if (isOpened is not null)
@@ -58,7 +67,7 @@ public class GetStoresQueryBuilder
 
 		return this;
 	}
-
+	
 	public IQueryable<Store> BuildQuery()
 	{
 		return _query;

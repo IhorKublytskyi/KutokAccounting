@@ -62,6 +62,8 @@ partial class StoresPage
 		if (_dataGrid != null && !dialogResult.Canceled)
 		{
 			await _dataGrid.ReloadServerData();
+			StateHasChanged();
+			StoreStateNotifier.StoreStateChanged();
 		}
 	}
 
@@ -86,6 +88,8 @@ partial class StoresPage
 			if (_dataGrid != null && !dialogResult.Canceled)
 			{
 				await _dataGrid.ReloadServerData();
+				StateHasChanged();
+				StoreStateNotifier.StoreStateChanged();
 			}
 		}
 		catch (Exception e)
@@ -102,6 +106,8 @@ partial class StoresPage
 		if (shouldBeDeleted.GetValueOrDefault())
 		{
 			await TryDeleteStoreAsync(storeDto);
+			StateHasChanged();
+			StoreStateNotifier.StoreStateChanged();
 		}
 	}
 

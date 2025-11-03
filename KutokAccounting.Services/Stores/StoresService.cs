@@ -44,7 +44,7 @@ public class StoresService : IStoresService
 			"A new store with following properties was created. Name: {storeName}, Address: {storeAddress}, Is opened: {isOpened}, Setup date: {setUpDate}"
 			, storeDto.Name, storeDto.Address, storeDto.IsOpened.ToString(), storeDto.SetupDate.ToString("mm/dd/yyyy"));
 	}
-
+	
 	public async ValueTask<PagedResult<StoreDto>> GetPageAsync(StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
@@ -55,17 +55,37 @@ public class StoresService : IStoresService
 		{
 			_logger.LogWarning("Store validation failed. Errors: {Errors}", validationResult.Errors);
 		}
-
+		
 		PagedResult<Store> storesPagedResult =
 			await _repository.GetFilteredPageAsync(queryParameters, ct);
 
 		_logger.LogInformation("Pages of stores were fetched");
-
+		
 		return new PagedResult<StoreDto>
 		{
 			Count = storesPagedResult.Count,
-			Items = storesPagedResult.Items.Select(x => x.MapToDto())
+			Items = storesPagedResult.Items.Select(s => s.MapToDto())
 		};
+	}
+	/// <summary>
+	/// returns store with requested id
+	/// </summary>
+	/// <param name="id">lookup id</param>
+	/// <param name="ct">CancellationToken</param>
+	/// <returns>store with requested id</returns>
+	/// <exception cref="ArgumentException">thrown when id does not exist</exception>
+	public async ValueTask<StoreDto> GetByIdAsync(int id, CancellationToken ct)
+	{
+		Store? store = await _repository.GetByIdAsync(id, ct);
+		if (store is null)
+		{
+			_logger.LogWarning("Store with id {StoreId} was not found", id);
+
+			throw new ArgumentException($"Store with id {id} was not found");
+		}
+		
+		_logger.LogInformation("Fetching store with id {StoreId}", id);
+		return store.MapToDto();
 	}
 
 	public async ValueTask UpdateAsync(int storeId,

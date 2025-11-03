@@ -10,7 +10,7 @@ public interface IStoresRepository
 	ValueTask<PagedResult<Store>> GetFilteredPageAsync(
 		StoreQueryParameters queryParameters,
 		CancellationToken ct);
-
+	ValueTask<Store?> GetByIdAsync(int id, CancellationToken ct);
 	ValueTask UpdateAsync(int storeId,
 		Store updatedStore,
 		CancellationToken ct);
