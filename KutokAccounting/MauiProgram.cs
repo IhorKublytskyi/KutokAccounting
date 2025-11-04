@@ -6,6 +6,10 @@ using KutokAccounting.Services.Stores.Abstractions;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Logging.Extensions;
+using KutokAccounting.Services.Transactions;
+using KutokAccounting.Services.Transactions.Interfaces;
+using KutokAccounting.Services.Transactions.Models;
+using KutokAccounting.Services.Transactions.Validators;
 using KutokAccounting.Services.TransactionTypes;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Models;
@@ -55,6 +59,10 @@ public static class MauiProgram
 		builder.Services.AddScoped<IValidator<StoreDto>, StoreDtoValidator>();
 		builder.Services.AddScoped<IStoresRepository, StoresRepository>();
 		builder.Services.AddScoped<IStoresService, StoresService>();
+		builder.Services.AddScoped<ITransactionService, TransactionService>();
+		builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+		builder.Services.AddScoped<IValidator<TransactionDto>, TransactionDtoValidator>();
+		builder.Services.AddScoped<IValidator<TransactionQueryParameters>, TransactionQueryParametersValidator>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

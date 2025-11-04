@@ -1,13 +1,12 @@
-@using KutokAccounting.Components.Pages.TransactionTypes.Models
 @using KutokAccounting.Services.TransactionTypes.Interfaces
-@using KutokAccounting.Services.TransactionTypes.Models
 @inject ITransactionTypeService TransactionTypeService
 
 <MudDialog>
     <TitleContent>
-        Редагувати тип транзації
+        Редагувати тип транзакції
     </TitleContent>
     <DialogContent>
+        
         <MudForm @bind-IsValid="_isSuccess">
             <MudTextField @bind-Value="TransactionTypeView.Name"
                           Placeholder="Назва типу транзакції"

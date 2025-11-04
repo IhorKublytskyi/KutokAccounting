@@ -1,10 +1,9 @@
 @using KutokAccounting.Services.TransactionTypes.Interfaces
-@using KutokAccounting.Services.TransactionTypes.Models
 @inject ITransactionTypeService TransactionTypeService
 
 <MudDialog>
     <TitleContent>
-        Додати нового постачальника
+        Додати новий тип транзакції
     </TitleContent>
     <DialogContent>
         <MudForm @bind-IsValid="_isSuccess"

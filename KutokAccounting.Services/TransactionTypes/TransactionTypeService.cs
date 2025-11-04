@@ -96,7 +96,7 @@ public sealed class TransactionTypeService : ITransactionTypeService
 
 		if (validationResult.IsValid is false)
 		{
-			_logger.LogWarning("Query parameters validation failed. Errors: {Errors}", validationResult.Errors);
+			_logger.LogWarning("Query parameters for transaction type validation failed. Errors: {Errors}", validationResult.Errors);
 
 			throw new ArgumentException(validationResult.ToString());
 		}

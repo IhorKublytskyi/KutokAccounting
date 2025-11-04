@@ -29,13 +29,13 @@ public partial class TransactionTypesPage
 		{
 			foreach (var filter in filterDefinitions)
 			{
-				if (filter.Title == "Назва типу транзакції")
+				if (filter.Title == TransactionTypeFiltersConstants.Name)
 				{
 					filters.Name = filter?.Value?.ToString();
 				}
-				else if (filter.Title == TransactionTypeFiltersConstants.Name)
+				else if (filter.Title == TransactionTypeFiltersConstants.Type)
 				{
-					filters.IsIncome = filter.Value is TransactionTypeFiltersConstants.Expense ? false : true;
+					filters.IsIncome = filter.Value is not TransactionTypeFiltersConstants.Expense;
 				}
 			}
 		}
@@ -73,8 +73,6 @@ public partial class TransactionTypesPage
 		GridState<TransactionTypeView> state,
 		CancellationToken cancellationToken)
 	{
-		string?[] filter = state.FilterDefinitions.Select(f => f?.Value?.ToString()).ToArray();
-
 		_page += state.Page;
 		_pageSize = state.PageSize;
 
