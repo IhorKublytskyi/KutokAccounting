@@ -7,7 +7,7 @@ namespace KutokAccounting.Components.Layout;
 
 public partial class NavMenu : ComponentBase
 {
-	private IEnumerable<StoreDto> _stores;
+	private IReadOnlyCollection<StoreDto> _stores;
 
 	public void Dispose()
 	{
@@ -32,7 +32,7 @@ public partial class NavMenu : ComponentBase
 			}
 		}, tokenSource.Token);
 
-		_stores = stores.Items;
+		_stores = stores.Items.ToList();
 	}
 
 	private string GetHrefToStore(int id)

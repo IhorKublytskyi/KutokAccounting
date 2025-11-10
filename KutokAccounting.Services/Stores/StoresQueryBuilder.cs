@@ -6,16 +6,16 @@ using Microsoft.EntityFrameworkCore;
 
 namespace KutokAccounting.Services.Stores;
 
-public class GetStoresQueryBuilder
+public class StoresQueryBuilder
 {
 	private IQueryable<Store> _query;
 
-	public GetStoresQueryBuilder(KutokDbContext dbContext)
+	public StoresQueryBuilder(KutokDbContext dbContext)
 	{
 		_query = dbContext.Stores.AsNoTracking();
 	}
 
-	public GetStoresQueryBuilder SearchId(int? id)
+	public StoresQueryBuilder SearchId(int? id)
 	{
 		if (id is not null)
 		{
@@ -24,7 +24,8 @@ public class GetStoresQueryBuilder
 
 		return this;
 	}
-	public GetStoresQueryBuilder SearchName(string? name)
+
+	public StoresQueryBuilder SearchName(string? name)
 	{
 		if (string.IsNullOrEmpty(name) is false)
 		{
@@ -34,7 +35,7 @@ public class GetStoresQueryBuilder
 		return this;
 	}
 
-	public GetStoresQueryBuilder SearchAddress(string? address)
+	public StoresQueryBuilder SearchAddress(string? address)
 	{
 		if (string.IsNullOrEmpty(address) is false)
 		{
@@ -44,7 +45,7 @@ public class GetStoresQueryBuilder
 		return this;
 	}
 
-	public GetStoresQueryBuilder SearchSetupDate(DateTime? setupDate)
+	public StoresQueryBuilder SearchSetupDate(DateTime? setupDate)
 	{
 		if (setupDate is not null)
 		{
@@ -57,8 +58,8 @@ public class GetStoresQueryBuilder
 
 		return this;
 	}
-	
-	public GetStoresQueryBuilder SearchOpened(bool? isOpened)
+
+	public StoresQueryBuilder SearchOpened(bool? isOpened)
 	{
 		if (isOpened is not null)
 		{
@@ -67,7 +68,7 @@ public class GetStoresQueryBuilder
 
 		return this;
 	}
-	
+
 	public IQueryable<Store> BuildQuery()
 	{
 		return _query;
