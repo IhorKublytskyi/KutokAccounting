@@ -14,9 +14,6 @@ public partial class TransactionTypesPage
 
 	private MudDataGrid<TransactionTypeView> _dataGrid = new();
 
-	private int _page = 1;
-	private int _pageSize = 10;
-
 	private string? _searchString;
 
 	private TransactionTypeQueryParameters BuildQuery(GridState<TransactionTypeView> state)
@@ -42,8 +39,8 @@ public partial class TransactionTypesPage
 
 		return new TransactionTypeQueryParameters(filters, _searchString, new Pagination
 		{
-			Page = _page,
-			PageSize = _pageSize
+			Page = state.Page + 1,
+			PageSize = state.PageSize
 		});
 	}
 
@@ -73,9 +70,6 @@ public partial class TransactionTypesPage
 		GridState<TransactionTypeView> state,
 		CancellationToken cancellationToken)
 	{
-		_page += state.Page;
-		_pageSize = state.PageSize;
-
 		TransactionTypeQueryParameters transactionTypeQueryParameters = BuildQuery(state);
 
 		PagedResult<TransactionType> pagedResult =
@@ -91,7 +85,7 @@ public partial class TransactionTypesPage
 		return new GridData<TransactionTypeView>
 		{
 			Items = view ?? new List<TransactionTypeView>(),
-			TotalItems = view.Count
+			TotalItems = pagedResult.Count
 		};
 	}
 

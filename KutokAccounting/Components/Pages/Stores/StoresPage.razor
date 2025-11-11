@@ -23,14 +23,15 @@
                     ПОШУК
                 </MudButton>
 
-                <MudButton Variant="Variant.Filled" Style="max-height: 38px" Color="Color.Primary" OnClick="OnAddShopButtonClick">
+                <MudButton Variant="Variant.Filled" Style="max-height: 38px" Color="Color.Primary"
+                           OnClick="OnAddShopButtonClick">
                     ДОДАТИ МАГАЗИН
                 </MudButton>
             </MudStack>
         </MudStack>
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="s => s.Name" Title="Назва" Sortable="false" Style="font-weight:bold;" />
+        <PropertyColumn Property="s => s.Name" Title="Назва" Sortable="false" Style="font-weight:bold;"/>
         <TemplateColumn CellClass="d-flex justify-end">
             <CellTemplate>
                 <MudStack Row>

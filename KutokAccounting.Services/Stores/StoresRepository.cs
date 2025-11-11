@@ -42,7 +42,7 @@ public class StoresRepository : IStoresRepository
 		GetStoresQueryBuilder getStoresQueryBuilder = new(_dbContext);
 
 		IQueryable<Store> storesQuery = getStoresQueryBuilder
-			.SearchName(queryParameters.Name)
+			.SearchName(queryParameters.Name)	
 			.SearchAddress(queryParameters.Address)
 			.SearchSetupDate(queryParameters.SetupDate)
 			.SearchOpened(queryParameters.IsOpened)

@@ -4,59 +4,65 @@
 @inject ITransactionTypeService TransactionTypeService
 @inject IDialogService DialogService
 
-<MudDataGrid
-    @ref="_dataGrid"
-    T="TransactionTypeView"
-    ServerData="GetTransactionTypesAsync"
-    FilterMode="DataGridFilterMode.ColumnFilterMenu">
-    <ToolBarContent>
-        <MudStack Style="width: 100%;">
-            <MudText Typo="Typo.h6" Style="margin-top:6px;">Типи транзакцій</MudText>
-            <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
-                <MudTextField
-                    T="string"
-                    @bind-Value="_searchString"
-                    @bind-Value:after="() => _dataGrid.ReloadServerData()"
-                    Placeholder="Пошук"
-                    Immediate="true"
-                    Adornment="Adornment.End"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    IconSize="Size.Medium"
-                    Style="width:450px;">
-                </MudTextField>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddButtonClick">
-                    Додати новий тип транзакції
-                </MudButton>
-            </MudStack>
-        </MudStack>
-    </ToolBarContent>
-    <Columns>
-        <PropertyColumn
-            Property="tp => tp.Name"
-            Title="Назва"
-            Sortable="false"
-            Filterable="true"
-            FilterOperators="_filterOperators"></PropertyColumn>
-        <PropertyColumn
-            Property="tp => tp.Label"
-            Title="Тип"
-            Sortable="false"
-            Filterable="true"
-            FilterOperators="_filterOperators"></PropertyColumn>
-        <TemplateColumn>
-            <CellTemplate>
-                <MudStack Row Justify="Justify.FlexEnd">
-                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
-                               OnClick="() => OnEditButtonClick(context.Item)">Редагувати
-                    </MudButton>
-                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
-                               OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
-                    </MudButton>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudPaper Outlined="true">
+        <MudDataGrid
+            @ref="_dataGrid"
+            T="TransactionTypeView"
+            ServerData="GetTransactionTypesAsync"
+            FilterMode="DataGridFilterMode.ColumnFilterMenu">
+            <ToolBarContent>
+                <MudStack Style="width: 100%;">
+                    <MudText Typo="Typo.h6" Style="margin-top:12px;">Типи транзакцій</MudText>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
+                        <MudTextField
+                            T="string"
+                            @bind-Value="_searchString"
+                            @bind-Value:after="() => _dataGrid.ReloadServerData()"
+                            Placeholder="Пошук"
+                            Immediate="true"
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium"
+                            Style="width:450px;">
+                        </MudTextField>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddButtonClick">
+                            Додати новий тип транзакції
+                        </MudButton>
+                    </MudStack>
                 </MudStack>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="TransactionTypeView"></MudDataGridPager>
-    </PagerContent>
-</MudDataGrid>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn
+                    Property="tp => tp.Name"
+                    Title="Назва"
+                    Sortable="false"
+                    Filterable="true"
+                    FilterOperators="_filterOperators"></PropertyColumn>
+                <PropertyColumn
+                    Property="tp => tp.Label"
+                    Title="Тип"
+                    Sortable="false"
+                    Filterable="true"
+                    FilterOperators="_filterOperators"></PropertyColumn>
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudStack Row Justify="Justify.FlexEnd">
+                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
+                                       OnClick="() => OnEditButtonClick(context.Item)">Редагувати
+                            </MudButton>
+                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
+                                       OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
+                            </MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="TransactionTypeView"></MudDataGridPager>
+            </PagerContent>
+        </MudDataGrid>
+    </MudPaper>
+</MudContainer>
+
+

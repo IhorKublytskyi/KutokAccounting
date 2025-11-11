@@ -7,15 +7,15 @@ namespace KutokAccounting.Components.Pages.TransactionTypes;
 
 public partial class EditTransactionTypeDialog
 {
+	private bool _isSuccess;
+
 	[CascadingParameter]
 	public IMudDialogInstance MudDialog { get; set; }
 
 	[Parameter]
 	public TransactionTypeView? TransactionTypeView { get; set; }
-	
-	private bool _isSuccess;
 
-	private async Task Update()
+	private async Task UpdateAsync()
 	{
 		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 

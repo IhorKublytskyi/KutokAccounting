@@ -26,7 +26,7 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 			.HasColumnType("TEXT")
 			.HasMaxLength(100)
 			.IsRequired();
-		
+
 		builder
 			.Property(t => t.Description)
 			.HasColumnName("description")
@@ -35,9 +35,10 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 			.IsRequired(false);
 
 		builder
-			.Property(t => t.Value)
+			.Property(t => t.Money)
 			.HasColumnName("value")
-			.HasColumnType("INTEGER")
+			.HasColumnType("NUMERIC")
+			.HasConversion<MoneyConverter>()
 			.IsRequired();
 
 		builder
