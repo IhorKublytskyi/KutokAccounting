@@ -39,9 +39,10 @@ public class StoresRepository : IStoresRepository
 		StoreQueryParameters queryParameters,
 		CancellationToken ct)
 	{
-		GetStoresQueryBuilder getStoresQueryBuilder = new(_dbContext);
+		StoresQueryBuilder storesQueryBuilder = new(_dbContext);
 
-		IQueryable<Store> storesQuery = getStoresQueryBuilder
+		IQueryable<Store> storesQuery = storesQueryBuilder
+			.SearchId(queryParameters.Id)
 			.SearchName(queryParameters.Name)
 			.SearchAddress(queryParameters.Address)
 			.SearchSetupDate(queryParameters.SetupDate)
@@ -56,6 +57,11 @@ public class StoresRepository : IStoresRepository
 			Items = pagedStores,
 			Count = await filteredStoresCountTask
 		};
+	}
+
+	public async ValueTask<Store?> GetByIdAsync(int id, CancellationToken ct)
+	{
+		return await _dbContext.Stores.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id, ct);
 	}
 
 	public async ValueTask UpdateAsync(int storeId,
