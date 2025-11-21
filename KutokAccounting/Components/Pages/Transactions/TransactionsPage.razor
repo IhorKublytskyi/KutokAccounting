@@ -10,7 +10,7 @@
             <MudDateRangePicker @ref="_picker"
                                 PickerVariant="PickerVariant.Dialog"
                                 @bind-DateRange="@_dateRange"
-                                @bind-DateRange:after="() => _dataGrid.ReloadServerData()"
+                                @bind-DateRange:after="OnDateRangeChanged"
                                 Margin="Margin.Dense">
             </MudDateRangePicker>
             
@@ -20,19 +20,15 @@
         </MudItem>
     </MudGrid>
 
-    <MudPaper Elevation="0" Class="pa-4 mb-4 text-center" Outlined="true">
-        <MudText Align="Align.Left" Typo="Typo.h4">Calculation result</MudText>
-        <MudText Align="Align.Left" Typo="Typo.subtitle1">Income: @_calculationResult.Income</MudText>
-        <MudText Align="Align.Left" Typo="Typo.subtitle1">Expense: @_calculationResult.Expense</MudText>
-        <MudText Align="Align.Left" Typo="Typo.subtitle1">Profit: @_calculationResult.Profit</MudText>
-    </MudPaper>
+   <CalculationResultView Value="_calculationResult"></CalculationResultView>
 
     <MudPaper Outlined="true">
         <MudDataGrid
             @ref="_dataGrid"
             T="TransactionView"
             ServerData="GetTransactionsAsync"
-            FilterMode="DataGridFilterMode.ColumnFilterMenu">
+            Filterable="true"
+            FilterMode="DataGridFilterMode.ColumnFilterRow">
             <ToolBarContent>
                 <MudStack Style="width: 100%;">
                     <MudText Typo="Typo.h6" Style="margin-top:20px;">Транзакції</MudText>
@@ -58,30 +54,38 @@
                 <PropertyColumn
                     Property="tv => tv.Name"
                     Title="Назва"
-                    Sortable="false"
+                    Sortable="true"
                     Filterable="true"
-                    FilterOperators="_filterOperators"></PropertyColumn>
+                    FilterOperators="_stringFilterOperators"></PropertyColumn>
                 <PropertyColumn
                     Property="tv => tv.Description"
                     Title="Опис"
-                    Sortable="false"
+                    Sortable="true"
                     Filterable="true"
-                    FilterOperators="_filterOperators"></PropertyColumn>
+                    FilterOperators="_stringFilterOperators"></PropertyColumn>
                 <PropertyColumn
-                    Property="tv => tv.Money"
+                    Property="tv => tv.Money.Value"
                     Title="Сума"
-                    Sortable="false"
-                    Filterable="true"></PropertyColumn>
+                    Sortable="true"
+                    FilterOperators="_intFilterOperators">
+                    <CellTemplate>
+                        @context.Item.Money.ToString()
+                    </CellTemplate>
+                    <FilterTemplate>
+                        <FilterWindow Context="@context" Operators="_intFilterOperators"></FilterWindow>
+                    </FilterTemplate>
+                </PropertyColumn>
                 <PropertyColumn
                     Property="tv => tv.CreatedAt"
                     Title="Час створення"
-                    Sortable="false"
+                    Sortable="true"
                     Filterable="false"></PropertyColumn>
                 <PropertyColumn
                     Property="tv => tv.TransactionType.ToString()"
                     Title="Тип"
                     Sortable="false"
-                    Filterable="false"></PropertyColumn>
+                    Filterable="false"
+                    FilterOperators="_stringFilterOperators"></PropertyColumn>
                 <TemplateColumn>
                     <CellTemplate>
                         <MudStack Row Justify="Justify.FlexEnd" Spacing="2">

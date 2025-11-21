@@ -32,7 +32,7 @@
                           Required="false"
                           Margin="Margin.Normal"/>
             <MudTextField T = "string"
-                          Value="@TransactionView.Money.Value.ToString()"
+                          Value="@TransactionView.Money.ToString("0.00")"
                           ValueChanged="OnMoneyChanged"
                           Placeholder="Сума транзакції"
                           Label="Сума"
@@ -55,7 +55,7 @@
         </MudForm>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Назад</MudButton>
-        <MudButton OnClick="UpdateAsync" Disabled="!_isSuccess" Color="Color.Primary">Підтвердити</MudButton>
+        <MudButton OnClick="@Cancel">Назад</MudButton>
+        <MudButton OnClick="@UpdateAsync" Disabled="!_isSuccess" Color="Color.Primary">Підтвердити</MudButton>
     </DialogActions>
 </MudDialog>

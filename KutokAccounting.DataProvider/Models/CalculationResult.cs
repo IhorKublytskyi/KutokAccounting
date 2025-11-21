@@ -1,3 +1,3 @@
 ﻿namespace KutokAccounting.DataProvider.Models;
 
-public readonly record struct CalculationResult(decimal Profit, decimal Income, decimal Expense);
+public readonly record struct CalculationResult(Money Profit, Money Income, Money Expense);

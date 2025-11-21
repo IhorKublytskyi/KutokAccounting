@@ -6,8 +6,8 @@ namespace KutokAccounting.DataProvider.Configurations;
 public class MoneyConverter : ValueConverter<Money, long>
 {
 	public MoneyConverter() : base(
-		m => m.GetValueInCoins(),
-		m => new Money(m / 100.0m)
+		m => m.Value,
+		m => new Money(m)
 	)
 	{
 	}

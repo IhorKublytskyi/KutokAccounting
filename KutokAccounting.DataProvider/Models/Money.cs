@@ -4,37 +4,54 @@ namespace KutokAccounting.DataProvider.Models;
 
 public readonly record struct Money
 {
-	public decimal Value { get; }
+	public long Value { get; }
 
-	public Money(decimal value)
+	public Money(long value)
 	{
 		Value = value;
 	}
 
+	public static bool operator >(Money left, Money right)
+	{
+		return left.Value > right.Value;
+	}
+
+	public static bool operator <(Money left, Money right)
+	{
+		return left.Value < right.Value;
+	}
+
 	public static Money ConvertFromStringToMoney(string value)
 	{
-		if (value == null)
+		if (string.IsNullOrWhiteSpace(value))
 		{
 			throw new ArgumentNullException(nameof(value));
 		}
 
-		string replacedValue = value.Replace('.', ',');
+		string formattedString = value.Replace('.', ',');
 
-		if (decimal.TryParse(replacedValue, out decimal result))
+		if (decimal.TryParse(formattedString, out decimal result))
 		{
-			return new Money(result);
+			return new Money((long) (result * 100));
 		}
 
 		throw new FormatException("Invalid money format.");
 	}
 
-	public long GetValueInCoins()
+	public decimal GetValueInCoins()
 	{
-		return (long) (Value * 100);
+		return decimal.Divide(Value, 100);
 	}
 
 	public override string ToString()
 	{
-		return Value.ToString("C2", CultureInfo.GetCultureInfo("uk-UA"));
+		decimal decimalValue = decimal.Divide(Value, 100);
+
+		return decimalValue.ToString("C2", CultureInfo.GetCultureInfo("uk-UA"));
+	}
+
+	public string ToString(string format)
+	{
+		return GetValueInCoins().ToString(format);
 	}
 }

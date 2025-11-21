@@ -100,13 +100,13 @@ public sealed class TransactionService : ITransactionService
 	{
 		cancellationToken.ThrowIfCancellationRequested();
 
-		TransactionQueryParameters parameters = new
-			(
+		TransactionQueryParameters parameters = new(
 			new Filters 
 			{
 				Range = range 
 			},
-			default, 
+			null,
+			null,
 			new Pagination 
 			{ 
 				Page = 1, 
@@ -115,17 +115,22 @@ public sealed class TransactionService : ITransactionService
 
 		PagedResult<Transaction> transactions = await _repository.GetAsync(parameters, cancellationToken);
 
-		decimal income = transactions.Items
+		long income = transactions.Items
 			.Where(t => t.TransactionType?.IsIncome is true)
 			.Select(t => t.Money.Value)
 			.Sum();
 
-		decimal expense = transactions.Items
+		long expense = transactions.Items
 			.Where(t => t.TransactionType?.IsIncome is false)
 			.Select(t => -t.Money.Value)
 			.Sum();
 
-		return new CalculationResult(income + expense, income, expense);
+		return new CalculationResult
+		{
+			Income = new Money(income),
+			Expense = new Money(expense),
+			Profit = new Money(income + expense)
+		};
     }
 	
 	public async ValueTask<Transaction> GetByIdAsync(int id, CancellationToken cancellationToken)

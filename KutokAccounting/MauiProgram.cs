@@ -18,6 +18,7 @@ using KutokAccounting.Services.Vendors;
 using KutokAccounting.Services.Vendors.Models;
 using KutokAccounting.Services.Vendors.Validators;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 
 namespace KutokAccounting;
@@ -33,6 +34,7 @@ public static class MauiProgram
 			.ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
 
 		builder.Services.AddMudServices();
+		builder.Services.AddTransient<MudLocalizer, UkrainianLocalizer>();
 		builder.Services.AddMauiBlazorWebView();
 
 		builder.Services.AddDbContext<KutokDbContext>(options =>

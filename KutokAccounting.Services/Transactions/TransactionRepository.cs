@@ -15,7 +15,8 @@ public sealed class TransactionRepository : ITransactionRepository
 	private readonly ILogger<Transaction> _logger;
 
 	public TransactionRepository(KutokDbContext dbContext,
-		[FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)] SemaphoreSlim semaphoreSlim,
+		[FromKeyedServices(KutokConfigurations.WriteOperationsSemaphore)]
+		SemaphoreSlim semaphoreSlim,
 		ILogger<Transaction> logger)
 	{
 		_dbContext = dbContext;
@@ -43,9 +44,19 @@ public sealed class TransactionRepository : ITransactionRepository
 			query = query.Where(t => t.TransactionTypeId == parameters.Filters.TransactionTypeId);
 		}
 
+		if (parameters?.Filters?.LessThan is not null)
+		{
+			query = query.Where(t => t.Money < parameters.Filters.LessThan);
+		}
+		
+		if (parameters?.Filters?.MoreThan is not null)
+		{
+			query = query.Where(t => t.Money > parameters.Filters.MoreThan);
+		}
+
 		if (parameters?.Filters?.Value is not null)
 		{
-			query = query.Where(t => t.Money.Value == parameters.Filters.Value);
+			query = query.Where(t => t.Money == parameters.Filters.Value);
 		}
 
 		if (parameters?.Filters?.Range is not null)
@@ -57,6 +68,30 @@ public sealed class TransactionRepository : ITransactionRepository
 		if (string.IsNullOrWhiteSpace(parameters?.SearchString) is false)
 		{
 			query = query.Where(t => EF.Functions.Like(t.Name + " " + t.Description, $"%{parameters.SearchString}%"));
+		}
+
+		if (string.IsNullOrWhiteSpace(parameters?.Sorting?.SortBy) is false)
+		{
+			query = parameters.Sorting.SortBy switch
+			{
+				nameof(Transaction.Name) => parameters.Sorting.Descending
+					? query.OrderByDescending(t => t.Name)
+					: query.OrderBy(t => t.Name),
+
+				nameof(Transaction.Description) => parameters.Sorting.Descending
+					? query.OrderByDescending(t => t.Description)
+					: query.OrderBy(t => t.Description),
+
+				nameof(Money) + "." + nameof(Money.Value) => parameters.Sorting.Descending
+					? query.OrderByDescending(t => t.Money)
+					: query.OrderBy(t => t.Money),
+
+				nameof(Transaction.CreatedAt) => parameters.Sorting.Descending
+					? query.OrderByDescending(t => t.CreatedAt)
+					: query.OrderBy(t => t.CreatedAt),
+				
+				_ => query.OrderBy(t => t.CreatedAt)
+			};
 		}
 
 		try
@@ -77,7 +112,6 @@ public sealed class TransactionRepository : ITransactionRepository
 					TransactionType = t.TransactionType,
 					TransactionTypeId = t.TransactionType.Id
 				})
-				.OrderBy(t => t.CreatedAt)
 				.ToListAsync(cancellationToken);
 
 			return new PagedResult<Transaction>
@@ -94,7 +128,7 @@ public sealed class TransactionRepository : ITransactionRepository
 			throw;
 		}
 	}
-	
+
 	public async ValueTask<Transaction> GetByIdAsync(int id, CancellationToken cancellationToken)
 	{
 		try

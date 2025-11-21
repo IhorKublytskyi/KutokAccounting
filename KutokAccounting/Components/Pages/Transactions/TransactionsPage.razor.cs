@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using KutokAccounting.Components.Pages.Transactions.Models;
 using KutokAccounting.Components.Pages.TransactionTypes.Models;
 using KutokAccounting.DataProvider.Models;
@@ -11,12 +12,11 @@ namespace KutokAccounting.Components.Pages.Transactions;
 
 public partial class TransactionsPage : ComponentBase
 {
-	private readonly HashSet<string> _filterOperators = new()
+	private readonly HashSet<string> _stringFilterOperators = new()
 	{
 		"equals"
 	};
 
-	//TODO: придумати шось з цим
 	private readonly HashSet<string> _intFilterOperators = new()
 	{
 		"=",
@@ -26,7 +26,7 @@ public partial class TransactionsPage : ComponentBase
 
 	private MudDataGrid<TransactionView> _dataGrid = new();
 
-	private MudDateRangePicker _picker;
+	private MudDateRangePicker _picker = new();
 
 	private string? _searchString;
 
@@ -34,42 +34,93 @@ public partial class TransactionsPage : ComponentBase
 
 	private CalculationResult _calculationResult;
 
+	protected override async Task OnInitializedAsync()
+	{
+		await UpdateCalculationAsync();
+	}
+
 	private TransactionQueryParameters BuildQuery(GridState<TransactionView> state)
 	{
 		Filters? filters = new();
+		Sorting? sorting = new();
 
-		ICollection<IFilterDefinition<TransactionView>> filterDefinitions = state.FilterDefinitions;
+		IFilterDefinition<TransactionView>? filterDefinition = state.FilterDefinitions.FirstOrDefault();
 
-		if (filterDefinitions is not null)
+		if (filterDefinition is not null)
 		{
-			foreach (var filter in filterDefinitions)
+			switch ($"{filterDefinition.Title} - {filterDefinition.Operator}")
 			{
-				switch (filter.Title)
-				{
-					case TransactionFiltersConstants.Name:
-						filters.Name = filter?.Value?.ToString();
+				case $"{TransactionFiltersConstants.Name} - {TransactionFiltersConstants.StringEqualsOperator}":
+					filters.Name = filterDefinition?.Value?.ToString();
 
-						break;
-					case TransactionFiltersConstants.Description:
-						filters.Description = filter?.Value?.ToString();
+					break;
+				case
+					$"{TransactionFiltersConstants.Description} - {TransactionFiltersConstants.StringEqualsOperator}"
+					:
+					filters.Description = filterDefinition?.Value?.ToString();
 
-						break;
-					case TransactionFiltersConstants.Value:
-						if (int.TryParse(filter?.Value?.ToString(), out int value))
-						{
-							filters.Value = value;
-						}
+					break;
+				case $"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.IntegerEqualsOperator}":
+					if (long.TryParse(filterDefinition?.Value?.ToString(), out long value))
+					{
+						filters.Value = new Money(value);
+					}
 
-						break;
-					case TransactionFiltersConstants.TransactionType:
-						if (int.TryParse(filter?.Value?.ToString(), out int transactionTypeId))
-						{
-							filters.TransactionTypeId = transactionTypeId;
-						}
+					break;
 
-						break;
-				}
+				case $"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.LessThanOperator}":
+					if (long.TryParse(filterDefinition?.Value?.ToString(), out long lessThan))
+					{
+						filters.LessThan = new Money(lessThan);
+					}
+
+					break;
+
+				case $"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.MoreThanOperator}":
+					if (long.TryParse(filterDefinition?.Value?.ToString(), out long moreThan))
+					{
+						filters.MoreThan = new Money(moreThan);
+					}
+
+					break;
+
+				case
+					$"{TransactionFiltersConstants.TransactionType} - {TransactionFiltersConstants.StringEqualsOperator}"
+					:
+					if (int.TryParse(filterDefinition?.Value?.ToString(), out int transactionTypeId))
+					{
+						filters.TransactionTypeId = transactionTypeId;
+					}
+
+					break;
 			}
+		}
+
+		SortDefinition<TransactionView>? sortDefinition = state.SortDefinitions.FirstOrDefault();
+
+		if (sortDefinition is not null)
+		{
+			switch (sortDefinition.SortBy)
+			{
+				case nameof(TransactionView.Name):
+					sorting.SortBy = sortDefinition.SortBy;
+
+					break;
+				case nameof(TransactionView.Description):
+					sorting.SortBy = sortDefinition.SortBy;
+
+					break;
+				case nameof(Money) + "." + nameof(Money.Value):
+					sorting.SortBy = sortDefinition.SortBy;
+
+					break;
+				case nameof(TransactionView.CreatedAt):
+					sorting.SortBy = sortDefinition.SortBy;
+
+					break;
+			}
+
+			sorting.Descending = sortDefinition.Descending;
 		}
 
 		if (_dateRange?.Start.HasValue is true && _dateRange?.End.HasValue is true)
@@ -84,7 +135,7 @@ public partial class TransactionsPage : ComponentBase
 			}
 		}
 
-		return new TransactionQueryParameters(filters, _searchString, new Pagination
+		return new TransactionQueryParameters(filters, sorting, _searchString, new Pagination
 		{
 			Page = state.Page + 1,
 			PageSize = state.PageSize
@@ -122,8 +173,6 @@ public partial class TransactionsPage : ComponentBase
 		PagedResult<Transaction> pagedResult =
 			await TransactionService.GetAsync(transactionQueryParameters, cancellationToken);
 
-		_calculationResult = await TransactionService.GetCalculation(transactionQueryParameters?.Filters?.Range, cancellationToken);
-
 		List<TransactionView> view = pagedResult.Items.Select(t => new TransactionView
 		{
 			Id = t.Id,
@@ -146,6 +195,18 @@ public partial class TransactionsPage : ComponentBase
 		};
 	}
 
+	private async Task UpdateCalculationAsync()
+	{
+		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
+		_calculationResult = await TransactionService.GetCalculation(
+			_dateRange?.Start.HasValue is true && _dateRange?.End.HasValue is true
+				? new DateTimeRange(_dateRange.Start.Value, _dateRange.End.Value)
+				: null, tokenSource.Token);
+
+		StateHasChanged();
+	}
+
 	private async Task OnAddButtonClick()
 	{
 		DialogOptions options = new()
@@ -163,6 +224,8 @@ public partial class TransactionsPage : ComponentBase
 
 		if (result?.Canceled is false)
 		{
+			await UpdateCalculationAsync();
+
 			await _dataGrid.ReloadServerData();
 		}
 	}
@@ -173,9 +236,18 @@ public partial class TransactionsPage : ComponentBase
 
 		await TransactionService.DeleteAsync(transaction.Id, tokenSource.Token);
 
+		await UpdateCalculationAsync();
+
 		await _dataGrid.ReloadServerData();
 
 		StateHasChanged();
+	}
+
+	private async Task OnDateRangeChanged()
+	{
+		await UpdateCalculationAsync();
+
+		await _dataGrid.ReloadServerData();
 	}
 
 	private async Task OnEditButtonClick(TransactionView transaction)
@@ -202,6 +274,8 @@ public partial class TransactionsPage : ComponentBase
 
 		if (result?.Canceled is false)
 		{
+			await UpdateCalculationAsync();
+
 			await _dataGrid.ReloadServerData();
 		}
 	}
