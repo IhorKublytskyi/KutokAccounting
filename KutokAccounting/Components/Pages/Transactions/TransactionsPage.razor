@@ -20,7 +20,8 @@
         </MudItem>
     </MudGrid>
 
-    <CalculationResultView @ref="_calculationResultView"></CalculationResultView>
+    <CalculationResultView StoreId="StoreId" Range="_rangeToCalculate">
+    </CalculationResultView>
 
     <MudPaper Outlined="true">
         <MudDataGrid
@@ -33,12 +34,13 @@
                 <MudStack Style="width: 100%;">
                     <MudText Typo="Typo.h6" Style="margin-top:20px;">Транзакції</MudText>
                     <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
-                        <MudTextField
+                        <MudTextField 
                             T="string"
                             @bind-Value="_searchString"
                             @bind-Value:after="() => _dataGrid.ReloadServerData()"
                             Placeholder="Пошук"
                             Immediate="true"
+                            DebounceInterval="300"
                             Adornment="Adornment.End"
                             AdornmentIcon="@Icons.Material.Filled.Search"
                             IconSize="Size.Medium"

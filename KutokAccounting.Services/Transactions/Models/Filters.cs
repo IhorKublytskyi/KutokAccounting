@@ -7,6 +7,7 @@ public sealed record Filters
 {
 	public string? Name { get; set; }
 	public string? Description { get; set; }
+	public required int StoreId { get; set; }
 	public int? TransactionTypeId { get; set; }
 	public Money? Value { get; set; }
 	public Money? MoreThan { get; set; }

@@ -50,7 +50,7 @@ public sealed class TransactionService : ITransactionService
 			Description = request.Description,
 			Money = new Money(request.Value),
 			CreatedAt = DateTime.Now,
-			StoreId = 2,
+			StoreId = request.StoreId,
 			TransactionTypeId = request.TransactionTypeId,
 			InvoiceId = 1
 		};
@@ -100,20 +100,20 @@ public sealed class TransactionService : ITransactionService
 	}
 
 	public async ValueTask CalculateAsync(CalculationResult result,
-		DateTimeRange? range,
+		CalculationQueryParameters parameters,
 		CancellationToken cancellationToken)
 	{
-		if (range.HasValue is false)
+		if (parameters.Range.HasValue is false)
 		{
 			return;
 		}
 
 		cancellationToken.ThrowIfCancellationRequested();
 
-		IAsyncEnumerable<TransactionView> transactions =
-			_repository.EnumerateTransactionsAsync(range.Value, cancellationToken);
+		IAsyncEnumerable<TransactionCalculationView> transactions =
+			_repository.EnumerateTransactionsAsync(parameters, cancellationToken);
 
-		await foreach (TransactionView transactionView in transactions)
+		await foreach (TransactionCalculationView transactionView in transactions)
 		{
 			if (transactionView.Sign)
 			{

@@ -22,6 +22,9 @@ public partial class AddTransactionDialog : ComponentBase
 
 	private bool _isSuccess;
 
+	[Parameter]
+	public int StoreId { get; set; }
+	
 	[CascadingParameter]
 	public IMudDialogInstance MudDialog { get; set; }
 
@@ -35,8 +38,8 @@ public partial class AddTransactionDialog : ComponentBase
 			Description = _description,
 			Value = Money.Parse(_value).Value,
 			TransactionTypeId = _transactionType.Id,
-			StoreId = 1,
-			InvoiceId = 1
+			StoreId = StoreId,
+			InvoiceId = 1 // Заглушка
 		};
 
 		await TransactionService.CreateAsync(transaction, tokenSource.Token);

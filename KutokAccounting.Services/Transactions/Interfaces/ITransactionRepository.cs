@@ -9,7 +9,7 @@ public interface ITransactionRepository
 	ValueTask<PagedResult<Transaction>> GetAsync(TransactionQueryParameters parameters,
 		CancellationToken cancellationToken);
 
-	IAsyncEnumerable<TransactionView> EnumerateTransactionsAsync(DateTimeRange range, CancellationToken cancellationToken);
+	IAsyncEnumerable<TransactionCalculationView> EnumerateTransactionsAsync(CalculationQueryParameters parameters, CancellationToken cancellationToken);
 	ValueTask<Transaction> GetByIdAsync(int id, CancellationToken cancellationToken);
 	ValueTask CreateAsync(Transaction transaction, CancellationToken cancellationToken);
 	ValueTask UpdateAsync(Transaction transaction, CancellationToken cancellationToken);

@@ -1,6 +1,5 @@
 using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
-using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Services.Transactions.Interfaces;
 using KutokAccounting.Services.Transactions.Models;
 using Microsoft.EntityFrameworkCore;
@@ -30,14 +29,13 @@ public sealed class TransactionRepository : ITransactionRepository
 	{
 		IQueryable<Transaction> query = _dbContext.Transactions.AsNoTracking();
 
-		TransactionQueryBuilder builder = new TransactionQueryBuilder(query);
+		TransactionQueryBuilder builder = new(query);
 
 		query = builder
 			.AddFilters(parameters.Filters)
 			.AddSearchString(parameters.SearchString)
 			.AddSorting(parameters.Sorting)
 			.Build();
-		
 
 		try
 		{
@@ -74,13 +72,21 @@ public sealed class TransactionRepository : ITransactionRepository
 		}
 	}
 
-	public IAsyncEnumerable<TransactionView> EnumerateTransactionsAsync(DateTimeRange range, CancellationToken cancellationToken)
+	public IAsyncEnumerable<TransactionCalculationView> EnumerateTransactionsAsync(CalculationQueryParameters parameters,
+		CancellationToken cancellationToken)
 	{
-		return _dbContext.Transactions
-			.AsNoTracking()
-			.Where(t => t.CreatedAt >= range.StartOfRange)
-			.Where(t => t.CreatedAt <= range.EndOfRange)
-			.Select(t => new TransactionView()
+		IQueryable<Transaction> query = _dbContext.Transactions.AsNoTracking();
+
+		if (parameters.Range.HasValue)
+		{
+			query = query.Where(t => t.CreatedAt >= parameters.Range.Value.StartOfRange);
+
+			query = query.Where(t => t.CreatedAt <= parameters.Range.Value.EndOfRange);
+		}
+
+		return query
+			.Where(t => t.StoreId == parameters.StoreId)
+			.Select(t => new TransactionCalculationView
 			{
 				Money = t.Money,
 				Sign = t.TransactionType.IsIncome
@@ -91,7 +97,6 @@ public sealed class TransactionRepository : ITransactionRepository
 	public async ValueTask<Transaction> GetByIdAsync(int id, CancellationToken cancellationToken)
 	{
 		try
-
 		{
 			Transaction? transaction = await _dbContext.Transactions
 				.AsNoTracking()
@@ -173,10 +178,4 @@ public sealed class TransactionRepository : ITransactionRepository
 			_semaphoreSlim.Release();
 		}
 	}
-}
-
-public record TransactionView
-{
-	public Money Money { get; set; }
-	public bool Sign { get; set; }
 }

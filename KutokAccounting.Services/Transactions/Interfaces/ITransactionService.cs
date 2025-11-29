@@ -8,7 +8,7 @@ public interface ITransactionService
 {
 	ValueTask<PagedResult<Transaction>> GetAsync(TransactionQueryParameters transactionQueryParameters, CancellationToken cancellationToken);
 
-	ValueTask CalculateAsync(CalculationResult result, DateTimeRange? range, CancellationToken cancellationToken);
+	ValueTask CalculateAsync(CalculationResult result, CalculationQueryParameters parameters, CancellationToken cancellationToken);
 
 	ValueTask<Transaction> GetByIdAsync(int id, CancellationToken cancellationToken);
 	ValueTask<Transaction> CreateAsync(TransactionDto request, CancellationToken cancellationToken);
