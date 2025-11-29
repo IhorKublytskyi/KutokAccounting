@@ -33,7 +33,7 @@ public partial class AddTransactionDialog : ComponentBase
 		{
 			Name = _name,
 			Description = _description,
-			Value = Money.ConvertFromStringToMoney(_value).Value,
+			Value = Money.Parse(_value).Value,
 			TransactionTypeId = _transactionType.Id,
 			StoreId = 1,
 			InvoiceId = 1

@@ -44,7 +44,7 @@ public partial class FilterWindow
 
 	private async Task ClearFilterAsync()
 	{
-		if (_currentMoneyFilter != null)
+		if (_currentMoneyFilter is not null)
 		{
 			await Context.Actions.ClearFilterAsync(_currentMoneyFilter);
 			_currentMoneyFilter = null;
@@ -60,9 +60,9 @@ public partial class FilterWindow
 
 	private async Task ApplyFilterAsync()
 	{
-		Money money = Money.ConvertFromStringToMoney(_rawValue);
+		Money money = Money.Parse(_rawValue);
 
-		if (_currentMoneyFilter != null)
+		if (_currentMoneyFilter is not null)
 		{
 			await Context.Actions.ClearFilterAsync(_currentMoneyFilter);
 		}
@@ -84,10 +84,11 @@ public partial class FilterWindow
 
 	private string ValidateValue(string value)
 	{
-		Regex regex = new(@"^(0|[1-9]\d*)(\.|,)([1-9]|\d\d)$");
-
-		return regex.IsMatch(value)
+		return MoneyValueRegex().IsMatch(value)
 			? string.Empty
 			: "Число має бути у форматі 123.45 або 123,45";
 	}
+	
+	[GeneratedRegex(@"^(0|[1-9]\d*)(\.|,)([1-9]|\d\d)$", RegexOptions.IgnoreCase, "en-US")]
+	private static partial Regex MoneyValueRegex();
 }

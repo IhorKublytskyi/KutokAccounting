@@ -1,3 +1,8 @@
 ﻿namespace KutokAccounting.DataProvider.Models;
 
-public readonly record struct CalculationResult(Money Profit, Money Income, Money Expense);
+public record CalculationResult
+{
+	public Money Profit { get; set; }
+	public Money Income { get; set; }
+	public Money Expense { get; set; }
+};

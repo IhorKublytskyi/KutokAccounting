@@ -17,9 +17,9 @@ public sealed class TransactionService : ITransactionService
 	private readonly IValidator<TransactionQueryParameters> _transactionQueryValidator;
 
 	public TransactionService(
-		ITransactionRepository repository, 
-		ILogger<Transaction> logger, 
-		IValidator<TransactionDto> transactionDtoValidator, 
+		ITransactionRepository repository,
+		ILogger<Transaction> logger,
+		IValidator<TransactionDto> transactionDtoValidator,
 		IValidator<TransactionQueryParameters> transactionQueryValidator)
 	{
 		_repository = repository;
@@ -27,6 +27,7 @@ public sealed class TransactionService : ITransactionService
 		_transactionDtoValidator = transactionDtoValidator;
 		_transactionQueryValidator = transactionQueryValidator;
 	}
+
 	public async ValueTask<Transaction> CreateAsync(TransactionDto request, CancellationToken cancellationToken)
 	{
 		cancellationToken.ThrowIfCancellationRequested();
@@ -40,7 +41,7 @@ public sealed class TransactionService : ITransactionService
 
 			throw new ArgumentException(validationResult.ToString());
 		}
-		
+
 		_logger.LogInformation("Validation succeeded for transaction {TransactionName}", request.Name);
 
 		Transaction transaction = new()
@@ -53,20 +54,21 @@ public sealed class TransactionService : ITransactionService
 			TransactionTypeId = request.TransactionTypeId,
 			InvoiceId = 1
 		};
-		
+
 		_logger.LogInformation("Saving transaction to repository. Name: {TransactionName}",
 			transaction.Name);
 
 		await _repository.CreateAsync(transaction, cancellationToken);
-		
+
 		_logger.LogInformation(
 			"Transaction  {TransactionName} successfully created with ID {TransactionId}",
 			transaction.Name, transaction.Id);
 
 		return transaction;
 	}
-	
-	public async ValueTask<PagedResult<Transaction>> GetAsync(TransactionQueryParameters transactionQueryParameters, CancellationToken cancellationToken)
+
+	public async ValueTask<PagedResult<Transaction>> GetAsync(TransactionQueryParameters transactionQueryParameters,
+		CancellationToken cancellationToken)
 	{
 		cancellationToken.ThrowIfCancellationRequested();
 
@@ -75,7 +77,8 @@ public sealed class TransactionService : ITransactionService
 
 		if (validationResult.IsValid is false)
 		{
-			_logger.LogWarning("Query parameters for transaction validation failed. Errors: {Errors}", validationResult.Errors);
+			_logger.LogWarning("Query parameters for transaction validation failed. Errors: {Errors}",
+				validationResult.Errors);
 
 			throw new ArgumentException(validationResult.ToString());
 		}
@@ -96,47 +99,39 @@ public sealed class TransactionService : ITransactionService
 		return transactions;
 	}
 
-	public async ValueTask<CalculationResult> GetCalculation(DateTimeRange? range, CancellationToken cancellationToken)
+	public async ValueTask CalculateAsync(CalculationResult result,
+		DateTimeRange? range,
+		CancellationToken cancellationToken)
 	{
+		if (range.HasValue is false)
+		{
+			return;
+		}
+
 		cancellationToken.ThrowIfCancellationRequested();
 
-		TransactionQueryParameters parameters = new(
-			new Filters 
-			{
-				Range = range 
-			},
-			null,
-			null,
-			new Pagination 
-			{ 
-				Page = 1, 
-				PageSize = int.MaxValue 
-			});
+		IAsyncEnumerable<TransactionView> transactions =
+			_repository.EnumerateTransactionsAsync(range.Value, cancellationToken);
 
-		PagedResult<Transaction> transactions = await _repository.GetAsync(parameters, cancellationToken);
-
-		long income = transactions.Items
-			.Where(t => t.TransactionType?.IsIncome is true)
-			.Select(t => t.Money.Value)
-			.Sum();
-
-		long expense = transactions.Items
-			.Where(t => t.TransactionType?.IsIncome is false)
-			.Select(t => -t.Money.Value)
-			.Sum();
-
-		return new CalculationResult
+		await foreach (TransactionView transactionView in transactions)
 		{
-			Income = new Money(income),
-			Expense = new Money(expense),
-			Profit = new Money(income + expense)
-		};
-    }
-	
+			if (transactionView.Sign)
+			{
+				result.Income += transactionView.Money;
+				result.Profit += transactionView.Money;
+			}
+			else
+			{
+				result.Expense += transactionView.Money;
+				result.Profit -= transactionView.Money;
+			}
+		}
+	}
+
 	public async ValueTask<Transaction> GetByIdAsync(int id, CancellationToken cancellationToken)
 	{
 		cancellationToken.ThrowIfCancellationRequested();
-		
+
 		_logger.LogInformation("Fetching transaction by ID: {TransactionId}", id);
 
 		Transaction? transaction = await _repository.GetByIdAsync(id, cancellationToken);

@@ -1,5 +1,6 @@
 using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
+using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Services.Transactions.Interfaces;
 using KutokAccounting.Services.Transactions.Models;
 using Microsoft.EntityFrameworkCore;
@@ -29,70 +30,14 @@ public sealed class TransactionRepository : ITransactionRepository
 	{
 		IQueryable<Transaction> query = _dbContext.Transactions.AsNoTracking();
 
-		if (parameters?.Filters?.Name is not null)
-		{
-			query = query.Where(t => t.Name == parameters.Filters.Name);
-		}
+		TransactionQueryBuilder builder = new TransactionQueryBuilder(query);
 
-		if (parameters?.Filters?.Description is not null)
-		{
-			query = query.Where(t => t.Description == parameters.Filters.Description);
-		}
-
-		if (parameters?.Filters?.TransactionTypeId is not null)
-		{
-			query = query.Where(t => t.TransactionTypeId == parameters.Filters.TransactionTypeId);
-		}
-
-		if (parameters?.Filters?.LessThan is not null)
-		{
-			query = query.Where(t => t.Money < parameters.Filters.LessThan);
-		}
+		query = builder
+			.AddFilters(parameters.Filters)
+			.AddSearchString(parameters.SearchString)
+			.AddSorting(parameters.Sorting)
+			.Build();
 		
-		if (parameters?.Filters?.MoreThan is not null)
-		{
-			query = query.Where(t => t.Money > parameters.Filters.MoreThan);
-		}
-
-		if (parameters?.Filters?.Value is not null)
-		{
-			query = query.Where(t => t.Money == parameters.Filters.Value);
-		}
-
-		if (parameters?.Filters?.Range is not null)
-		{
-			query = query.Where(t => t.CreatedAt >= parameters.Filters.Range.Value.StartOfRange &&
-				t.CreatedAt <= parameters.Filters.Range.Value.EndOfRange);
-		}
-
-		if (string.IsNullOrWhiteSpace(parameters?.SearchString) is false)
-		{
-			query = query.Where(t => EF.Functions.Like(t.Name + " " + t.Description, $"%{parameters.SearchString}%"));
-		}
-
-		if (string.IsNullOrWhiteSpace(parameters?.Sorting?.SortBy) is false)
-		{
-			query = parameters.Sorting.SortBy switch
-			{
-				nameof(Transaction.Name) => parameters.Sorting.Descending
-					? query.OrderByDescending(t => t.Name)
-					: query.OrderBy(t => t.Name),
-
-				nameof(Transaction.Description) => parameters.Sorting.Descending
-					? query.OrderByDescending(t => t.Description)
-					: query.OrderBy(t => t.Description),
-
-				nameof(Money) + "." + nameof(Money.Value) => parameters.Sorting.Descending
-					? query.OrderByDescending(t => t.Money)
-					: query.OrderBy(t => t.Money),
-
-				nameof(Transaction.CreatedAt) => parameters.Sorting.Descending
-					? query.OrderByDescending(t => t.CreatedAt)
-					: query.OrderBy(t => t.CreatedAt),
-				
-				_ => query.OrderBy(t => t.CreatedAt)
-			};
-		}
 
 		try
 		{
@@ -127,6 +72,20 @@ public sealed class TransactionRepository : ITransactionRepository
 
 			throw;
 		}
+	}
+
+	public IAsyncEnumerable<TransactionView> EnumerateTransactionsAsync(DateTimeRange range, CancellationToken cancellationToken)
+	{
+		return _dbContext.Transactions
+			.AsNoTracking()
+			.Where(t => t.CreatedAt >= range.StartOfRange)
+			.Where(t => t.CreatedAt <= range.EndOfRange)
+			.Select(t => new TransactionView()
+			{
+				Money = t.Money,
+				Sign = t.TransactionType.IsIncome
+			})
+			.AsAsyncEnumerable();
 	}
 
 	public async ValueTask<Transaction> GetByIdAsync(int id, CancellationToken cancellationToken)
@@ -214,4 +173,10 @@ public sealed class TransactionRepository : ITransactionRepository
 			_semaphoreSlim.Release();
 		}
 	}
+}
+
+public record TransactionView
+{
+	public Money Money { get; set; }
+	public bool Sign { get; set; }
 }

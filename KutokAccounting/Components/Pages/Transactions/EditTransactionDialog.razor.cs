@@ -69,7 +69,7 @@ public partial class EditTransactionDialog : ComponentBase
 	{
 		try
 		{
-			TransactionView.Money = Money.ConvertFromStringToMoney(value);
+			TransactionView.Money = Money.Parse(value);
 		}
 		catch (Exception e)
 		{

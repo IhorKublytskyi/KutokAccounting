@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using KutokAccounting.Components.Pages.Transactions.Models;
 using KutokAccounting.Components.Pages.TransactionTypes.Models;
 using KutokAccounting.DataProvider.Models;
@@ -12,6 +11,9 @@ namespace KutokAccounting.Components.Pages.Transactions;
 
 public partial class TransactionsPage : ComponentBase
 {
+	[Parameter]
+	public int StoreId { get; set; }
+	
 	private readonly HashSet<string> _stringFilterOperators = new()
 	{
 		"equals"
@@ -26,17 +28,32 @@ public partial class TransactionsPage : ComponentBase
 
 	private MudDataGrid<TransactionView> _dataGrid = new();
 
+	private CalculationResultView _calculationResultView;
+
 	private MudDateRangePicker _picker = new();
 
 	private string? _searchString;
 
 	private DateRange? _dateRange;
-
-	private CalculationResult _calculationResult;
-
-	protected override async Task OnInitializedAsync()
+	
+	protected override Task OnInitializedAsync()
 	{
-		await UpdateCalculationAsync();
+		if (_dateRange == null)
+		{
+			var now = DateTime.Now;
+			
+			_dateRange = new DateRange(new DateTime(now.Year, now.Month, 1), new DateTime(now.Year, now.Month, 1).AddMonths(1).AddDays(-1));
+		}
+		
+		return Task.CompletedTask;
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender && _dateRange is not null)
+		{
+			await RefreshCalculationResultView();
+		}
 	}
 
 	private TransactionQueryParameters BuildQuery(GridState<TransactionView> state)
@@ -48,51 +65,47 @@ public partial class TransactionsPage : ComponentBase
 
 		if (filterDefinition is not null)
 		{
-			switch ($"{filterDefinition.Title} - {filterDefinition.Operator}")
+			if ($"{filterDefinition.Title} - {filterDefinition.Operator}" ==
+				$"{TransactionFiltersConstants.Name} - {TransactionFiltersConstants.StringEqualsOperator}")
 			{
-				case $"{TransactionFiltersConstants.Name} - {TransactionFiltersConstants.StringEqualsOperator}":
-					filters.Name = filterDefinition?.Value?.ToString();
-
-					break;
-				case
-					$"{TransactionFiltersConstants.Description} - {TransactionFiltersConstants.StringEqualsOperator}"
-					:
-					filters.Description = filterDefinition?.Value?.ToString();
-
-					break;
-				case $"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.IntegerEqualsOperator}":
-					if (long.TryParse(filterDefinition?.Value?.ToString(), out long value))
-					{
-						filters.Value = new Money(value);
-					}
-
-					break;
-
-				case $"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.LessThanOperator}":
-					if (long.TryParse(filterDefinition?.Value?.ToString(), out long lessThan))
-					{
-						filters.LessThan = new Money(lessThan);
-					}
-
-					break;
-
-				case $"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.MoreThanOperator}":
-					if (long.TryParse(filterDefinition?.Value?.ToString(), out long moreThan))
-					{
-						filters.MoreThan = new Money(moreThan);
-					}
-
-					break;
-
-				case
-					$"{TransactionFiltersConstants.TransactionType} - {TransactionFiltersConstants.StringEqualsOperator}"
-					:
-					if (int.TryParse(filterDefinition?.Value?.ToString(), out int transactionTypeId))
-					{
-						filters.TransactionTypeId = transactionTypeId;
-					}
-
-					break;
+				filters.Name = filterDefinition?.Value?.ToString();
+			}
+			else if ($"{filterDefinition.Title} - {filterDefinition.Operator}" ==
+				$"{TransactionFiltersConstants.Description} - {TransactionFiltersConstants.StringEqualsOperator}")
+			{
+				filters.Description = filterDefinition?.Value?.ToString();
+			}
+			else if ($"{filterDefinition.Title} - {filterDefinition.Operator}" ==
+				$"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.IntegerEqualsOperator}")
+			{
+				if (long.TryParse(filterDefinition?.Value?.ToString(), out long value))
+				{
+					filters.Value = new Money(value);
+				}
+			}
+			else if ($"{filterDefinition.Title} - {filterDefinition.Operator}" ==
+				$"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.LessThanOperator}")
+			{
+				if (long.TryParse(filterDefinition?.Value?.ToString(), out long lessThan))
+				{
+					filters.LessThan = new Money(lessThan);
+				}
+			}
+			else if ($"{filterDefinition.Title} - {filterDefinition.Operator}" ==
+				$"{TransactionFiltersConstants.Value} - {TransactionFiltersConstants.MoreThanOperator}")
+			{
+				if (long.TryParse(filterDefinition?.Value?.ToString(), out long moreThan))
+				{
+					filters.MoreThan = new Money(moreThan);
+				}
+			}
+			else if ($"{filterDefinition.Title} - {filterDefinition.Operator}" ==
+				$"{TransactionFiltersConstants.TransactionType} - {TransactionFiltersConstants.StringEqualsOperator}")
+			{
+				if (int.TryParse(filterDefinition?.Value?.ToString(), out int transactionTypeId))
+				{
+					filters.TransactionTypeId = transactionTypeId;
+				}
 			}
 		}
 
@@ -100,25 +113,14 @@ public partial class TransactionsPage : ComponentBase
 
 		if (sortDefinition is not null)
 		{
-			switch (sortDefinition.SortBy)
+			sorting.SortBy = sortDefinition.SortBy switch
 			{
-				case nameof(TransactionView.Name):
-					sorting.SortBy = sortDefinition.SortBy;
-
-					break;
-				case nameof(TransactionView.Description):
-					sorting.SortBy = sortDefinition.SortBy;
-
-					break;
-				case nameof(Money) + "." + nameof(Money.Value):
-					sorting.SortBy = sortDefinition.SortBy;
-
-					break;
-				case nameof(TransactionView.CreatedAt):
-					sorting.SortBy = sortDefinition.SortBy;
-
-					break;
-			}
+				nameof(TransactionView.Name) => sortDefinition.SortBy,
+				nameof(TransactionView.Description) => sortDefinition.SortBy,
+				nameof(Money) + "." + nameof(Money.Value) => sortDefinition.SortBy,
+				nameof(TransactionView.CreatedAt) => sortDefinition.SortBy,
+				_ => sorting.SortBy
+			};
 
 			sorting.Descending = sortDefinition.Descending;
 		}
@@ -135,17 +137,23 @@ public partial class TransactionsPage : ComponentBase
 			}
 		}
 
-		return new TransactionQueryParameters(filters, sorting, _searchString, new Pagination
+		return new TransactionQueryParameters
 		{
-			Page = state.Page + 1,
-			PageSize = state.PageSize
-		});
+			Filters = filters,
+			Pagination = new Pagination
+			{
+				Page = state.Page + 1,
+				PageSize = state.PageSize
+			},
+			SearchString = _searchString,
+			Sorting = sorting
+		};
 	}
 
 	private async Task<GridData<TransactionView>> GetTransactionsAsync(GridState<TransactionView> state)
 	{
 		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-
+		
 		try
 		{
 			return await GetTransactionInternalAsync(state, tokenSource.Token);
@@ -195,18 +203,6 @@ public partial class TransactionsPage : ComponentBase
 		};
 	}
 
-	private async Task UpdateCalculationAsync()
-	{
-		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-
-		_calculationResult = await TransactionService.GetCalculation(
-			_dateRange?.Start.HasValue is true && _dateRange?.End.HasValue is true
-				? new DateTimeRange(_dateRange.Start.Value, _dateRange.End.Value)
-				: null, tokenSource.Token);
-
-		StateHasChanged();
-	}
-
 	private async Task OnAddButtonClick()
 	{
 		DialogOptions options = new()
@@ -224,8 +220,8 @@ public partial class TransactionsPage : ComponentBase
 
 		if (result?.Canceled is false)
 		{
-			await UpdateCalculationAsync();
-
+			await RefreshCalculationResultView();
+			
 			await _dataGrid.ReloadServerData();
 		}
 	}
@@ -236,8 +232,8 @@ public partial class TransactionsPage : ComponentBase
 
 		await TransactionService.DeleteAsync(transaction.Id, tokenSource.Token);
 
-		await UpdateCalculationAsync();
-
+		await RefreshCalculationResultView();
+		
 		await _dataGrid.ReloadServerData();
 
 		StateHasChanged();
@@ -245,9 +241,33 @@ public partial class TransactionsPage : ComponentBase
 
 	private async Task OnDateRangeChanged()
 	{
-		await UpdateCalculationAsync();
-
+		await RefreshCalculationResultView();
 		await _dataGrid.ReloadServerData();
+	}
+
+	private async ValueTask RefreshCalculationResultView()
+	{
+		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
+
+		DateTimeRange rangeToCalculate;
+
+		if (_dateRange?.Start.HasValue is true && _dateRange.End.HasValue is true)
+		{
+			if (_dateRange.Start.Value == _dateRange.End.Value)
+			{
+				rangeToCalculate = DateTimeHelper.GetDayStartEndRange(_dateRange.Start.Value);
+			}
+			else
+			{
+				rangeToCalculate = new DateTimeRange(_dateRange.Start.Value, _dateRange.End.Value);
+			}
+		}
+		else
+		{
+			rangeToCalculate = new DateTimeRange(DateTime.MinValue, DateTime.MaxValue);
+		}
+		
+		await _calculationResultView.RecalculateResultAsync(rangeToCalculate, tokenSource.Token);
 	}
 
 	private async Task OnEditButtonClick(TransactionView transaction)
@@ -274,8 +294,8 @@ public partial class TransactionsPage : ComponentBase
 
 		if (result?.Canceled is false)
 		{
-			await UpdateCalculationAsync();
-
+			await RefreshCalculationResultView();
+			
 			await _dataGrid.ReloadServerData();
 		}
 	}

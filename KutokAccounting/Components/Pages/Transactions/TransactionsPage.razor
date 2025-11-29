@@ -1,4 +1,4 @@
-@page "/transactions"
+@page "/StoreAccounting/{storeId:int}"
 @using KutokAccounting.Components.Pages.Transactions.Models
 @using KutokAccounting.Services.Transactions.Interfaces
 @inject ITransactionService TransactionService
@@ -13,14 +13,14 @@
                                 @bind-DateRange:after="OnDateRangeChanged"
                                 Margin="Margin.Dense">
             </MudDateRangePicker>
-            
+
             <PickerActions>
-                <MudButton Class="mr-auto align-self-start" OnClick="() =>  _picker.ClearAsync()">Очистити</MudButton>
+                <MudButton Class="mr-auto align-self-start" OnClick="() => _picker.ClearAsync()">Очистити</MudButton>
             </PickerActions>
         </MudItem>
     </MudGrid>
 
-   <CalculationResultView Value="_calculationResult"></CalculationResultView>
+    <CalculationResultView @ref="_calculationResultView"></CalculationResultView>
 
     <MudPaper Outlined="true">
         <MudDataGrid

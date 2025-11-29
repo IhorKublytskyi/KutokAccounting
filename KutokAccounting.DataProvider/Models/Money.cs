@@ -20,17 +20,38 @@ public readonly record struct Money
 	{
 		return left.Value < right.Value;
 	}
-
-	public static Money ConvertFromStringToMoney(string value)
+	
+	public static Money operator +(Money left, Money right)
 	{
-		if (string.IsNullOrWhiteSpace(value))
+		return new Money(left.Value + right.Value);
+	}
+	
+	public static Money operator -(Money left, Money right)
+	{
+		return new Money(left.Value - right.Value);
+	}
+
+	public static Money Parse(string value)
+	{
+		ArgumentException.ThrowIfNullOrWhiteSpace(value);
+
+		ReadOnlySpan<char> span = value.AsSpan();
+
+		Span<char> formattedSpan = stackalloc char[span.Length];
+
+		for (int i = 0; i < span.Length; i++)
 		{
-			throw new ArgumentNullException(nameof(value));
+			if (span[i] == '.')
+			{
+				formattedSpan[i] = ',';
+				
+				continue;
+			}
+
+			formattedSpan[i] = span[i];
 		}
 
-		string formattedString = value.Replace('.', ',');
-
-		if (decimal.TryParse(formattedString, out decimal result))
+		if (decimal.TryParse(formattedSpan, out decimal result))
 		{
 			return new Money((long) (result * 100));
 		}
