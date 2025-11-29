@@ -3,7 +3,7 @@ using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Transactions.Models;
 using MudBlazor;
 
-namespace KutokAccounting.Components.Pages.Transactions.F;
+namespace KutokAccounting.Components.Pages.Transactions.Helpers;
 
 public class MoneyFilterStrategy : IFilterStrategy
 {

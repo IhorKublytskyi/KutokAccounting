@@ -2,7 +2,7 @@ using KutokAccounting.Components.Pages.Transactions.Models;
 using KutokAccounting.Services.Transactions.Models;
 using MudBlazor;
 
-namespace KutokAccounting.Components.Pages.Transactions.F;
+namespace KutokAccounting.Components.Pages.Transactions.Helpers;
 
 public class TransactionTypeStrategy : IFilterStrategy
 {
