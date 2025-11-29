@@ -64,8 +64,26 @@ public class StoresService : IStoresService
 		return new PagedResult<StoreDto>
 		{
 			Count = storesPagedResult.Count,
-			Items = storesPagedResult.Items.Select(x => x.MapToDto())
+			Items = storesPagedResult.Items.Select(s => s.MapToDto()) // Bc items is ICollection
 		};
+	}
+
+	public async ValueTask<StoreDto> GetByIdAsync(int id, CancellationToken ct)
+	{
+		ct.ThrowIfCancellationRequested();
+
+		Store? store = await _repository.GetByIdAsync(id, ct);
+
+		if (store is null)
+		{
+			_logger.LogWarning("Store with id {StoreId} was not found", id);
+
+			throw new ArgumentException($"Store with id {id} was not found");
+		}
+
+		_logger.LogInformation("Fetching store with id {StoreId}", id);
+
+		return store.MapToDto();
 	}
 
 	public async ValueTask UpdateAsync(int storeId,
@@ -74,7 +92,7 @@ public class StoresService : IStoresService
 	{
 		ct.ThrowIfCancellationRequested();
 
-		ValidationResult? validationResult = await _storeDtoValidator.ValidateAsync(updatedStoreDto, ct);
+		ValidationResult validationResult = await _storeDtoValidator.ValidateAsync(updatedStoreDto, ct);
 
 		if (validationResult.IsValid is false)
 		{

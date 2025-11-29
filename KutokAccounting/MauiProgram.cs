@@ -1,4 +1,5 @@
 using FluentValidation;
+using KutokAccounting.Components.Pages.Stores;
 using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores;
@@ -47,7 +48,7 @@ public static class MauiProgram
 		builder.Services.AddScoped<IVendorService, VendorService>();
 		builder.Services.AddScoped<IVendorRepository, VendorRepository>();
 		builder.Services.AddScoped<IValidator<TransactionTypeDto>, TransactionTypeDtoValidator>();
-
+		
 		builder.Services
 			.AddScoped<IValidator<TransactionTypeQueryParameters>, TransactionTypeQueryParametersValidator>();
 
@@ -56,7 +57,8 @@ public static class MauiProgram
 		builder.Services.AddScoped<IValidator<VendorDto>, VendorDtoValidator>();
 		builder.Services.AddScoped<IValidator<VendorQueryParameters>, VendorQueryParametersValidator>();
 		builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore, new SemaphoreSlim(1, 1));
-		
+
+		builder.Services.AddSingleton<StoreStateNotifier>();
 		builder.Services.AddScoped<IValidator<Pagination>, PaginationValidator>();
 		builder.Services.AddScoped<IValidator<StoreDto>, StoreDtoValidator>();
 		builder.Services.AddScoped<IStoresRepository, StoresRepository>();
