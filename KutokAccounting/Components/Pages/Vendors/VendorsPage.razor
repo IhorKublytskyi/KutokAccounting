@@ -3,52 +3,59 @@
 @inject IVendorService VendorService
 @inject IDialogService DialogService
 
-<MudDataGrid
-    @ref="_dataGrid"
-    T="Vendor"
-    ServerData="GetVendorsAsync"
-    FilterMode="DataGridFilterMode.ColumnFilterMenu">
-    <ToolBarContent>
-        <MudStack Style="width: 100%;">
-            <MudText Typo="Typo.h6" Style="margin-top:6px;">Постачальники</MudText>
-            <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
-                <MudTextField
-                    T="string"
-                    @bind-Value="_searchString"
-                    @bind-Value:after="() => _dataGrid.ReloadServerData()"
-                    Placeholder="Пошук"
-                    Immediate="true"
-                    Adornment="Adornment.End"
-                    AdornmentIcon="@Icons.Material.Filled.Search"
-                    IconSize="Size.Medium"
-                    Style="width:450px;">
-                </MudTextField>
-                <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddButtonClick">Додати нового
-                    постачальника
-                </MudButton>
-            </MudStack>
-        </MudStack>
-    </ToolBarContent>
-    <Columns>
-        <PropertyColumn Property="v => v.Name" Title="Постачальник" Sortable="false" Filterable="true"
-                        FilterOperators="_filterOperators"></PropertyColumn>
-        <PropertyColumn Property="v => v.Description" Title="Опис" Sortable="false" Filterable="false"></PropertyColumn>
-        <TemplateColumn>
-            <CellTemplate>
-                <MudStack Row Justify="Justify.FlexEnd">
-                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
-                               OnClick="() => OnEditButtonClick(context.Item)">Редагувати
-                    </MudButton>
-                    <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
-                               OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
-                    </MudButton>
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudPaper Outlined="true">
+        <MudDataGrid
+            @ref="_dataGrid"
+            T="Vendor"
+            ServerData="GetVendorsAsync"
+            FilterMode="DataGridFilterMode.ColumnFilterMenu">
+            <ToolBarContent>
+                <MudStack Style="width: 100%;">
+                    <MudText Typo="Typo.h6" Style="margin-top:12px;">Постачальники</MudText>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
+                        <MudTextField
+                            T="string"
+                            @bind-Value="_searchString"
+                            @bind-Value:after="() => _dataGrid.ReloadServerData()"
+                            Placeholder="Пошук"
+                            Immediate="true"
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium"
+                            Style="width:450px;">
+                        </MudTextField>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddButtonClick">Додати
+                            нового
+                            постачальника
+                        </MudButton>
+                    </MudStack>
                 </MudStack>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
-    <PagerContent>
-        <MudDataGridPager T="Vendor"></MudDataGridPager>
-    </PagerContent>
-</MudDataGrid>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn Property="v => v.Name" Title="Постачальник" Sortable="false" Filterable="true"
+                                FilterOperators="_filterOperators"></PropertyColumn>
+                <PropertyColumn Property="v => v.Description" Title="Опис" Sortable="false"
+                                Filterable="false"></PropertyColumn>
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudStack Row Justify="Justify.FlexEnd">
+                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
+                                       OnClick="() => OnEditButtonClick(context.Item)">Редагувати
+                            </MudButton>
+                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
+                                       OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
+                            </MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="Vendor"></MudDataGridPager>
+            </PagerContent>
+        </MudDataGrid>
+    </MudPaper>
+</MudContainer>
+
 
 

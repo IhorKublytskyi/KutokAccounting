@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace KutokAccounting.Services.TransactionTypes;
 
-public class TransactionTypeRepository : ITransactionTypeRepository
+public sealed class TransactionTypeRepository : ITransactionTypeRepository
 {
 	private readonly KutokDbContext _dbContext;
 	private readonly SemaphoreSlim _semaphoreSlim;

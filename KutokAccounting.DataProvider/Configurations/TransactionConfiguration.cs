@@ -17,15 +17,28 @@ public class TransactionConfiguration : IEntityTypeConfiguration<Transaction>
 			.HasDatabaseName("IX_Transaction_Created_At");
 
 		builder
+			.HasIndex(t => t.Name)
+			.HasDatabaseName("IX_Transaction_Name");
+
+		builder
+			.Property(t => t.Name)
+			.HasColumnName("name")
+			.HasColumnType("TEXT")
+			.HasMaxLength(100)
+			.IsRequired();
+
+		builder
 			.Property(t => t.Description)
 			.HasColumnName("description")
 			.HasColumnType("TEXT")
-			.HasMaxLength(1024);
+			.HasMaxLength(1024)
+			.IsRequired(false);
 
 		builder
-			.Property(t => t.Value)
+			.Property(t => t.Money)
 			.HasColumnName("value")
-			.HasColumnType("INTEGER")
+			.HasColumnType("NUMERIC")
+			.HasConversion<MoneyConverter>()
 			.IsRequired();
 
 		builder

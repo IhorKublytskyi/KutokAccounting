@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KutokAccounting.DataProvider.Migrations
 {
     [DbContext(typeof(KutokDbContext))]
-    [Migration("20250916160342_Initial")]
-    partial class Initial
+    [Migration("20251030194322_TransactionChanged")]
+    partial class TransactionChanged
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,7 +60,6 @@ namespace KutokAccounting.DataProvider.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("TEXT")
                         .HasColumnName("address");
@@ -105,6 +104,12 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.Property<int?>("InvoiceId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
                     b.Property<int>("StoreId")
                         .HasColumnType("INTEGER");
 
@@ -122,6 +127,9 @@ namespace KutokAccounting.DataProvider.Migrations
 
                     b.HasIndex("InvoiceId");
 
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_Transaction_Name");
+
                     b.HasIndex("StoreId");
 
                     b.HasIndex("TransactionTypeId");
@@ -135,7 +143,7 @@ namespace KutokAccounting.DataProvider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("IsPositiveValue")
+                    b.Property<int>("IsIncome")
                         .HasColumnType("INTEGER")
                         .HasColumnName("is_positive_value");
 

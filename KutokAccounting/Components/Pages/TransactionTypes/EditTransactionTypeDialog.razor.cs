@@ -15,7 +15,7 @@ public partial class EditTransactionTypeDialog
 	[Parameter]
 	public TransactionTypeView? TransactionTypeView { get; set; }
 
-	private async Task Update()
+	private async Task UpdateAsync()
 	{
 		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 

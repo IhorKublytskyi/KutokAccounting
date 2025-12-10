@@ -12,10 +12,7 @@ public partial class VendorsPage
 	};
 
 	private MudDataGrid<Vendor> _dataGrid = new();
-
-	private int _page = 1;
-	private int _pageSize = 10;
-
+	
 	private string? _searchString;
 
 	private async Task<GridData<Vendor>> GetVendorsAsync(GridState<Vendor> state)
@@ -24,13 +21,10 @@ public partial class VendorsPage
 
 		string? filter = state.FilterDefinitions.FirstOrDefault()?.Value?.ToString();
 
-		_page += state.Page;
-		_pageSize = state.PageSize;
-
 		VendorQueryParameters queryParameters = new(filter, _searchString, new Pagination
 		{
-			Page = _page,
-			PageSize = _pageSize
+			Page = state.Page + 1,
+			PageSize = state.PageSize
 		});
 
 		try

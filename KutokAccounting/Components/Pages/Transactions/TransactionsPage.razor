@@ -1,0 +1,109 @@
+@page "/StoreAccounting/{storeId:int}"
+@using KutokAccounting.Components.Pages.Transactions.Models
+@using KutokAccounting.Services.Transactions.Interfaces
+@inject ITransactionService TransactionService
+@inject IDialogService DialogService
+
+<MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
+    <MudGrid Justify="Justify.FlexStart" Class="mb-6">
+        <MudItem>
+            <MudDateRangePicker @ref="_picker"
+                                PickerVariant="PickerVariant.Dialog"
+                                @bind-DateRange="@_dateRange"
+                                @bind-DateRange:after="OnDateRangeChanged"
+                                Margin="Margin.Dense">
+            </MudDateRangePicker>
+
+            <PickerActions>
+                <MudButton Class="mr-auto align-self-start" OnClick="() => _picker.ClearAsync()">Очистити</MudButton>
+            </PickerActions>
+        </MudItem>
+    </MudGrid>
+
+    <CalculationResultView StoreId="StoreId" Range="_rangeToCalculate">
+    </CalculationResultView>
+
+    <MudPaper Outlined="true">
+        <MudDataGrid
+            @ref="_dataGrid"
+            T="TransactionView"
+            ServerData="GetTransactionsAsync"
+            Filterable="true"
+            FilterMode="DataGridFilterMode.ColumnFilterRow">
+            <ToolBarContent>
+                <MudStack Style="width: 100%;">
+                    <MudText Typo="Typo.h6" Style="margin-top:20px;">Транзакції</MudText>
+                    <MudStack Row="true" Justify="Justify.SpaceBetween" Style="width:100%;">
+                        <MudTextField 
+                            T="string"
+                            @bind-Value="_searchString"
+                            @bind-Value:after="() => _dataGrid.ReloadServerData()"
+                            Placeholder="Пошук"
+                            Immediate="true"
+                            DebounceInterval="300"
+                            Adornment="Adornment.End"
+                            AdornmentIcon="@Icons.Material.Filled.Search"
+                            IconSize="Size.Medium"
+                            Style="width:450px;">
+                        </MudTextField>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnAddButtonClick">
+                            Додати нову транзакцію
+                        </MudButton>
+                    </MudStack>
+                </MudStack>
+            </ToolBarContent>
+            <Columns>
+                <PropertyColumn
+                    Property="tv => tv.Name"
+                    Title="Назва"
+                    Sortable="true"
+                    Filterable="true"
+                    FilterOperators="_stringFilterOperators"></PropertyColumn>
+                <PropertyColumn
+                    Property="tv => tv.Description"
+                    Title="Опис"
+                    Sortable="true"
+                    Filterable="true"
+                    FilterOperators="_stringFilterOperators"></PropertyColumn>
+                <PropertyColumn
+                    Property="tv => tv.Money.Value"
+                    Title="Сума"
+                    Sortable="true"
+                    FilterOperators="_intFilterOperators">
+                    <CellTemplate>
+                        @context.Item.Money.ToString()
+                    </CellTemplate>
+                    <FilterTemplate>
+                        <FilterWindow Context="@context" Operators="_intFilterOperators"></FilterWindow>
+                    </FilterTemplate>
+                </PropertyColumn>
+                <PropertyColumn
+                    Property="tv => tv.CreatedAt"
+                    Title="Час створення"
+                    Sortable="true"
+                    Filterable="false"></PropertyColumn>
+                <PropertyColumn
+                    Property="tv => tv.TransactionType.ToString()"
+                    Title="Тип"
+                    Sortable="false"
+                    Filterable="false"
+                    FilterOperators="_stringFilterOperators"></PropertyColumn>
+                <TemplateColumn>
+                    <CellTemplate>
+                        <MudStack Row Justify="Justify.FlexEnd" Spacing="2">
+                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
+                                       OnClick="() => OnEditButtonClick(context.Item)">Редагувати
+                            </MudButton>
+                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
+                                       OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
+                            </MudButton>
+                        </MudStack>
+                    </CellTemplate>
+                </TemplateColumn>
+            </Columns>
+            <PagerContent>
+                <MudDataGridPager T="TransactionView"></MudDataGridPager>
+            </PagerContent>
+        </MudDataGrid>
+    </MudPaper>
+</MudContainer>

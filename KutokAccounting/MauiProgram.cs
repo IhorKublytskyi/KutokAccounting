@@ -1,5 +1,6 @@
 using FluentValidation;
 using KutokAccounting.Components.Pages.Stores;
+using KutokAccounting.Components.Pages.Transactions;
 using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Stores;
@@ -7,6 +8,10 @@ using KutokAccounting.Services.Stores.Abstractions;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Logging.Extensions;
+using KutokAccounting.Services.Transactions;
+using KutokAccounting.Services.Transactions.Interfaces;
+using KutokAccounting.Services.Transactions.Models;
+using KutokAccounting.Services.Transactions.Validators;
 using KutokAccounting.Services.TransactionTypes;
 using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Models;
@@ -15,6 +20,7 @@ using KutokAccounting.Services.Vendors;
 using KutokAccounting.Services.Vendors.Models;
 using KutokAccounting.Services.Vendors.Validators;
 using Microsoft.EntityFrameworkCore;
+using MudBlazor;
 using MudBlazor.Services;
 
 namespace KutokAccounting;
@@ -30,6 +36,7 @@ public static class MauiProgram
 			.ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
 
 		builder.Services.AddMudServices();
+		builder.Services.AddTransient<MudLocalizer, UkrainianLocalizer>();
 		builder.Services.AddMauiBlazorWebView();
 
 		builder.Services.AddDbContext<KutokDbContext>(options =>
@@ -51,12 +58,16 @@ public static class MauiProgram
 		builder.Services.AddScoped<IValidator<VendorDto>, VendorDtoValidator>();
 		builder.Services.AddScoped<IValidator<VendorQueryParameters>, VendorQueryParametersValidator>();
 		builder.Services.AddKeyedSingleton(KutokConfigurations.WriteOperationsSemaphore, new SemaphoreSlim(1, 1));
-
 		builder.Services.AddSingleton<StoreStateNotifier>();
+		builder.Services.AddScoped<TransactionsStateNotifier>();
 		builder.Services.AddScoped<IValidator<Pagination>, PaginationValidator>();
 		builder.Services.AddScoped<IValidator<StoreDto>, StoreDtoValidator>();
 		builder.Services.AddScoped<IStoresRepository, StoresRepository>();
 		builder.Services.AddScoped<IStoresService, StoresService>();
+		builder.Services.AddScoped<ITransactionService, TransactionService>();
+		builder.Services.AddScoped<ITransactionRepository, TransactionRepository>();
+		builder.Services.AddScoped<IValidator<TransactionDto>, TransactionDtoValidator>();
+		builder.Services.AddScoped<IValidator<TransactionQueryParameters>, TransactionQueryParametersValidator>();
 
 #if DEBUG
 		builder.Services.AddBlazorWebViewDeveloperTools();

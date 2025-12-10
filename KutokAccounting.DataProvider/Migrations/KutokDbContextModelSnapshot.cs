@@ -101,15 +101,21 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.Property<int?>("InvoiceId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("Money")
+                        .HasColumnType("NUMERIC")
+                        .HasColumnName("value");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasColumnName("name");
+
                     b.Property<int>("StoreId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("TransactionTypeId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("value");
 
                     b.HasKey("Id");
 
@@ -117,6 +123,9 @@ namespace KutokAccounting.DataProvider.Migrations
                         .HasDatabaseName("IX_Transaction_Created_At");
 
                     b.HasIndex("InvoiceId");
+
+                    b.HasIndex("Name")
+                        .HasDatabaseName("IX_Transaction_Name");
 
                     b.HasIndex("StoreId");
 
