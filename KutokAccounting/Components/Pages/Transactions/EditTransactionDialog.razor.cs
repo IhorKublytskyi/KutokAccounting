@@ -79,9 +79,7 @@ public partial class EditTransactionDialog : ComponentBase
 
 	private string ValidateValue(string value)
 	{
-		Regex regex = new(@"^(0|[1-9]\d*)(\.|,)([1-9]|\d\d)$");
-
-		return regex.Match(value) is not {Success: true}
+		return MoneyFormatRegex.MoneyValueRegex().IsMatch(value)
 			? "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45)."
 			: string.Empty;
 	}

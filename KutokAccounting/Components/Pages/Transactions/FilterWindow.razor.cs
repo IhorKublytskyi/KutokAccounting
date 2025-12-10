@@ -84,11 +84,8 @@ public partial class FilterWindow
 
 	private string ValidateValue(string value)
 	{
-		return MoneyValueRegex().IsMatch(value)
+		return MoneyFormatRegex.MoneyValueRegex().IsMatch(value)
 			? string.Empty
 			: "Число має бути у форматі 123.45 або 123,45";
 	}
-	
-	[GeneratedRegex(@"^(0|[1-9]\d*)(\.|,)([1-9]|\d\d)$", RegexOptions.IgnoreCase, "en-US")]
-	private static partial Regex MoneyValueRegex();
 }

@@ -79,9 +79,9 @@ public sealed class TransactionRepository : ITransactionRepository
 
 		if (parameters.Range.HasValue)
 		{
-			query = query.Where(t => t.CreatedAt >= parameters.Range.Value.StartOfRange);
-
-			query = query.Where(t => t.CreatedAt <= parameters.Range.Value.EndOfRange);
+			query = query
+				.Where(t => t.CreatedAt >= parameters.Range.Value.StartOfRange)
+				.Where(t => t.CreatedAt <= parameters.Range.Value.EndOfRange);
 		}
 
 		return query
