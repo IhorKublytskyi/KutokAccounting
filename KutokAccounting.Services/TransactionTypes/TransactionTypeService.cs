@@ -148,12 +148,14 @@ public sealed class TransactionTypeService : ITransactionTypeService
 		_logger.LogInformation("Transaction type {TransactionTypeName} updated successfully", transactionType.Name);
 	}
 
-	public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
+	public async ValueTask<int> DeleteAsync(int id, CancellationToken cancellationToken)
 	{
 		cancellationToken.ThrowIfCancellationRequested();
 
-		await _repository.DeleteAsync(id, cancellationToken);
+		int rowsDeleted = await _repository.DeleteAsync(id, cancellationToken);
 
 		_logger.LogInformation("Transaction type with ID {TransactionTypeId} deleted successfully", id);
+
+		return rowsDeleted;
 	}
 }

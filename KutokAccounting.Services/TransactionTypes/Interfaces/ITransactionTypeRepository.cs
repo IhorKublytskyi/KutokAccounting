@@ -11,6 +11,6 @@ public interface ITransactionTypeRepository
 	ValueTask<PagedResult<TransactionType>> GetAsync(TransactionTypeQueryParameters transactionTypeQueryParameters,
 		CancellationToken cancellationToken);
 
-	ValueTask DeleteAsync(int id, CancellationToken cancellationToken);
+	ValueTask<int> DeleteAsync(int id, CancellationToken cancellationToken);
 	ValueTask UpdateAsync(TransactionType transactionType, CancellationToken cancellationToken);
 }

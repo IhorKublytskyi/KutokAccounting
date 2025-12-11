@@ -115,13 +115,15 @@ public sealed class TransactionTypeRepository : ITransactionTypeRepository
 		}
 	}
 
-	public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
+	public async ValueTask<int> DeleteAsync(int id, CancellationToken cancellationToken)
 	{
+		int rowsDeleted = 0;
+		
 		await _semaphoreSlim.WaitAsync(cancellationToken);
 
 		try
 		{
-			await _dbContext.TransactionTypes
+			 rowsDeleted =  await _dbContext.TransactionTypes
 				.Where(transactionType => transactionType.Id == id)
 				.ExecuteDeleteAsync(cancellationToken);
 		}
@@ -133,6 +135,8 @@ public sealed class TransactionTypeRepository : ITransactionTypeRepository
 		{
 			_semaphoreSlim.Release();
 		}
+
+		return rowsDeleted;
 	}
 
 	public async ValueTask UpdateAsync(TransactionType transactionType, CancellationToken cancellationToken)
