@@ -38,12 +38,14 @@ public partial class CalculationResultView : ComponentBase, IDisposable
 
 		_result = new CalculationResult();
 
+		_result.PropertyChanged += (_, _) => StateHasChanged();
+		
 		CalculationQueryParameters parameters = new()
 		{
 			Range = Range,
 			StoreId = StoreId
 		};
-
+		
 		await TransactionService.CalculateAsync(_result, parameters, tokenSource.Token);
 
 		await InvokeAsync(StateHasChanged);

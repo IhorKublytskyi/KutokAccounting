@@ -113,8 +113,20 @@ public sealed class TransactionService : ITransactionService
 		IAsyncEnumerable<TransactionCalculationView> transactions =
 			_repository.EnumerateTransactionsAsync(parameters, cancellationToken);
 
+		int counter = 0;
+		
 		await foreach (TransactionCalculationView transactionView in transactions)
 		{
+			await Task.Yield();
+
+			Interlocked.Increment(ref counter);
+
+			if (counter % 5 == 0)
+			{
+				await Task.Delay(1, cancellationToken);
+			}
+			//TODO: НЕ ЗАБУДЬ ЧТО ТЫ НЕ В ТОЙ ВЕТКЕ!!!
+			
 			if (transactionView.Sign)
 			{
 				result.Income += transactionView.Money;
