@@ -8,6 +8,10 @@ using KutokAccounting.Services.Stores.Abstractions;
 using KutokAccounting.Services.Stores.Dtos;
 using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Logging.Extensions;
+using KutokAccounting.Services.Invoices;
+using KutokAccounting.Services.Invoices.Interfaces;
+using KutokAccounting.Services.Invoices.Models;
+using KutokAccounting.Services.Invoices.Validators;
 using KutokAccounting.Services.Transactions;
 using KutokAccounting.Services.Transactions.Interfaces;
 using KutokAccounting.Services.Transactions.Models;
@@ -44,6 +48,12 @@ public static class MauiProgram
 			options.UseSqlite(KutokConfigurations.ConnectionString);
 		});
 
+		builder.Services.AddScoped<IInvoiceService, InvoiceService>();
+		builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+		builder.Services.AddScoped<IValidator<InvoiceDto>, InvoiceDtoValidator>();
+		builder.Services
+			.AddScoped<IValidator<InvoiceQueryParameters>, InvoiceQueryParametersValidator>();
+		
 		builder.Services.AddFileLogging();
 
 		builder.Services.AddScoped<IVendorService, VendorService>();

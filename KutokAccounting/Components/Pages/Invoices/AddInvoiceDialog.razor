@@ -1,0 +1,47 @@
+@using KutokAccounting.DataProvider.Models
+
+<MudDialog>
+    <TitleContent>
+        Відкрити нову накладну
+    </TitleContent>
+    <DialogContent>
+        <MudForm @bind-IsValid="_isSuccess"
+                 @bind-Errors="_errors">
+            <MudTextField @bind-Value="_number"
+                          Placeholder="Номер накладної"
+                          Label="Назва"
+                          Variant="Variant.Outlined"
+                          Counter="100"
+                          MaxLength="100"
+                          Lines="1"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"
+                          Margin="Margin.Normal"/>
+            <MudTextField @bind-Value="_value"
+                          Placeholder="Сума накладної"
+                          Label="Сума"
+                          Validation="ValidateValue"
+                          Variant="Variant.Outlined"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"/>
+            <MudAutocomplete T="Vendor"
+                             AdornmentIcon="@Icons.Material.Filled.Search"
+                             Variant="Variant.Outlined"
+                             @bind-Value="_vendor"
+                             SearchFunc="Search"
+                             Immediate="true"
+                             Clearable="true"
+                             Dense="true"
+                             Placeholder="Введіть постачальника"
+                             Label="Постачальник"
+                             Required="true"
+                             RequiredError="Це поле обов'язкове"/>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Назад</MudButton>
+        <MudButton OnClick="AddAsync" Disabled="!_isSuccess" Color="Color.Primary">Додати</MudButton>
+    </DialogActions>
+</MudDialog>

@@ -50,6 +50,31 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.ToTable("invoice", (string)null);
                 });
 
+            modelBuilder.Entity("KutokAccounting.DataProvider.Models.InvoiceStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("state");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId")
+                        .IsUnique();
+
+                    b.ToTable("invoice_status", (string)null);
+                });
+
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Store", b =>
                 {
                     b.Property<int>("Id")
@@ -196,6 +221,17 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.Navigation("Vendor");
                 });
 
+            modelBuilder.Entity("KutokAccounting.DataProvider.Models.InvoiceStatus", b =>
+                {
+                    b.HasOne("KutokAccounting.DataProvider.Models.Invoice", "Invoice")
+                        .WithOne("Status")
+                        .HasForeignKey("KutokAccounting.DataProvider.Models.InvoiceStatus", "InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Invoice");
+                });
+
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Transaction", b =>
                 {
                     b.HasOne("KutokAccounting.DataProvider.Models.Invoice", "Invoice")
@@ -221,6 +257,9 @@ namespace KutokAccounting.DataProvider.Migrations
 
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Invoice", b =>
                 {
+                    b.Navigation("Status")
+                        .IsRequired();
+
                     b.Navigation("Transactions");
                 });
 

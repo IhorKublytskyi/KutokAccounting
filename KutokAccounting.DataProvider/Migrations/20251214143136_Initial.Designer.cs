@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KutokAccounting.DataProvider.Migrations
 {
     [DbContext(typeof(KutokDbContext))]
-    [Migration("20251030194322_TransactionChanged")]
-    partial class TransactionChanged
+    [Migration("20251214143136_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,6 +51,31 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.HasIndex("VendorId");
 
                     b.ToTable("invoice", (string)null);
+                });
+
+            modelBuilder.Entity("KutokAccounting.DataProvider.Models.InvoiceStatus", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("CreatedAt")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("created_at");
+
+                    b.Property<int>("InvoiceId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("State")
+                        .HasColumnType("INTEGER")
+                        .HasColumnName("state");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InvoiceId")
+                        .IsUnique();
+
+                    b.ToTable("invoice_status", (string)null);
                 });
 
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Store", b =>
@@ -104,6 +129,10 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.Property<int?>("InvoiceId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long>("Money")
+                        .HasColumnType("NUMERIC")
+                        .HasColumnName("value");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -115,10 +144,6 @@ namespace KutokAccounting.DataProvider.Migrations
 
                     b.Property<int>("TransactionTypeId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("INTEGER")
-                        .HasColumnName("value");
 
                     b.HasKey("Id");
 
@@ -199,6 +224,17 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.Navigation("Vendor");
                 });
 
+            modelBuilder.Entity("KutokAccounting.DataProvider.Models.InvoiceStatus", b =>
+                {
+                    b.HasOne("KutokAccounting.DataProvider.Models.Invoice", "Invoice")
+                        .WithOne("Status")
+                        .HasForeignKey("KutokAccounting.DataProvider.Models.InvoiceStatus", "InvoiceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Invoice");
+                });
+
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Transaction", b =>
                 {
                     b.HasOne("KutokAccounting.DataProvider.Models.Invoice", "Invoice")
@@ -224,6 +260,9 @@ namespace KutokAccounting.DataProvider.Migrations
 
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Invoice", b =>
                 {
+                    b.Navigation("Status")
+                        .IsRequired();
+
                     b.Navigation("Transactions");
                 });
 

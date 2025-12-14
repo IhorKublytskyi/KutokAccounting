@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using KutokAccounting.Components.Pages.Transactions.Models;
 using KutokAccounting.Components.Pages.TransactionTypes.Models;
 using KutokAccounting.DataProvider.Models;
@@ -80,8 +79,8 @@ public partial class EditTransactionDialog : ComponentBase
 	private string ValidateValue(string value)
 	{
 		return MoneyFormatRegex.MoneyValueRegex().IsMatch(value)
-			? "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45)."
-			: string.Empty;
+			? string.Empty
+			: "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45).";
 	}
 
 	private void Cancel()

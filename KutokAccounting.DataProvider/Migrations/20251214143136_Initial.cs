@@ -19,7 +19,7 @@ namespace KutokAccounting.DataProvider.Migrations
                     name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     is_opened = table.Column<int>(type: "INTEGER", nullable: false),
                     setup_date = table.Column<long>(type: "INTEGER", nullable: false),
-                    address = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)
+                    address = table.Column<string>(type: "TEXT", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -83,13 +83,35 @@ namespace KutokAccounting.DataProvider.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "invoice_status",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    InvoiceId = table.Column<int>(type: "INTEGER", nullable: false),
+                    created_at = table.Column<long>(type: "INTEGER", nullable: false),
+                    state = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_invoice_status", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_invoice_status_invoice_InvoiceId",
+                        column: x => x.InvoiceId,
+                        principalTable: "invoice",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "transaction",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     description = table.Column<string>(type: "TEXT", maxLength: 1024, nullable: true),
-                    value = table.Column<int>(type: "INTEGER", nullable: false),
+                    value = table.Column<long>(type: "NUMERIC", nullable: false),
                     created_at = table.Column<long>(type: "INTEGER", nullable: false),
                     StoreId = table.Column<int>(type: "INTEGER", nullable: false),
                     TransactionTypeId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -132,6 +154,12 @@ namespace KutokAccounting.DataProvider.Migrations
                 column: "VendorId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_invoice_status_InvoiceId",
+                table: "invoice_status",
+                column: "InvoiceId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Name",
                 table: "store",
                 column: "name");
@@ -147,6 +175,11 @@ namespace KutokAccounting.DataProvider.Migrations
                 column: "InvoiceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Transaction_Name",
+                table: "transaction",
+                column: "name");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_transaction_StoreId",
                 table: "transaction",
                 column: "StoreId");
@@ -160,6 +193,9 @@ namespace KutokAccounting.DataProvider.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "invoice_status");
+
             migrationBuilder.DropTable(
                 name: "transaction");
 

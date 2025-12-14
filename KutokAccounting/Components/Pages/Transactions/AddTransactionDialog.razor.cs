@@ -1,4 +1,3 @@
-using System.Text.RegularExpressions;
 using KutokAccounting.Components.Pages.TransactionTypes.Models;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Transactions.Models;
@@ -24,14 +23,14 @@ public partial class AddTransactionDialog : ComponentBase
 
 	[Parameter]
 	public int StoreId { get; set; }
-	
+
 	[CascadingParameter]
 	public IMudDialogInstance MudDialog { get; set; }
 
 	private async Task AddAsync()
 	{
 		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-		
+
 		TransactionDto transaction = new()
 		{
 			Name = _name,
@@ -73,8 +72,8 @@ public partial class AddTransactionDialog : ComponentBase
 	private string ValidateValue(string value)
 	{
 		return MoneyFormatRegex.MoneyValueRegex().IsMatch(value)
-			? "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45)."
-			: string.Empty;
+			? string.Empty
+			: "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45).";
 	}
 
 	private void Cancel()
