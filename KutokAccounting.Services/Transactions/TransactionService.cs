@@ -52,7 +52,7 @@ public sealed class TransactionService : ITransactionService
 			CreatedAt = DateTime.Now,
 			StoreId = request.StoreId,
 			TransactionTypeId = request.TransactionTypeId,
-			InvoiceId = 1
+			InvoiceId = request.InvoiceId
 		};
 
 		_logger.LogInformation("Saving transaction to repository. Name: {TransactionName}",
@@ -61,8 +61,8 @@ public sealed class TransactionService : ITransactionService
 		await _repository.CreateAsync(transaction, cancellationToken);
 
 		_logger.LogInformation(
-			"Transaction  {TransactionName} successfully created with ID {TransactionId}",
-			transaction.Name, transaction.Id);
+			"Transaction  {TransactionName} successfully created",
+			transaction.Name);
 
 		return transaction;
 	}
@@ -125,7 +125,6 @@ public sealed class TransactionService : ITransactionService
 			{
 				await Task.Delay(1, cancellationToken);
 			}
-			//TODO: НЕ ЗАБУДЬ ЧТО ТЫ НЕ В ТОЙ ВЕТКЕ!!!
 			
 			if (transactionView.Sign)
 			{

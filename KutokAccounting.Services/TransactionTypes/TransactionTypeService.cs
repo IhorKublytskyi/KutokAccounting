@@ -56,8 +56,8 @@ public sealed class TransactionTypeService : ITransactionTypeService
 		await _repository.CreateAsync(transactionType, cancellationToken);
 
 		_logger.LogInformation(
-			"Transaction type {TransactionTypeName} successfully created with ID {TransactionTypeId}",
-			transactionType.Name, transactionType.Id);
+			"Transaction type {TransactionTypeName} successfully created",
+			transactionType.Name);
 
 		return transactionType;
 	}

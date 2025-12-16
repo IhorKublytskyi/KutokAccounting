@@ -38,7 +38,6 @@ public partial class AddTransactionDialog : ComponentBase
 			Value = Money.Parse(_value).Value,
 			TransactionTypeId = _transactionType.Id,
 			StoreId = StoreId,
-			InvoiceId = 1 // Заглушка
 		};
 
 		await TransactionService.CreateAsync(transaction, tokenSource.Token);

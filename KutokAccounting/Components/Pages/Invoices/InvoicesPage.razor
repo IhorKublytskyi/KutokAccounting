@@ -1,6 +1,5 @@
 @page "/invoices/{storeId:int}"
 @using KutokAccounting.Components.Pages.Invoices.Models
-@inject IDialogService DialogService
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
     <MudGrid Justify="Justify.FlexStart" Class="mb-6">
@@ -23,7 +22,7 @@
             T="InvoiceView"
             ServerData="GetInvoicesAsync"
             Filterable="true"
-            FilterMode="DataGridFilterMode.Simple">
+            FilterMode="DataGridFilterMode.ColumnFilterMenu">
             <ToolBarContent>
                 <MudStack Style="width: 100%;">
                     <MudText Typo="Typo.h6" Style="margin-top:20px;">Накладні</MudText>
@@ -57,7 +56,7 @@
                     Property="iv => iv.Status.CreatedAt"
                     Title="Час створення"
                     Sortable="true"
-                    Filterable="true"></PropertyColumn>
+                    Filterable="false"></PropertyColumn>
                 <PropertyColumn
                     Property="iv => iv.Status.State"
                     Title="Статус"
@@ -72,12 +71,9 @@
                 <TemplateColumn>
                     <CellTemplate>
                         <MudStack Row Justify="Justify.FlexEnd">
-                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Primary"
-                                       OnClick="() => OnEditButtonClick(context.Item)">Редагувати
-                            </MudButton>
-                            <MudButton Size="Size.Medium" Variant="Variant.Filled" Color="Color.Secondary"
-                                       OnClick="() => OnDeleteButtonClick(context.Item)">Видалити
-                            </MudButton>
+                            <MudFab Size="Size.Small" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" OnClick="() => OnEditButtonClick(context.Item)"/>
+                            <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" OnClick="() => OnDeleteButtonClick(context.Item)"/>
+                            <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Close" OnClick="() => OnCloseButtonClick(context.Item)"/>
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>

@@ -9,7 +9,7 @@ public interface IInvoiceRepository
 		CancellationToken cancellationToken);
 
 	ValueTask<Invoice> GetByIdAsync(int id, CancellationToken cancellationToken);
-	ValueTask CreateAsync(Invoice request, CancellationToken cancellationToken);
-	ValueTask UpdateAsync(Invoice request, CancellationToken cancellationToken);
+	ValueTask CreateAsync(Invoice invoice, CancellationToken cancellationToken);
+	ValueTask UpdateAsync(Invoice invoice, CancellationToken cancellationToken);
 	ValueTask DeleteAsync(int id, CancellationToken cancellationToken);
 }

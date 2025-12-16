@@ -1,4 +1,7 @@
 using KutokAccounting.Components.Pages.Invoices.Models;
+using KutokAccounting.DataProvider.Models;
+using KutokAccounting.Services.Invoices.Interfaces;
+using KutokAccounting.Services.Invoices.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
@@ -11,6 +14,12 @@ public partial class InvoicesPage : ComponentBase
     private string? _searchString;
     private MudDateRangePicker _picker = new();
     private DateRange? _dateRange;
+    
+    [Inject]
+    public required IDialogService DialogService { get; set; }
+    
+    [Inject]
+    public required IInvoiceService InvoiceService { get; set; }
     
     [Parameter]
     public int StoreId { get; set; }
@@ -37,15 +46,40 @@ public partial class InvoicesPage : ComponentBase
         GridState<InvoiceView> state,
         CancellationToken cancellationToken)
     {
-        return new GridData<InvoiceView>
+        try
         {
-            Items =  new List<InvoiceView>(),
-            TotalItems = 0
-        };
+            var invoices = await InvoiceService.GetAsync(new InvoiceQueryParameters()
+            {
+                Pagination = new Pagination()
+                {
+                    Page = state.Page + 1,
+                    PageSize = state.PageSize
+                }
+            }, cancellationToken);
+
+            var result = invoices.Items.Select(i => new InvoiceView()
+            {
+                Id = i.Id,
+                Number = i.Number,
+                Status = i.Status,
+                VendorName = i.Vendor?.Name ?? "Unknown"
+            }).ToList();
+
+            return new GridData<InvoiceView>()
+            {
+                Items = result,
+                TotalItems = result.Count
+            };
+        }
+        catch (Exception e)
+        {
+            return new GridData<InvoiceView>()
+            {
+                Items = new List<InvoiceView>(),
+                TotalItems = 0
+            };
+        }
     } 
-    
-    
-    
     
     private async Task OnAddButtonClick()
     {
@@ -79,6 +113,10 @@ public partial class InvoicesPage : ComponentBase
         
     }
     private async Task OnDeleteButtonClick(InvoiceView invoice)
+    {
+        
+    }
+    private async Task OnCloseButtonClick(InvoiceView invoice)
     {
         
     }
