@@ -1,7 +1,9 @@
 using KutokAccounting.Components.Pages.Transactions.Models;
 using KutokAccounting.Components.Pages.TransactionTypes.Models;
 using KutokAccounting.DataProvider.Models;
+using KutokAccounting.Services.Transactions.Interfaces;
 using KutokAccounting.Services.Transactions.Models;
+using KutokAccounting.Services.TransactionTypes.Interfaces;
 using KutokAccounting.Services.TransactionTypes.Models;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -14,24 +16,30 @@ public partial class EditTransactionDialog : ComponentBase
 
 	private TransactionTypeView _transactionType;
 
+	[Inject]
+	public required ITransactionService TransactionService { get; set; }
+
+	[Inject]
+	public required ITransactionTypeService TransactionTypeService { get; set; }
+
 	[CascadingParameter]
 	public IMudDialogInstance MudDialog { get; set; }
 
 	[Parameter]
-	public TransactionView? TransactionView { get; set; }
+	public TransactionView? Transaction { get; set; }
 
-	private async Task UpdateAsync()
+	private async Task EditAsync()
 	{
 		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
 		TransactionDto transaction = new()
 		{
-			Id = TransactionView.Id,
-			Name = TransactionView.Name,
-			Description = TransactionView.Description,
-			Value = TransactionView.Money.Value,
-			StoreId = TransactionView.StoreId,
-			TransactionTypeId = TransactionView.TransactionType.Id
+			Id = Transaction.Id,
+			Name = Transaction.Name,
+			Description = Transaction.Description,
+			Value = Transaction.Money.Value,
+			StoreId = Transaction.StoreId,
+			TransactionTypeId = Transaction.TransactionType.Id
 		};
 
 		await TransactionService.UpdateAsync(transaction, tokenSource.Token);
@@ -68,11 +76,11 @@ public partial class EditTransactionDialog : ComponentBase
 	{
 		try
 		{
-			TransactionView.Money = Money.Parse(value);
+			Transaction.Money = Money.Parse(value);
 		}
 		catch (Exception e)
 		{
-			TransactionView.Money = default;
+			Transaction.Money = default;
 		}
 	}
 

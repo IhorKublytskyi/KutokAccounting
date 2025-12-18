@@ -31,9 +31,9 @@ public class InvoiceConfiguration : IEntityTypeConfiguration<Invoice>
 			.IsRequired();
 
 		builder
-			.HasOne(i => i.Status)
+			.HasMany(i => i.StatusHistory)
 			.WithOne(s => s.Invoice)
-			.HasForeignKey<InvoiceStatus>(s => s.InvoiceId)
+			.HasForeignKey(s => s.InvoiceId)
 			.IsRequired();
 
 		builder

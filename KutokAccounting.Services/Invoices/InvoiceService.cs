@@ -3,7 +3,7 @@ using FluentValidation.Results;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Invoices.Interfaces;
 using KutokAccounting.Services.Invoices.Models;
-using KutokAccounting.Services.Transactions.Interfaces;
+using KutokAccounting.Services.Invoices.Validators;
 using KutokAccounting.Services.TransactionTypes.Exceptions;
 using Microsoft.Extensions.Logging;
 
@@ -11,25 +11,27 @@ namespace KutokAccounting.Services.Invoices;
 
 public class InvoiceService : IInvoiceService
 {
-	private readonly IInvoiceTransactionHelper _invoiceTransactionHelper;
+	private readonly IInvoiceStateService _invoiceStateService;
 	private readonly IInvoiceRepository _repository;
 	private readonly ILogger<InvoiceService> _logger;
 	private readonly IValidator<InvoiceDto> _invoiceDtoValidator;
 	private readonly IValidator<InvoiceQueryParameters> _invoiceQueryValidator;
+	private readonly IValidator<CloseInvoiceDto> _closeInvoiceDtoValidator;
 
 	public InvoiceService(
-		IInvoiceTransactionHelper invoiceTransactionHelper,
-		ITransactionService transactionService,
+		IInvoiceStateService invoiceStateService,
 		IInvoiceRepository repository,
 		ILogger<InvoiceService> logger,
 		IValidator<InvoiceDto> invoiceDtoValidator,
-		IValidator<InvoiceQueryParameters> invoiceQueryValidator)
+		IValidator<InvoiceQueryParameters> invoiceQueryValidator,
+		IValidator<CloseInvoiceDto> closeInvoiceDtoValidator)
 	{
-		_invoiceTransactionHelper = invoiceTransactionHelper;
+		_invoiceStateService = invoiceStateService;
 		_repository = repository;
 		_logger = logger;
 		_invoiceDtoValidator = invoiceDtoValidator;
 		_invoiceQueryValidator = invoiceQueryValidator;
+		_closeInvoiceDtoValidator = closeInvoiceDtoValidator;
 	}
 
 	public async ValueTask<PagedResult<Invoice>> GetAsync(InvoiceQueryParameters parameters,
@@ -99,8 +101,8 @@ public class InvoiceService : IInvoiceService
 
 			throw new ArgumentException(validationResult.ToString());
 		}
-		
-		Invoice invoice = await _invoiceTransactionHelper.OpenAsync(request, cancellationToken);
+
+		Invoice invoice = await _invoiceStateService.OpenInvoiceAsync(request, cancellationToken);
 
 		return invoice;
 	}
@@ -128,7 +130,7 @@ public class InvoiceService : IInvoiceService
 		{
 			Number = request.Number,
 			VendorId = request.VendorId,
-			Status = null
+			StatusHistory = null
 		};
 
 		await _repository.UpdateAsync(invoice, cancellationToken);
@@ -143,5 +145,22 @@ public class InvoiceService : IInvoiceService
 		await _repository.DeleteAsync(id, cancellationToken);
 
 		_logger.LogInformation("Invoice with ID {InvoiceId} deleted successfully", id);
+	}
+
+	public async ValueTask CloseAsync(CloseInvoiceDto request, CancellationToken cancellationToken)
+	{
+		cancellationToken.ThrowIfCancellationRequested();
+
+		ValidationResult validationResult = await _closeInvoiceDtoValidator.ValidateAsync(request, cancellationToken);
+
+		if (validationResult.IsValid is false)
+		{
+			_logger.LogWarning("Invoice closing validation failed: {ValidationErrors}",
+				validationResult.Errors);
+
+			throw new Exception(validationResult.ToString());
+		}
+
+		await _invoiceStateService.CloseInvoiceAsync(request, cancellationToken);
 	}
 }

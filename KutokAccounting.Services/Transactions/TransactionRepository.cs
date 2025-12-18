@@ -2,6 +2,7 @@ using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Transactions.Interfaces;
 using KutokAccounting.Services.Transactions.Models;
+using KutokAccounting.Services.TransactionTypes.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -102,7 +103,7 @@ public sealed class TransactionRepository : ITransactionRepository
 				.AsNoTracking()
 				.FirstOrDefaultAsync(t => t.Id == id, cancellationToken);
 
-			return transaction;
+			return transaction ?? throw new NotFoundException("Transaction not found.");
 		}
 		catch (Exception e)
 		{

@@ -6,6 +6,8 @@ public sealed record InvoiceView
 {
 	public required int Id { get; set; }
 	public required string Number { get; set; }
-	public required	InvoiceStatus Status { get; set; }
-	public required string VendorName { get; set; }
+	public InvoiceStatus Status => StatusHistory.Last();
+	public string VendorName => Vendor.Name;
+	public required Vendor Vendor { get; set; }
+	public required IEnumerable<InvoiceStatus> StatusHistory { get; set; }
 }

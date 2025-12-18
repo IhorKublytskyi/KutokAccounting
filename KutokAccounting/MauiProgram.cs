@@ -40,7 +40,14 @@ public static class MauiProgram
 			.UseMauiApp<App>()
 			.ConfigureFonts(fonts => { fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular"); });
 
-		builder.Services.AddMudServices();
+		builder.Services.AddMudServices(config =>
+		{
+			config.SnackbarConfiguration.ShowCloseIcon = true;
+			config.SnackbarConfiguration.ShowTransitionDuration = 500;
+			config.SnackbarConfiguration.HideTransitionDuration = 250;
+			config.SnackbarConfiguration.PreventDuplicates = true;
+			config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+		});
 		builder.Services.AddTransient<MudLocalizer, UkrainianLocalizer>();
 		builder.Services.AddMauiBlazorWebView();
 
@@ -49,11 +56,12 @@ public static class MauiProgram
 			options.UseSqlite(KutokConfigurations.ConnectionString);
 		});
 
-		builder.Services.AddScoped<IInvoiceTransactionHelper, InvoiceTransactionHelper>();
+		builder.Services.AddScoped<IInvoiceStateService, InvoiceStateService>();
 		
 		builder.Services.AddScoped<IInvoiceService, InvoiceService>();
 		builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 		builder.Services.AddScoped<IValidator<InvoiceDto>, InvoiceDtoValidator>();
+		builder.Services.AddScoped<IValidator<CloseInvoiceDto>, CloseInvoiceDtoValidator>();
 		builder.Services
 			.AddScoped<IValidator<InvoiceQueryParameters>, InvoiceQueryParametersValidator>();
 		

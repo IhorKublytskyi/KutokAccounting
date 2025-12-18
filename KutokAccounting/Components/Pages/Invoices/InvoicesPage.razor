@@ -1,5 +1,6 @@
 @page "/invoices/{storeId:int}"
 @using KutokAccounting.Components.Pages.Invoices.Models
+@using KutokAccounting.DataProvider.Models
 
 <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="mt-4">
     <MudGrid Justify="Justify.FlexStart" Class="mb-6">
@@ -73,7 +74,10 @@
                         <MudStack Row Justify="Justify.FlexEnd">
                             <MudFab Size="Size.Small" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" OnClick="() => OnEditButtonClick(context.Item)"/>
                             <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" OnClick="() => OnDeleteButtonClick(context.Item)"/>
-                            <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Close" OnClick="() => OnCloseButtonClick(context.Item)"/>
+                            @if (context.Item.Status.State is not State.Closed)
+                            {
+                                <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Close" OnClick="() => OnCloseButtonClick(context.Item)"/>
+                            }
                         </MudStack>
                     </CellTemplate>
                 </TemplateColumn>

@@ -1,15 +1,13 @@
 @using KutokAccounting.DataProvider.Models
-
 <MudDialog>
     <TitleContent>
         Відкрити нову накладну
     </TitleContent>
     <DialogContent>
-        <MudForm @bind-IsValid="_isSuccess"
-                 @bind-Errors="_errors">
+        <MudForm @bind-IsValid="_isSuccess">
             <MudTextField @bind-Value="_number"
                           Placeholder="Номер накладної"
-                          Label="Назва"
+                          Label="Номер"
                           Variant="Variant.Outlined"
                           Counter="100"
                           MaxLength="100"
@@ -30,7 +28,7 @@
                              AdornmentIcon="@Icons.Material.Filled.Search"
                              Variant="Variant.Outlined"
                              @bind-Value="_vendor"
-                             SearchFunc="Search"
+                             SearchFunc="SearchAsync"
                              Immediate="true"
                              Clearable="true"
                              Dense="true"

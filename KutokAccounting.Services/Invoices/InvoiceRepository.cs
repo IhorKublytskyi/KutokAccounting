@@ -2,6 +2,7 @@ using KutokAccounting.DataProvider;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Invoices.Interfaces;
 using KutokAccounting.Services.Invoices.Models;
+using KutokAccounting.Services.TransactionTypes.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,7 +38,7 @@ public class InvoiceRepository : IInvoiceRepository
 			List<Invoice> invoices = await query
 				.Skip(parameters.Pagination.Skip)
 				.Take(parameters.Pagination.PageSize)
-				.Include(i => i.Status)
+				.Include(i => i.StatusHistory)
 				.Include(i => i.Vendor)
 				.Include(i => i.Store)
 				.Select(i => new Invoice
@@ -45,7 +46,7 @@ public class InvoiceRepository : IInvoiceRepository
 					Id = i.Id,
 					CreatedAt = i.CreatedAt,
 					Number = i.Number,
-					Status = i.Status,
+					StatusHistory = i.StatusHistory,
 					Vendor = i.Vendor,
 					Store = i.Store,
 					StoreId = i.StoreId,
@@ -61,15 +62,28 @@ public class InvoiceRepository : IInvoiceRepository
 		}
 		catch (Exception e)
 		{
-			_logger.LogWarning(e, "Failed to retrieve invoices with QueryParameterss: {QueryParameters}", parameters);
+			_logger.LogWarning(e, "Failed to retrieve invoices with QueryParameters: {QueryParameters}", parameters);
 
 			throw;
 		}
 	}
 
-	public async ValueTask<Invoice> GetByIdAsync(int id, CancellationToken cancellationToken)
+	public async ValueTask<Invoice?> GetByIdAsync(int id, CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		try
+		{
+			Invoice? invoice = await _dbContext.Invoices
+				.AsNoTracking()
+				.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
+
+			return invoice ?? throw new NotFoundException("Invoice not found");
+		}
+		catch (Exception e)
+		{
+			_logger.LogWarning(e, "Failed to retrieve invoice with Id: {InvoiceId}", id);
+
+			throw;
+		}
 	}
 
 	public async ValueTask CreateAsync(Invoice invoice, CancellationToken cancellationToken)
@@ -98,11 +112,84 @@ public class InvoiceRepository : IInvoiceRepository
 
 	public async ValueTask UpdateAsync(Invoice invoice, CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		await _semaphoreSlim.WaitAsync(cancellationToken);
+
+		try
+		{
+			await _dbContext.Invoices
+				.Where(i => i.Id == invoice.Id)
+				.ExecuteUpdateAsync(
+					i => i
+						.SetProperty(p => p.Number, invoice.Number)
+						.SetProperty(p => p.VendorId, invoice.VendorId), cancellationToken);
+		}
+		catch (Exception e)
+		{
+			_logger.LogWarning(e, "Failed to update invoice with Id: {InvoiceId}, Name: {InvoiceNumber}", invoice.Id,
+				invoice.Number);
+
+			throw;
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
 	}
 
 	public async ValueTask DeleteAsync(int id, CancellationToken cancellationToken)
 	{
-		throw new NotImplementedException();
+		await _semaphoreSlim.WaitAsync(cancellationToken);
+
+		try
+		{
+			await _dbContext.Invoices
+				.Where(i => i.Id == id)
+				.ExecuteDeleteAsync(cancellationToken);
+		}
+		catch (Exception e)
+		{
+			_logger.LogWarning(e, "Failed to delete invoice with Id: {InvoiceId}", id);
+
+			throw;
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
+	}
+
+	public async ValueTask CloseAsync(Invoice request, CancellationToken cancellationToken)
+	{
+		await _semaphoreSlim.WaitAsync(cancellationToken);
+
+		try
+		{
+			Invoice? invoice =
+				await _dbContext.Invoices.FirstOrDefaultAsync(i => i.Id == request.Id, cancellationToken);
+
+			if (invoice is not null)
+			{
+				InvoiceStatus invoiceStatus = new()
+				{
+					InvoiceId = invoice.Id,
+					CreatedAt = DateTime.Now,
+					State = State.Closed
+				};
+
+				await _dbContext.InvoiceStatuses.AddAsync(invoiceStatus, cancellationToken);
+				await _dbContext.SaveChangesAsync(cancellationToken);
+			}
+		}
+		catch (Exception e)
+		{
+			_logger.LogError(e, "Failed to close invoice with Number: {InvoiceNumber}",
+				request.Number);
+
+			throw;
+		}
+		finally
+		{
+			_semaphoreSlim.Release();
+		}
 	}
 }

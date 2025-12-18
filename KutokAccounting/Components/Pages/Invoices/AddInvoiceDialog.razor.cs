@@ -10,22 +10,19 @@ namespace KutokAccounting.Components.Pages.Invoices;
 
 public partial class AddInvoiceDialog : ComponentBase
 {
-	private string[] _errors;
-
 	private string? _number;
 	private string _value = string.Empty;
 	private Vendor _vendor;
-
 	private bool _isSuccess;
 
 	[Inject]
-	public IInvoiceService InvoiceService { get; set; }
+	public required IInvoiceService InvoiceService { get; set; }
 
 	[Inject]
-	public IVendorService VendorService { get; set; }
+	public required IVendorService VendorService { get; set; }
 
 	[CascadingParameter]
-	public IMudDialogInstance MudDialog { get; set; }
+	public required IMudDialogInstance MudDialog { get; set; }
 
 	[Parameter]
 	public int StoreId { get; set; }
@@ -39,7 +36,7 @@ public partial class AddInvoiceDialog : ComponentBase
 			Number = _number,
 			StoreId = StoreId,
 			VendorId = _vendor.Id,
-			Value = Money.Parse(_value).Value
+			Money = Money.Parse(_value)
 		};
 
 		await InvoiceService.CreateAsync(invoice, tokenSource.Token);
@@ -47,7 +44,7 @@ public partial class AddInvoiceDialog : ComponentBase
 		MudDialog.Close(DialogResult.Ok(true));
 	}
 
-	private async Task<IEnumerable<Vendor>> Search(string value, CancellationToken cancellationToken)
+	private async Task<IEnumerable<Vendor>> SearchAsync(string value, CancellationToken cancellationToken)
 	{
 		VendorQueryParameters parameters = new(null, Pagination: new Pagination
 		{

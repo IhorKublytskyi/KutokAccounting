@@ -9,8 +9,6 @@ namespace KutokAccounting.Components.Pages.Transactions;
 
 public partial class AddTransactionDialog : ComponentBase
 {
-	private string[] _errors;
-
 	private string? _name;
 
 	private string? _description;

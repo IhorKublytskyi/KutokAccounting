@@ -182,7 +182,7 @@ public partial class TransactionsPage : ComponentBase
 		DialogParameters<EditTransactionDialog> parameters = new()
 		{
 			{
-				d => d.TransactionView, transaction
+				d => d.Transaction, transaction
 			}
 		};
 
