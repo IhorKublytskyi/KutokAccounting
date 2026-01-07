@@ -9,6 +9,6 @@ public class Invoice
 	public Store? Store { get; set; }
 	public int VendorId { get; set; }
 	public Vendor? Vendor { get; set; }
-	public ICollection<Transaction>? Transactions { get; set; }
-	public ICollection<InvoiceStatus>? StatusHistory { get; set; } = new List<InvoiceStatus>();
+	public ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+	public ICollection<InvoiceStatus> StatusHistory { get; set; } = new List<InvoiceStatus>();
 }

@@ -5,14 +5,6 @@
     </TitleContent>
     <DialogContent>
         <MudForm @bind-IsValid="_isSuccess">
-            <MudTextField @bind-Value="_value"
-                          Placeholder="Сума накладної"
-                          Label="Сума"
-                          Validation="ValidateValue"
-                          Variant="Variant.Outlined"
-                          Immediate="true"
-                          Required="true"
-                          RequiredError="Це поле обов'язкове"/>
             <MudTextField @bind-Value="Invoice.Number"
                           Placeholder="Номер накладної"
                           Label="Номер"
@@ -24,18 +16,28 @@
                           Required="true"
                           RequiredError="Це поле обов'язкове"
                           Margin="Margin.Normal"/>
+            <MudTextField T="string"
+                          Value="@Invoice.Money.ToString("0.00")"
+                          ValueChanged="OnMoneyChanged"
+                          Placeholder="Сума накладної"
+                          Label="Сума"
+                          Validation="ValidateValue"
+                          Variant="Variant.Outlined"
+                          Immediate="true"
+                          Required="true"
+                          RequiredError="Це поле обов'язкове"/>
             <MudAutocomplete T="Vendor"
+                             @bind-Value="Invoice.Vendor"
                              AdornmentIcon="@Icons.Material.Filled.Search"
                              Variant="Variant.Outlined"
-                             @bind-Value="Invoice.Vendor"
                              SearchFunc="SearchAsync"
                              Immediate="true"
                              Clearable="true"
-                             Required="true"
-                             RequiredError="Це поле обов'язкове"
                              Dense="true"
                              Placeholder="Введіть тип транзакції"
-                             Label="Тип транзакції"/>
+                             Label="Тип транзакції"
+                             Required="true"
+                             RequiredError="Це поле обов'язкове"/>
         </MudForm>
     </DialogContent>
     <DialogActions>

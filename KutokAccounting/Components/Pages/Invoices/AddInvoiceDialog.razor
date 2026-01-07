@@ -16,14 +16,6 @@
                           Required="true"
                           RequiredError="Це поле обов'язкове"
                           Margin="Margin.Normal"/>
-            <MudTextField @bind-Value="_value"
-                          Placeholder="Сума накладної"
-                          Label="Сума"
-                          Validation="ValidateValue"
-                          Variant="Variant.Outlined"
-                          Immediate="true"
-                          Required="true"
-                          RequiredError="Це поле обов'язкове"/>
             <MudAutocomplete T="Vendor"
                              AdornmentIcon="@Icons.Material.Filled.Search"
                              Variant="Variant.Outlined"
@@ -40,6 +32,6 @@
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="Cancel">Назад</MudButton>
-        <MudButton OnClick="AddAsync" Disabled="!_isSuccess" Color="Color.Primary">Додати</MudButton>
+        <MudButton OnClick="OpenAsync" Disabled="!_isSuccess" Color="Color.Primary">Додати</MudButton>
     </DialogActions>
 </MudDialog>

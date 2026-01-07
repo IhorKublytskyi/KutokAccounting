@@ -21,7 +21,12 @@ public partial class CalculationResultView : ComponentBase, IDisposable
 
 	[Inject]
 	public required ITransactionService TransactionService { get; set; }
-	
+
+	public void Dispose()
+	{
+		TransactionsStateNotifier.OnTransactionsChangedAsync -= RecalculateResultAsync;
+	}
+
 	protected override async Task OnParametersSetAsync()
 	{
 		await RecalculateResultAsync();
@@ -34,25 +39,20 @@ public partial class CalculationResultView : ComponentBase, IDisposable
 
 	private async Task RecalculateResultAsync()
 	{
-		using CancellationTokenSource tokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
 		_result = new CalculationResult();
 
 		_result.PropertyChanged += (_, _) => StateHasChanged();
-		
+
 		CalculationQueryParameters parameters = new()
 		{
 			Range = Range,
 			StoreId = StoreId
 		};
-		
+
 		await TransactionService.CalculateAsync(_result, parameters, tokenSource.Token);
 
 		await InvokeAsync(StateHasChanged);
-	}
-	
-	public void Dispose()
-	{
-		TransactionsStateNotifier.OnTransactionsChangedAsync -= RecalculateResultAsync;
 	}
 }

@@ -6,5 +6,5 @@ public class TransactionType
 	public required string Name { get; set; }
 	public bool IsIncome { get; set; }
 	public string? Code { get; set; }
-	public IEnumerable<Transaction> Transactions { get; set; } = [];
+	public IEnumerable<Transaction>? Transactions { get; set; }
 }

@@ -13,4 +13,5 @@ public interface ITransactionTypeService
 
 	ValueTask UpdateAsync(TransactionTypeDto request, CancellationToken cancellationToken);
 	ValueTask<int> DeleteAsync(int id, CancellationToken cancellationToken);
+	ValueTask<TransactionType> GetByCodeAsync(string code, CancellationToken cancellationToken);
 }

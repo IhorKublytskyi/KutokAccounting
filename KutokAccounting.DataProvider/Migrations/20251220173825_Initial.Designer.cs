@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace KutokAccounting.DataProvider.Migrations
 {
     [DbContext(typeof(KutokDbContext))]
-    [Migration("20251214143136_Initial")]
+    [Migration("20251220173825_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -72,8 +72,7 @@ namespace KutokAccounting.DataProvider.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("InvoiceId")
-                        .IsUnique();
+                    b.HasIndex("InvoiceId");
 
                     b.ToTable("invoice_status", (string)null);
                 });
@@ -142,7 +141,7 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.Property<int>("StoreId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TransactionTypeId")
+                    b.Property<int?>("TransactionTypeId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -168,6 +167,14 @@ namespace KutokAccounting.DataProvider.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT")
+                        .HasDefaultValue("CUSTOM")
+                        .HasColumnName("code");
+
                     b.Property<int>("IsIncome")
                         .HasColumnType("INTEGER")
                         .HasColumnName("is_positive_value");
@@ -181,6 +188,22 @@ namespace KutokAccounting.DataProvider.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("transaction_type", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Code = "OPEN_INVOICE",
+                            IsIncome = 0,
+                            Name = "Відкриття накладної"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Code = "CLOSE_INVOICE",
+                            IsIncome = 1,
+                            Name = "Закриття накладної"
+                        });
                 });
 
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Vendor", b =>
@@ -227,8 +250,8 @@ namespace KutokAccounting.DataProvider.Migrations
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.InvoiceStatus", b =>
                 {
                     b.HasOne("KutokAccounting.DataProvider.Models.Invoice", "Invoice")
-                        .WithOne("Status")
-                        .HasForeignKey("KutokAccounting.DataProvider.Models.InvoiceStatus", "InvoiceId")
+                        .WithMany("StatusHistory")
+                        .HasForeignKey("InvoiceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -260,8 +283,7 @@ namespace KutokAccounting.DataProvider.Migrations
 
             modelBuilder.Entity("KutokAccounting.DataProvider.Models.Invoice", b =>
                 {
-                    b.Navigation("Status")
-                        .IsRequired();
+                    b.Navigation("StatusHistory");
 
                     b.Navigation("Transactions");
                 });

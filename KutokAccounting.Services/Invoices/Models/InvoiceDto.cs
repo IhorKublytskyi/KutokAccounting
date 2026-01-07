@@ -8,5 +8,5 @@ public sealed record InvoiceDto
 	public required string Number { get; init; }
 	public required int StoreId { get; init; }
 	public required int VendorId { get; init; }
-	public required Money Money { get; set; }
+	public Money Money { get; init; }
 }

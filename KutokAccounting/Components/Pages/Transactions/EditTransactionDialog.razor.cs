@@ -26,7 +26,7 @@ public partial class EditTransactionDialog : ComponentBase
 	public IMudDialogInstance MudDialog { get; set; }
 
 	[Parameter]
-	public TransactionView? Transaction { get; set; }
+	public required TransactionView Transaction { get; set; }
 
 	private async Task EditAsync()
 	{

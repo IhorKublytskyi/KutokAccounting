@@ -15,7 +15,7 @@ public class InvoiceDtoValidator : AbstractValidator<InvoiceDto>
 
 		RuleFor(i => i.StoreId)
 			.GreaterThan(0);
-		
+
 		RuleFor(t => t.Money.Value)
 			.GreaterThanOrEqualTo(0);
 	}

@@ -31,6 +31,14 @@ public class InvoiceRepository : IInvoiceRepository
 	{
 		IQueryable<Invoice> query = _dbContext.Invoices.AsNoTracking();
 
+		InvoiceQueryBuilder builder = new(query);
+
+		query = builder
+			.AddFilters(parameters.Filters)
+			.AddSearchString(parameters.SearchString)
+			.AddSorting(parameters.Sorting)
+			.Build();
+
 		try
 		{
 			Task<int> countTask = query.CountAsync(cancellationToken);
@@ -38,6 +46,7 @@ public class InvoiceRepository : IInvoiceRepository
 			List<Invoice> invoices = await query
 				.Skip(parameters.Pagination.Skip)
 				.Take(parameters.Pagination.PageSize)
+				.Include(i => i.Transactions)
 				.Include(i => i.StatusHistory)
 				.Include(i => i.Vendor)
 				.Include(i => i.Store)
@@ -50,10 +59,11 @@ public class InvoiceRepository : IInvoiceRepository
 					Vendor = i.Vendor,
 					Store = i.Store,
 					StoreId = i.StoreId,
-					VendorId = i.VendorId
+					VendorId = i.VendorId,
+					Transactions = i.Transactions
 				})
 				.ToListAsync(cancellationToken);
-
+	
 			return new PagedResult<Invoice>
 			{
 				Items = invoices,
@@ -149,8 +159,6 @@ public class InvoiceRepository : IInvoiceRepository
 		catch (Exception e)
 		{
 			_logger.LogWarning(e, "Failed to delete invoice with Id: {InvoiceId}", id);
-
-			throw;
 		}
 		finally
 		{
@@ -158,32 +166,28 @@ public class InvoiceRepository : IInvoiceRepository
 		}
 	}
 
-	public async ValueTask CloseAsync(Invoice request, CancellationToken cancellationToken)
+	public async ValueTask CloseAsync(int id, CancellationToken cancellationToken)
 	{
 		await _semaphoreSlim.WaitAsync(cancellationToken);
 
 		try
 		{
-			Invoice? invoice =
-				await _dbContext.Invoices.FirstOrDefaultAsync(i => i.Id == request.Id, cancellationToken);
+			Invoice? invoice = await _dbContext.Invoices.FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
 
 			if (invoice is not null)
 			{
-				InvoiceStatus invoiceStatus = new()
+				invoice.StatusHistory.Add(new InvoiceStatus
 				{
-					InvoiceId = invoice.Id,
 					CreatedAt = DateTime.Now,
 					State = State.Closed
-				};
-
-				await _dbContext.InvoiceStatuses.AddAsync(invoiceStatus, cancellationToken);
-				await _dbContext.SaveChangesAsync(cancellationToken);
+				});
 			}
+
+			await _dbContext.SaveChangesAsync(cancellationToken);
 		}
 		catch (Exception e)
 		{
-			_logger.LogError(e, "Failed to close invoice with Number: {InvoiceNumber}",
-				request.Number);
+			_logger.LogWarning(e, "Failed to close invoice with Id: {InvoiceId}", id);
 
 			throw;
 		}

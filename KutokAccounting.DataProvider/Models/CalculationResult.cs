@@ -5,8 +5,8 @@ namespace KutokAccounting.DataProvider.Models;
 
 public record CalculationResult : INotifyPropertyChanged
 {
-	
 	private Money _profit;
+
 	public Money Profit
 	{
 		get => _profit;
@@ -26,4 +26,4 @@ public record CalculationResult : INotifyPropertyChanged
 	{
 		PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 	}
-};
+}

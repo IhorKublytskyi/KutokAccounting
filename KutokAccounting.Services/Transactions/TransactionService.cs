@@ -1,7 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
 using KutokAccounting.DataProvider.Models;
-using KutokAccounting.Services.Stores.Models;
 using KutokAccounting.Services.Transactions.Interfaces;
 using KutokAccounting.Services.Transactions.Models;
 using KutokAccounting.Services.TransactionTypes.Exceptions;
@@ -114,7 +113,7 @@ public sealed class TransactionService : ITransactionService
 			_repository.EnumerateTransactionsAsync(parameters, cancellationToken);
 
 		int counter = 0;
-		
+
 		await foreach (TransactionCalculationView transactionView in transactions)
 		{
 			await Task.Yield();
@@ -125,7 +124,7 @@ public sealed class TransactionService : ITransactionService
 			{
 				await Task.Delay(1, cancellationToken);
 			}
-			
+
 			if (transactionView.Sign)
 			{
 				result.Income += transactionView.Money;

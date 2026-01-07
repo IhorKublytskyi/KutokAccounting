@@ -39,7 +39,7 @@ public partial class NavMenu : ComponentBase
 	{
 		return $"/StoreAccounting/{id}";
 	}
-	
+
 	private string GetHrefToStoreInvoices(int id)
 	{
 		return $"/invoices/{id}";

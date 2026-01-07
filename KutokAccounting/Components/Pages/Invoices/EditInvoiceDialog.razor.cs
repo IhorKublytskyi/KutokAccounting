@@ -11,21 +11,17 @@ namespace KutokAccounting.Components.Pages.Invoices;
 
 public partial class EditInvoiceDialog : ComponentBase
 {
-	public string _value = string.Empty;
-	public bool _isSuccess;
+	private bool _isSuccess = true;
 
 	[Parameter]
 	public int StoreId { get; set; }
 
 	[Parameter]
-	public InvoiceView Invoice { get; set; }
+	public required InvoiceView Invoice { get; set; }
 
-	[Inject]
-	public required ISnackbar Snackbar { get; set; }
-	
 	[Inject]
 	public required IVendorService VendorService { get; set; }
-
+	
 	[Inject]
 	public required IInvoiceService InvoiceService { get; set; }
 
@@ -35,14 +31,14 @@ public partial class EditInvoiceDialog : ComponentBase
 	public async Task EditAsync()
 	{
 		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
-		
+
 		InvoiceDto invoice = new()
 		{
 			Id = Invoice.Id,
 			Number = Invoice.Number,
 			StoreId = StoreId,
 			VendorId = Invoice.Vendor.Id,
-			Money = Money.Parse(_value)
+			Money = Invoice.Money
 		};
 
 		await InvoiceService.UpdateAsync(invoice, tokenSource.Token);
@@ -55,13 +51,6 @@ public partial class EditInvoiceDialog : ComponentBase
 		MudDialog.Close();
 	}
 
-	private string ValidateValue(string value)
-	{
-		return MoneyFormatRegex.MoneyValueRegex().IsMatch(value)
-			? string.Empty
-			: "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45).";
-	}
-	
 	private async Task<IEnumerable<Vendor>> SearchAsync(string value, CancellationToken cancellationToken)
 	{
 		VendorQueryParameters parameters = new(null, Pagination: new Pagination
@@ -73,5 +62,24 @@ public partial class EditInvoiceDialog : ComponentBase
 		PagedResult<Vendor> pagedResult = await VendorService.GetAsync(parameters, cancellationToken);
 
 		return pagedResult.Items;
+	}
+
+	private void OnMoneyChanged(string value)
+	{
+		try
+		{
+			Invoice.Money = Money.Parse(value);
+		}
+		catch (Exception)
+		{
+			Invoice.Money = default;
+		}
+	}
+
+	private string ValidateValue(string value)
+	{
+		return MoneyFormatRegex.MoneyValueRegex().IsMatch(value)
+			? string.Empty
+			: "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45).";
 	}
 }

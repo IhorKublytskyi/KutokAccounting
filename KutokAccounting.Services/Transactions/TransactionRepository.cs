@@ -73,7 +73,8 @@ public sealed class TransactionRepository : ITransactionRepository
 		}
 	}
 
-	public IAsyncEnumerable<TransactionCalculationView> EnumerateTransactionsAsync(CalculationQueryParameters parameters,
+	public IAsyncEnumerable<TransactionCalculationView> EnumerateTransactionsAsync(
+		CalculationQueryParameters parameters,
 		CancellationToken cancellationToken)
 	{
 		IQueryable<Transaction> query = _dbContext.Transactions.AsNoTracking();

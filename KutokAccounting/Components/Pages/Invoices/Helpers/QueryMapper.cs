@@ -1,11 +1,11 @@
-using KutokAccounting.Components.Pages.Transactions.Models;
+using KutokAccounting.Components.Pages.Invoices.Models;
 using KutokAccounting.DataProvider.Models;
 using KutokAccounting.Services.Helpers;
+using KutokAccounting.Services.Invoices.Models;
 using KutokAccounting.Services.Stores.Models;
-using KutokAccounting.Services.Transactions.Models;
 using MudBlazor;
 
-namespace KutokAccounting.Components.Pages.Transactions.Helpers;
+namespace KutokAccounting.Components.Pages.Invoices.Helpers;
 
 public class QueryMapper
 {
@@ -15,10 +15,8 @@ public class QueryMapper
 
 	private readonly Dictionary<string, IFilterStrategy> _strategies = new()
 	{
-		[TransactionFiltersConstants.Name] = new StringFilterStrategy((f, v) => f.Name = v),
-		[TransactionFiltersConstants.Description] = new StringFilterStrategy((f, v) => f.Description = v),
-		[TransactionFiltersConstants.Value] = new MoneyFilterStrategy(),
-		[TransactionFiltersConstants.TransactionType] = new TransactionTypeStrategy()
+		[InvoiceFiltersConstants.Number] = new StringFilterStrategy((f, v) => f.Number = v),
+		[InvoiceFiltersConstants.State] = new StateFilterStrategy((f, v) => f.IsClosed = v)
 	};
 
 	public QueryMapper(int storeId,
@@ -30,7 +28,7 @@ public class QueryMapper
 		_dateRange = dateRange;
 	}
 
-	public TransactionQueryParameters MapToQueryParameters(GridState<TransactionView> state)
+	public InvoiceQueryParameters MapToQueryParameters(GridState<InvoiceView> state)
 	{
 		Filters filters = new()
 		{
@@ -39,18 +37,18 @@ public class QueryMapper
 
 		Sorting sorting = MapSorting(state.SortDefinitions.FirstOrDefault());
 
-		IFilterDefinition<TransactionView>? filterDefinition = state.FilterDefinitions.FirstOrDefault();
+		IFilterDefinition<InvoiceView>? filterDefinition = state.FilterDefinitions.FirstOrDefault();
 
 		string? key = filterDefinition?.Title;
 
-		if (key is not null && _strategies.TryGetValue(key, out IFilterStrategy? strategy))
+		if (string.IsNullOrWhiteSpace(key) is false && _strategies.TryGetValue(key, out IFilterStrategy? strategy))
 		{
 			strategy.Apply(filters, filterDefinition);
 		}
 
 		MapDateRange(filters, _dateRange);
 
-		return new TransactionQueryParameters
+		return new InvoiceQueryParameters
 		{
 			Filters = filters,
 			Pagination = new Pagination
@@ -73,16 +71,18 @@ public class QueryMapper
 		}
 	}
 
-	private Sorting MapSorting(SortDefinition<TransactionView>? sortDefinition)
+	private Sorting MapSorting(SortDefinition<InvoiceView>? sortDefinition)
 	{
 		Sorting sorting = new();
 
-		if (sortDefinition is not null)
+		if (sortDefinition is null)
 		{
-			sorting.SortBy = sortDefinition.SortBy;
-
-			sorting.Descending = sortDefinition.Descending;
+			return sorting;
 		}
+
+		sorting.SortBy = sortDefinition.SortBy;
+
+		sorting.Descending = sortDefinition.Descending;
 
 		return sorting;
 	}

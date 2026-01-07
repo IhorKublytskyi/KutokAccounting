@@ -23,7 +23,7 @@
             T="InvoiceView"
             ServerData="GetInvoicesAsync"
             Filterable="true"
-            FilterMode="DataGridFilterMode.ColumnFilterMenu">
+            FilterMode="DataGridFilterMode.ColumnFilterRow">
             <ToolBarContent>
                 <MudStack Style="width: 100%;">
                     <MudText Typo="Typo.h6" Style="margin-top:20px;">Накладні</MudText>
@@ -68,15 +68,45 @@
                     Title="Постачальник"
                     Sortable="true"
                     Filterable="true"
-                    FilterOperators="_stringFilterOperators"></PropertyColumn>
+                    FilterOperators="_stringFilterOperators">
+                    <FilterTemplate>
+                        <MudIconButton OnClick="() => _filterOpen = true" Icon="@_icon" Size="@Size.Small"/>
+                        <MudOverlay Visible="@_filterOpen" OnClick="() => _filterOpen = false"/>
+                        <MudPopover Open="@_filterOpen" AnchorOrigin="Origin.BottomCenter"
+                                    TransformOrigin="Origin.TopCenter" Style="width:150px">
+                            <MudStack Spacing="0">
+                                <MudCheckBox T="bool" Label="Select All" Size="@Size.Small" Value="@_selectAll"
+                                             ValueChanged="@SelectAll"/>
+                                <MudStack Spacing="0" Style="overflow-y:auto;max-height:250px">
+                                    @foreach (InvoiceView? item in context.Items)
+                                    {
+                                        <MudCheckBox T="bool" Label="@($"{item.Vendor.Name}")" Size="@Size.Small"
+                                                     Value="@(_selectedVendors.Contains(item.Vendor))"
+                                                     ValueChanged="@(value => SelectedChanged(value, item.Vendor))"/>
+                                    }
+                                </MudStack>
+                            </MudStack>
+                        </MudPopover>
+                    </FilterTemplate>
+                </PropertyColumn>
                 <TemplateColumn>
                     <CellTemplate>
                         <MudStack Row Justify="Justify.FlexEnd">
-                            <MudFab Size="Size.Small" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit" OnClick="() => OnEditButtonClick(context.Item)"/>
-                            <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete" OnClick="() => OnDeleteButtonClick(context.Item)"/>
+                            <MudFab Size="Size.Small" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Edit"
+                                    OnClick="() => OnEditButtonClick(context.Item)"/>
+                            <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Delete"
+                                    OnClick="() => OnDeleteButtonClick(context.Item)"/>
                             @if (context.Item.Status.State is not State.Closed)
                             {
-                                <MudFab Size="Size.Small" Color="Color.Secondary" StartIcon="@Icons.Material.Filled.Close" OnClick="() => OnCloseButtonClick(context.Item)"/>
+                                <MudFab Size="Size.Small"
+                                        Color="Color.Secondary"
+                                        StartIcon="@Icons.Material.Filled.Close"
+                                        OnClick="() => OnCloseButtonClick(context.Item)"/>
+
+                                <MudFab Size="Size.Small"
+                                        Color="Color.Info"
+                                        StartIcon="@Icons.Material.Filled.Add"
+                                        OnClick="() => OnAddTransactionClick(context.Item)"></MudFab>
                             }
                         </MudStack>
                     </CellTemplate>

@@ -10,14 +10,13 @@ namespace KutokAccounting.Components.Pages.Invoices;
 
 public partial class AddInvoiceDialog : ComponentBase
 {
-	private string? _number;
-	private string _value = string.Empty;
+	private string _number = string.Empty;
 	private Vendor _vendor;
 	private bool _isSuccess;
-
+	
 	[Inject]
 	public required IInvoiceService InvoiceService { get; set; }
-
+	
 	[Inject]
 	public required IVendorService VendorService { get; set; }
 
@@ -27,7 +26,7 @@ public partial class AddInvoiceDialog : ComponentBase
 	[Parameter]
 	public int StoreId { get; set; }
 
-	private async Task AddAsync()
+	private async Task OpenAsync()
 	{
 		using CancellationTokenSource tokenSource = new(TimeSpan.FromSeconds(30));
 
@@ -36,7 +35,6 @@ public partial class AddInvoiceDialog : ComponentBase
 			Number = _number,
 			StoreId = StoreId,
 			VendorId = _vendor.Id,
-			Money = Money.Parse(_value)
 		};
 
 		await InvoiceService.CreateAsync(invoice, tokenSource.Token);
@@ -56,14 +54,7 @@ public partial class AddInvoiceDialog : ComponentBase
 
 		return pagedResult.Items;
 	}
-
-	private string ValidateValue(string value)
-	{
-		return MoneyFormatRegex.MoneyValueRegex().IsMatch(value)
-			? string.Empty
-			: "Значення повинно бути додатним числом з двома знаками після точки (наприклад, 123.45 або 123,45).";
-	}
-
+	
 	private void Cancel()
 	{
 		MudDialog.Close();

@@ -1,8 +1,8 @@
-using KutokAccounting.Components.Pages.Transactions.Models;
-using KutokAccounting.Services.Transactions.Models;
+using KutokAccounting.Components.Pages.Invoices.Models;
+using KutokAccounting.Services.Invoices.Models;
 using MudBlazor;
 
-namespace KutokAccounting.Components.Pages.Transactions.Helpers;
+namespace KutokAccounting.Components.Pages.Invoices.Helpers;
 
 public class StringFilterStrategy : IFilterStrategy
 {
@@ -13,7 +13,7 @@ public class StringFilterStrategy : IFilterStrategy
 		_applyAction = applyAction;
 	}
 
-	public void Apply(Filters filters, IFilterDefinition<TransactionView> filterDefinition)
+	public void Apply(Filters filters, IFilterDefinition<InvoiceView> filterDefinition)
 	{
 		string? value = filterDefinition.Value?.ToString();
 

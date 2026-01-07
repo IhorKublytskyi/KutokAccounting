@@ -2,6 +2,8 @@
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace KutokAccounting.DataProvider.Migrations
 {
     /// <inheritdoc />
@@ -33,7 +35,8 @@ namespace KutokAccounting.DataProvider.Migrations
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     name = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
-                    is_positive_value = table.Column<int>(type: "INTEGER", nullable: false)
+                    is_positive_value = table.Column<int>(type: "INTEGER", nullable: false),
+                    code = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false, defaultValue: "CUSTOM")
                 },
                 constraints: table =>
                 {
@@ -114,7 +117,7 @@ namespace KutokAccounting.DataProvider.Migrations
                     value = table.Column<long>(type: "NUMERIC", nullable: false),
                     created_at = table.Column<long>(type: "INTEGER", nullable: false),
                     StoreId = table.Column<int>(type: "INTEGER", nullable: false),
-                    TransactionTypeId = table.Column<int>(type: "INTEGER", nullable: false),
+                    TransactionTypeId = table.Column<int>(type: "INTEGER", nullable: true),
                     InvoiceId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -138,6 +141,15 @@ namespace KutokAccounting.DataProvider.Migrations
                         principalColumn: "Id");
                 });
 
+            migrationBuilder.InsertData(
+                table: "transaction_type",
+                columns: new[] { "Id", "code", "is_positive_value", "name" },
+                values: new object[,]
+                {
+                    { 1, "OPEN_INVOICE", 0, "Відкриття накладної" },
+                    { 2, "CLOSE_INVOICE", 1, "Закриття накладної" }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Invoice_Created_At",
                 table: "invoice",
@@ -156,8 +168,7 @@ namespace KutokAccounting.DataProvider.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_invoice_status_InvoiceId",
                 table: "invoice_status",
-                column: "InvoiceId",
-                unique: true);
+                column: "InvoiceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Name",

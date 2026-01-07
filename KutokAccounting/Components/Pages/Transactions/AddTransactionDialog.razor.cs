@@ -20,6 +20,9 @@ public partial class AddTransactionDialog : ComponentBase
 	private bool _isSuccess;
 
 	[Parameter]
+	public int? InvoiceId { get; set; }
+
+	[Parameter]
 	public int StoreId { get; set; }
 
 	[CascadingParameter]
@@ -36,6 +39,7 @@ public partial class AddTransactionDialog : ComponentBase
 			Value = Money.Parse(_value).Value,
 			TransactionTypeId = _transactionType.Id,
 			StoreId = StoreId,
+			InvoiceId = InvoiceId
 		};
 
 		await TransactionService.CreateAsync(transaction, tokenSource.Token);
